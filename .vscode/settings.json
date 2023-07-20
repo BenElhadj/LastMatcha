@@ -1,0 +1,16 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "vetur.validation.template": false,
+  "cSpell.words": [
+    "Elliane",
+    "quasar"
+  ],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ],
+  "editor.formatOnSave": true
+}
