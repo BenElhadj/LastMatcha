@@ -1,7 +1,7 @@
 <template>
   <div class="footer">
+    <div class="divider first-divider"></div>
     <div class="full-container">
-      <div class="divider"></div>
       <div class="top-container">
         <div class="contact-container">
           <h2>Contactez-nous:</h2>
@@ -77,9 +77,17 @@ export default {
   right: 0;
   bottom: 0;
   width: 100%;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+  background: linear-gradient(to bottom, white, black);
 }
-
+.footer::before {
+  position: absolute;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+  pointer-events: none;
+}
+.first-divider {
+  position: relative;
+  z-index: 1;
+}
 .full-container {
   width: 95%;
   min-width: 670px;

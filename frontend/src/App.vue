@@ -5,7 +5,7 @@ import FooterView from './components/FooterView.vue'
 </script>
 
 <template>
-  <header>
+  <header class="content">
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
@@ -18,7 +18,7 @@ import FooterView from './components/FooterView.vue'
     </div>
   </header>
 
-  <RouterView />
+  <RouterView class="content"/>
   <FooterView class="footer"/>
 </template>
 
@@ -27,9 +27,25 @@ header {
   line-height: 1.5;
   max-height: 100vh;
 }
+.content {
+  flex: 1 0 auto;
+  position: relative;
+  margin-bottom: 250px;
+}
 
+.content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background-image: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
 .footer {
   position: fixed;
+  bottom: 0;
   margin-top: 0;
   width: 100%;
 }
