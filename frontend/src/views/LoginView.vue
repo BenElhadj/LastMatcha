@@ -17,9 +17,7 @@
     </v-container>
 </template>
     
-<script>
-import vuetify from '../plugins/vuetify'
-</script>
+
 <style>
 .alert-enter-active,
 .alert-leave-active,
