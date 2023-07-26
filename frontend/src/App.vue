@@ -18,8 +18,8 @@ import FooterView from './components/FooterView.vue'
     </div>
   </header>
 
-  <RouterView class="content"/>
-  <FooterView class="footer"/>
+  <RouterView class="content" />
+  <FooterView class="footer" />
 </template>
 
 <style scoped>
@@ -27,6 +27,7 @@ header {
   line-height: 1.5;
   max-height: 100vh;
 }
+
 .content {
   flex: 1 0 auto;
   position: relative;
@@ -40,9 +41,10 @@ header {
   left: 0;
   width: 100%;
   height: 5px;
-  background-image: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+  background-image: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
   pointer-events: none;
 }
+
 .footer {
   position: fixed;
   bottom: 0;
