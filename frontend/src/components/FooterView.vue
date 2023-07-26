@@ -2,7 +2,7 @@
   <div class="footer">
     <div class="back-to-top-container">
       <img class="back-to-top" src="@/assets/Footer/back-to-top.png" alt="Back to top" @click="moveUp" :style="{ opacity: backToTopOpacity }" :disabled="isTop"/>
-      <div class="divider first-divider"></div>
+      <div class="divider"></div>
     </div>
     <div class="full-container">
       <div class="top-container">
@@ -112,8 +112,7 @@ export default {
 }
 
 .back-to-top-container,
-.full-container,
-.first-divider {
+.full-container {
   position: relative;
 }
 
@@ -212,6 +211,7 @@ export default {
 }
 
 .divider {
+  position: relative;
   width: 100%;
   height: 1px;
   background: rgba(128, 128, 128, 0.467);
