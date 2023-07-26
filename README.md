@@ -9,10 +9,13 @@ Matcha is web app ..........
 > sur win, il faut ouvrir docker desktop
 > docker-compose up --build
 
-> cd frontend
+
+> cd backend
 > npm install
-> npm start 
+> npm start
 
 > cd frontend
 > npm install
+> npm run dev 
+
 

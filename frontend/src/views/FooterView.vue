@@ -1,7 +1,8 @@
 <template>
   <div class="footer">
-    <div class="divider first-divider">
+    <div class="back-to-top-container">
       <img class="back-to-top" src="@/assets/Footer/back-to-top.png" alt="Back to top" @click="moveUp" :style="{ opacity: backToTopOpacity }" :disabled="isTop"/>
+      <div class="divider"></div>
     </div>
     <div class="full-container">
       <div class="top-container">
@@ -89,9 +90,13 @@ export default {
   font-weight: bold;
   align-items: center;
   text-align: center;
-  /* font-size: 16px; */
-  font-size: clamp(12px, 2em, 18px);
+  font-size: clamp(12px, 1em, 18px);
   max-height: fit-content;
+}
+
+.footer,
+.footer::before {
+  background: linear-gradient(to top, #000 0%, #fff 91%, rgba(255, 255, 255, 0) 100%);
 }
 
 .footer {
@@ -99,19 +104,33 @@ export default {
   right: 0;
   bottom: 0;
   width: 100%;
-  background: linear-gradient(to bottom, white, black);
 }
+
 .footer::before {
   position: absolute;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
   pointer-events: none;
 }
-.first-divider {
-  position: relative;
-  z-index: 1;
-}
+
+.back-to-top-container,
 .full-container {
   position: relative;
+}
+
+.back-to-top {
+  position: absolute;
+  max-height: 15vh;
+  min-height: 13vh;
+  cursor: pointer;
+  right: 23px;
+  bottom: 0px;
+  z-index: 2;
+}
+
+.back-to-top:disabled {
+  pointer-events: none;
+}
+
+.full-container {
   width: 95vw;
   min-width: 670px;
   margin: auto;
@@ -131,23 +150,15 @@ export default {
 .follow-container {
   flex: 1;
   width: 33.33%;
+  display: flex;
 }
 
 .contact-container {
   align-items: flex-start;
-  display: flex;
   flex-direction: column;
 }
 
-.links-contact-container img {
-  max-height: 5vh;
-  min-height: 3vh;
-  margin-right: 50px;
-  border-right: 50px;
-}
-
 .logo-container {
-  display: flex;
   justify-content: space-between;
   align-items: center;
   flex-direction: column;
@@ -161,56 +172,51 @@ export default {
 }
 
 .follow-container {
-  display: flex;
   flex-direction: column;
   align-items: flex-end;
-  /* font-size: 18px; */
-  font-size: clamp(14px, 2em, 20px);
+  font-size: clamp(14px, 1em, 20px);
   margin-left: auto;
 }
 
+.links-contact-container img,
 .links-follow-container img {
   max-height: 5vh;
   min-height: 3vh;
+}
+
+.links-contact-container img {
+  margin-right: 50px;
+  border-right: 50px;
+}
+
+.links-follow-container img {
   height: 40px;
 }
 
-.link-box
-.follow-text-container {
+.link-box,
+.follow-text-container,
+.follow-links-container,
+.bottom-container {
   display: flex;
 }
 
 .follow-links-container {
-  display: flex;
   gap: 30px;
 }
 
 .bottom-container {
-  display: flex;
-  /* font-size: 26px; */
-  font-size: clamp(22px, 2em, 28px);
+  font-size: clamp(22px, 1em, 28px);
   text-align: center;
   margin-bottom: 17px;
 }
 
 .divider {
+  position: relative;
   width: 100%;
   height: 1px;
   background: rgba(128, 128, 128, 0.467);
   margin-top: 17px;
   margin-bottom: 17px;
-}
-
-.back-to-top {
-  position: absolute;
-  max-height: 15vh;
-  min-height: 13vh;
-  cursor: pointer;
-  right: 35px;
-  top: -100px;
-}
-.back-to-top:disabled {
-  pointer-events: none;
 }
 
 </style>
