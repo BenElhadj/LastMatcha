@@ -19,7 +19,7 @@
 import { useRouter } from 'vue-router'
 
 export default {
-  name: 'NotFound',
+  // name: 'NotFound',
   setup () {
     const router = useRouter()
 

@@ -1,7 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import HomeView from '@/views/HomeView.vue'
-import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/LoginView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,28 +6,31 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      // component: HomeView
       component: () => import('@/views/HomeView.vue')
     },
     {
       path: '/register',
-      name: 'RegisterView',
-      // component: RegisterView
-      component: () => import('@/components/beforLogin/RegisterView.vue')
+      name: 'register',
+      component: () => import('@/components/beforLogin/Register.vue')
     },
     {
       path: '/login',
-      name: 'LoginView',
-      // component: LoginView
-      component: () => import('@/components/beforLogin/LoginView.vue')
+      name: 'login',
+      component: () => import('@/components/beforLogin/Login.vue')
     },
     {
       path: '/about',
       name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue')
+    },
+    {
+      path: '/404',
+      name: '404',
+      component: () => import('@/views/NotFound.vue')
+    },
+    {
+      path: '/:catchAll(.*)',
+      redirect: '/404'
     }
   ]
 })

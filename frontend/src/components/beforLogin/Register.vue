@@ -73,11 +73,11 @@
 <script>
 // Import axios
 import axios from 'axios'
-import AlertView from './Alert'
-import utility from '../utility.js'
+import AlertView from '@/views/Alert.vue'
+import utility from '@/utility.js'
 
 export default {
-  name: 'RegisterView',
+  // name: 'Register',
   components: {
     AlertView
   },

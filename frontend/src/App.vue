@@ -2,6 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from '@/components/HelloWorld.vue'
 import FooterView from '@/views/FooterView.vue'
+
 </script>
 
 <template>
@@ -12,8 +13,8 @@ import FooterView from '@/views/FooterView.vue'
       <HelloWorld msg="You did it!" />
 
       <nav>
-        <RouterLink to="/">LoginView</RouterLink>
-        <RouterLink to="/about">RegisterView</RouterLink>
+        <RouterLink to="/login">Login</RouterLink>
+        <RouterLink to="/register">Register</RouterLink>
       </nav>
     </div>
   </header>
