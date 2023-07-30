@@ -1,73 +1,24 @@
 <template>
-  <q-page padding>
-    <div class="register mt-5">
-      <h1 class="text-h3 text-grey-7 mb-4">
-        S'inscrire
-      </h1>
-      <form @submit.prevent="registerUser">
-        <q-input
-          v-model="firstname"
-          class="my-3"
-          :rules="rules.name"
-          label="Nom"
-          required
-        />
-        <q-input
-          v-model="lastname"
-          class="my-3"
-          :rules="rules.name"
-          label="Prénom"
-          required
-        />
-        <q-input
-          v-model="username"
-          class="my-3"
-          :rules="rules.username"
-          label="Nom d'utilisateur"
-          required
-        />
-        <q-input
-          v-model="email"
-          class="my-3"
-          :rules="rules.email"
-          label="E-mail"
-          required
-        />
-        <q-input
-          v-model="password"
-          class="my-3"
-          :rules="rules.password"
-          label="Mot de passe"
-          required
-          :type="showPass ? 'password' : 'text'"
-          @click:append="showPass = !showPass"
-        />
-        <q-input
-          v-model="passwordConfirm"
-          class="my-3"
-          label="Confirmation du mot de passe"
-          required
-          :type="showConfPass ? 'password' : 'text'"
-          :error-messages="passwordMatch()"
-          @click:append="showConfPass = !showConfPass"
-        />
-        <q-btn
-          type="submit"
-          color="primary"
-          class="my-5"
-          :disable="valid"
-        >
-          Envoyer
-        </q-btn>
-      </form>
-      <q-btn
-        flat
-        label="Déja membre? Se conncecter"
-        to="/login"
-      />
-    </div>
-    <AlertView :value="alert.state" />
-  </q-page>
+  <q-layout>
+    <q-page-container class="mt-4">
+      <div class="register mt-5">
+        <h1 class="page-header text-h3 text-secondary">Register</h1>
+        <q-form @submit.prevent="registerUser" class="my-4" ref="formRef">
+          <q-input v-model="firstname" color="primary" class="my-3" :rules="rules.name" label="First name" required></q-input>
+          <q-input v-model="lastname" color="primary" class="my-3" :rules="rules.name" label="Last name" required></q-input>
+          <q-input v-model="username" color="primary" class="my-3" :rules="rules.username" label="Username" required></q-input>
+          <q-input v-model="email" color="primary" class="my-3" :rules="rules.email" label="E-mail" required></q-input>
+          <q-input v-model="password" color="primary" class="my-3" :rules="rules.password" label="Password" :type="showPass ? 'text' : 'password'" @keyup.enter="registerUser"></q-input>
+          <q-input v-model="passwordConfirm" color="primary" class="my-3" label="Confirm Password" :type="showConfPass ? 'text' : 'password'" @keyup.enter="registerUser" :error-messages="passwordMatch"></q-input>
+          <q-btn block large color="primary" @click="registerUser" :disabled="!valid" class="my-5">Submit</q-btn>
+          <div class="row justify-end">
+            <q-btn flat label="Have an account? Login" color="primary" to="/login"></q-btn>
+          </div>
+        </q-form>
+      </div>
+      <AlertView :message="alert"></AlertView>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script>
@@ -77,7 +28,7 @@ import AlertView from '@/views/Alert.vue'
 import utility from '@/utility.js'
 
 export default {
-  // name: 'Register',
+  name: 'RegisterView',
   components: {
     AlertView
   },
@@ -100,7 +51,7 @@ export default {
       name: [
         v => !!v || 'This field is required',
         // eslint-disable-next-line
-        v => !(/[^a-zA-Z\-]+/.test(v)) || 'Le nom doit contenir des lettres uniquement', // Check \- escape char
+        v => !(/[^a-zA-Z\-]+/.test(v)) || 'Le nom doit contenir des lettres uniquement',
         v => (v.length >= 3 && v.length <= 255) || 'Le nom doit contenir entre 3 et 255 caractères'
       ],
       username: [
@@ -123,7 +74,7 @@ export default {
     ...utility,
     async registerUser () {
       try {
-        const url = `${process.env.VUE_APP_API_URL}/api/users/add`
+        const url = `http://localhost:3000/api/users/add`
         const data = {
           first_name: this.firstname,
           last_name: this.lastname,

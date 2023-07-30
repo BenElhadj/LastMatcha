@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from '@/components/HelloWorld.vue'
-import FooterView from '@/views/FooterView.vue'
+import HelloWorld from './components/HelloWorld.vue'
+import NavbarView from './views/NavbarView.vue'
+import FooterView from './views/FooterView.vue'
 
 </script>
 
