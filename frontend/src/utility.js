@@ -45,7 +45,7 @@ const getLocationFromIp = async f => {
 const syncLocation = async location => {
   try {
     const token = localStorage.getItem('token')
-    const url = `http://localhost:3000/api/users/location`
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/users/location`
     const headers = { 'x-auth-token': token }
     await axios.post(url, location, { headers })
   } catch (err) {
@@ -59,7 +59,7 @@ export default {
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line
-  getFullPath: (file) => isExternal(file) ? file : `localhost:3000/uploads/${file ? file : 'default.png'}`,
+  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'default.png'}`,
   // consoleLog: ('utility.js getFullPath => ', getFullPath),
   formatTime (date) {
     const when = moment(getDate(date))
@@ -75,7 +75,7 @@ export default {
   sync: async type => {
     try {
       const token = localStorage.getItem('token')
-      const url = `localhost:3000/api/${type}`
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/${type}`
       const headers = { 'x-auth-token': token }
       const res = await axios.get(url, { headers })
       return res.data.msg ? [] : res.data
@@ -86,7 +86,7 @@ export default {
   syncNotif: async () => {
     try {
       const token = localStorage.getItem('token')
-      const url = `localhost:3000/api/notif/all`
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/all`
       const headers = { 'x-auth-token': token }
       const result = await axios.get(url, { headers })
       return result.data.msg ? [] : result.data

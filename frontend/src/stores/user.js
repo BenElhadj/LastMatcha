@@ -1,4 +1,4 @@
-import utility from '../utility'
+import utility from '@/utility'
 import axios from 'axios'
 
 export const user = {
@@ -200,7 +200,7 @@ export const user = {
     syncBlacklist: async ({ commit }, blocked) => {
       if (!blocked || !blocked.length) return commit('syncBlacklist', [])
       const token = localStorage.getItem('token')
-      const url = `http://localhost:3000/api/users/blacklisted`
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/users/blacklisted`
       const headers = { 'x-auth-token': token }
       const data = { ids: JSON.stringify(blocked) }
       try {

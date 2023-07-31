@@ -1,4 +1,4 @@
-import utility from '../utility'
+import utility from '@/utility'
 
 export const getters = {
   user: (state) => state.user,

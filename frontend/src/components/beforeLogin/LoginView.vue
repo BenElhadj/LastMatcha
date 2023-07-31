@@ -86,9 +86,9 @@ export default {
     ])
 
     const log = async () => {
-      console.log("================== VUE_APP_API_URL:", process.env.VUE_APP_API_URL)
+      console.log("================== VUE_APP_API_URL:", import.meta.env.VITE_APP_API_URL)
       try {
-        const url = `http://localhost:5173/api/auth/login`
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/login`
         console.log("====================== URL for login: ", url)
         const auth = {
           username: username.value,
@@ -118,8 +118,8 @@ export default {
     const checkLogin = async () => {
       try {
         const token = localStorage.getItem('token')
-        const url = `http://localhost:5173/api/auth/isloggedin`
-        console.log("====================== URL for checking login status:", process.env.VUE_APP_API_URL)
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
+        console.log("====================== URL for checking login status:", import.meta.env.VITE_APP_API_URL)
         const headers = { 'x-auth-token': token }
         const res = await axios.get(url, { headers })
         if (!res.data.msg) router.push('/')

@@ -1,280 +1,280 @@
 <template>
-  <q-layout view="hHh Lpr lFf">
-  <q-header
-    elevated
-    class="black-text"
-  >
-    <q-toolbar>
-      <q-btn
-        v-if="status"
-        flat
-        round
-        dense
-        @click="drawer = true"
-      >
-        <q-avatar
-          :src="image"
-          size="42px"
-          alt="Photo de profil"
-          class="icon-size circular-icon"
-        ></q-avatar>
-      </q-btn>
-      <div v-else></div>
-      <q-toolbar-title>
-        <span>MATCHA </span>
-      </q-toolbar-title>
-      <q-space></q-space>
-      <div
-        v-if="status"
-        justify-end
-        class="search-notif-msg"
-      >
-        <q-input
-          v-model="searchText"
-          margin-right="37px"
-          class="search-field"
+  <!-- <q-layout view="hHh Lpr lFf"> -->
+    <q-header
+      elevated
+      class="black-text"
+    >
+      <q-toolbar>
+        <q-btn
+          v-if="status"
+          flat
+          round
           dense
-          outlined
-          hide-details
-          placeholder="Recherche"
-          prefix="mdi-magnify"
-        ></q-input>
-        <q-menu
-          v-model="notifMenu"
-          :nudge-width="250"
+          @click="drawer = true"
         >
-          <template #activator="{ on }">
+          <q-avatar
+            :src="image"
+            size="42px"
+            alt="Photo de profil"
+            class="icon-size circular-icon"
+          ></q-avatar>
+        </q-btn>
+        <div v-else></div>
+        <q-toolbar-title>
+          <span>MATCHA </span>
+        </q-toolbar-title>
+        <q-space></q-space>
+        <div
+          v-if="status"
+          justify-end
+          class="search-notif-msg"
+        >
+          <q-input
+            v-model="searchText"
+            margin-right="37px"
+            class="search-field"
+            dense
+            outlined
+            hide-details
+            placeholder="Recherche"
+            prefix="mdi-magnify"
+          ></q-input>
+          <q-menu
+            v-model="notifMenu"
+            :nudge-width="250"
+          >
+            <template #activator="{ on }">
+              <q-btn
+                text
+                icon
+                large
+                color="grey"
+                v-on="on"
+              >
+                <q-badge
+                  overlap
+                  :value="!!notifNum"
+                  color="primary"
+                  class="mx-2"
+                  right
+                >
+                  <template #badge>
+                    <span>{{ notifNum }}</span>
+                  </template>
+                </q-badge>
+                <img
+                  src="@/assets/notification.png"
+                  alt="Notifications"
+                >
+              </q-btn>
+            </template>
+            <q-list
+              padding
+              class="pa-0"
+            >
+              <q-item
+                v-for="(item, i) in notifs"
+                :key="i"
+                clickable
+                @click="toUserProfile(item.id_from)"
+              >
+                <q-item-section avatar>
+                  <q-avatar :src="getFullPath(item.profile_image)"></q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="notif_msg">
+                    <strong class="notif_username">{{ item.username }}</strong>
+                    <span>{{ getNotifMsg(item) }}</span>
+                  </q-item-label>
+                  <q-item-label caption>
+                    <q-icon
+                      small
+                      color="blue lighten-2"
+                      class="mr-2"
+                    >
+                      {{ getNotifIcon(item.type) }}
+                    </q-icon>
+                    <span class="notif_date">{{ formatNotifDate(item) }}</span>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                @click="$router.push('/notifications')"
+              >
+                <q-item-label class="see_all">
+                  Consulter toutes les notifications
+                </q-item-label>
+              </q-item>
+            </q-list>
+          </q-menu>
+          <q-menu
+            v-model="msgMenu"
+            anchor="top-right"
+            :content-class="'grey lighten-5'"
+          >
             <q-btn
-              text
-              icon
-              large
-              color="grey"
+              ripple
+              flat
+              round
+              dense
+              class="icon-size"
               v-on="on"
             >
               <q-badge
-                overlap
-                :value="!!notifNum"
+                :value="!!newMsgNum"
                 color="primary"
+                floating
                 class="mx-2"
-                right
               >
-                <template #badge>
-                  <span>{{ notifNum }}</span>
+                <template #default>
+                  <span>{{ newMsgNum }}</span>
                 </template>
               </q-badge>
               <img
-                src="@/assets/notification.png"
-                alt="Notifications"
+                src="@/assets/chat.png"
+                alt="Messages"
               >
             </q-btn>
-          </template>
-          <q-list
-            padding
-            class="pa-0"
-          >
-            <q-item
-              v-for="(item, i) in notifs"
-              :key="i"
-              clickable
-              @click="toUserProfile(item.id_from)"
+            <q-list
+              padding
+              class="pa-0 message_list"
             >
-              <q-item-section avatar>
-                <q-avatar :src="getFullPath(item.profile_image)"></q-avatar>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="notif_msg">
-                  <strong class="notif_username">{{ item.username }}</strong>
-                  <span>{{ getNotifMsg(item) }}</span>
+              <q-item
+                v-for="(item, i) in menuConvos"
+                :key="i"
+                clickable
+                @click="toUserChat(item)"
+              >
+                <q-item-section avatar>
+                  <q-avatar :src="getFullPath(item.profile_image)"></q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="notif_msg">
+                    <q-item-section horizontal>
+                      <q-item-section>
+                        <strong class="notif_username">{{ item.username }}</strong>
+                      </q-item-section>
+                      <q-item-section side>
+                        <span class="ml-auto chat_time">{{ formatNotifDate(item) }}</span>
+                      </q-item-section>
+                    </q-item-section>
+                  </q-item-label>
+                  <q-item-label caption>
+                    <span
+                      v-if="item.message_from === user.id"
+                      class="notif_date"
+                    >You: </span>
+                    <span class="notif_date text-truncate">{{ item.message }}</span>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                @click="$router.push('/chat')"
+              >
+                <q-item-label class="see_all">
+                  Voir toutes les discussions
                 </q-item-label>
-                <q-item-label caption>
-                  <q-icon
-                    small
-                    color="blue lighten-2"
-                    class="mr-2"
-                  >
-                    {{ getNotifIcon(item.type) }}
-                  </q-icon>
-                  <span class="notif_date">{{ formatNotifDate(item) }}</span>
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item
-              clickable
-              @click="$router.push('/notifications')"
-            >
-              <q-item-label class="see_all">
-                Consulter toutes les notifications
-              </q-item-label>
-            </q-item>
-          </q-list>
-        </q-menu>
-        <q-menu
-          v-model="msgMenu"
-          anchor="top-right"
-          :content-class="'grey lighten-5'"
-        >
+              </q-item>
+            </q-list>
+          </q-menu>
+        </div>
+        <div v-else>
           <q-btn
             ripple
-            flat
-            round
-            dense
-            class="icon-size"
-            v-on="on"
+            text
+            color="grey"
+            class="q-ml-sm"
+            @click="$router.push('/login')"
           >
-            <q-badge
-              :value="!!newMsgNum"
-              color="primary"
-              floating
-              class="mx-2"
-            >
-              <template #default>
-                <span>{{ newMsgNum }}</span>
-              </template>
-            </q-badge>
-            <img
-              src="@/assets/chat.png"
-              alt="Messages"
-            >
+            Se connecter
           </q-btn>
-          <q-list
-            padding
-            class="pa-0 message_list"
+          <q-btn
+            ripple
+            text
+            color="grey"
+            class="q-ml-sm"
+            @click="$router.push('/register')"
+          >
+            S'inscrire
+          </q-btn>
+        </div>
+      </q-toolbar>
+      <q-drawer
+        v-if="status"
+        v-model="drawer"
+        show-if-above
+        bordered
+        :content-class="'primary'"
+        @click-outside="drawer = false"
+      >
+        <div class="drawer-bg"></div>
+        <q-list padding>
+          <q-item>
+            <q-item-section avatar>
+              <q-avatar :src="image"></q-avatar>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ user.username }}</q-item-label>
+            </q-item-section>
+            <q-item-section
+              side
+              top
+            >
+              <q-icon
+                name="arrow_back_ios"
+                @click="drawer = false"
+              ></q-icon>
+            </q-item-section>
+          </q-item>
+          <q-separator></q-separator>
+          <div
+            v-for="link in links"
+            :key="link.text"
           >
             <q-item
-              v-for="(item, i) in menuConvos"
-              :key="i"
+              v-if="link.public || status"
               clickable
-              @click="toUserChat(item)"
+              @click="$router.push(link.route)"
             >
               <q-item-section avatar>
-                <q-avatar :src="getFullPath(item.profile_image)"></q-avatar>
+                <q-avatar>
+                  <img
+                    :src="link.image"
+                    alt="Icon"
+                  >
+                </q-avatar>
               </q-item-section>
               <q-item-section>
-                <q-item-label class="notif_msg">
-                  <q-item-section horizontal>
-                    <q-item-section>
-                      <strong class="notif_username">{{ item.username }}</strong>
-                    </q-item-section>
-                    <q-item-section side>
-                      <span class="ml-auto chat_time">{{ formatNotifDate(item) }}</span>
-                    </q-item-section>
-                  </q-item-section>
-                </q-item-label>
-                <q-item-label caption>
-                  <span
-                    v-if="item.message_from === user.id"
-                    class="notif_date"
-                  >You: </span>
-                  <span class="notif_date text-truncate">{{ item.message }}</span>
-                </q-item-label>
+                <q-item-label>{{ link.text }}</q-item-label>
               </q-item-section>
             </q-item>
-            <q-item
-              clickable
-              @click="$router.push('/chat')"
-            >
-              <q-item-label class="see_all">
-                Voir toutes les discussions
-              </q-item-label>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </div>
-      <div v-else>
-        <q-btn
-          ripple
-          text
-          color="grey"
-          class="q-ml-sm"
-          @click="$router.push('/login')"
-        >
-          Se connecter
-        </q-btn>
-        <q-btn
-          ripple
-          text
-          color="grey"
-          class="q-ml-sm"
-          @click="$router.push('/register')"
-        >
-          S'inscrire
-        </q-btn>
-      </div>
-    </q-toolbar>
-    <q-drawer
-      v-if="status"
-      v-model="drawer"
-      show-if-above
-      bordered
-      :content-class="'primary'"
-      @click-outside="drawer = false"
-    >
-      <div class="drawer-bg"></div>
-      <q-list padding>
-        <q-item>
-          <q-item-section avatar>
-            <q-avatar :src="image"></q-avatar>
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ user.username }}</q-item-label>
-          </q-item-section>
-          <q-item-section
-            side
-            top
-          >
-            <q-icon
-              name="arrow_back_ios"
-              @click="drawer = false"
-            ></q-icon>
-          </q-item-section>
-        </q-item>
-        <q-separator></q-separator>
-        <div
-          v-for="link in links"
-          :key="link.text"
-        >
+          </div>
           <q-item
-            v-if="link.public || status"
             clickable
-            @click="$router.push(link.route)"
+            @click="logout"
           >
             <q-item-section avatar>
               <q-avatar>
                 <img
-                  :src="link.image"
-                  alt="Icon"
+                  src="@/assets/Navbar/deconnexion.png"
+                  alt="Déconnexion"
                 >
               </q-avatar>
             </q-item-section>
             <q-item-section>
-              <q-item-label>{{ link.text }}</q-item-label>
+              <q-item-label>Se déconnecter</q-item-label>
             </q-item-section>
           </q-item>
-        </div>
-        <q-item
-          clickable
-          @click="logout"
-        >
-          <q-item-section avatar>
-            <q-avatar>
-              <img
-                src="@/assets/deconnexion.png"
-                alt="Déconnexion"
-              >
-            </q-avatar>
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Se déconnecter</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-drawer>
-  </q-header>
-</q-layout>
+        </q-list>
+      </q-drawer>
+    </q-header>
+  <!-- </q-layout> -->
 </template>
 
 <script>
-import utility from '../utility.js'
+import utility from '@/utility.js'
 import { computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
@@ -358,7 +358,7 @@ export default {
     console.log('Getters:', store.getters);
     const seenNotif = async () => {
       try {
-        const url = `http://localhost:3000/api/notif/update`
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/update`
         const headers = { 'x-auth-token': user.value.token }
         await axios.post(url, {}, { headers })
         store.dispatch('seenNotif')
@@ -400,7 +400,7 @@ export default {
 
     const logout = async () => {
       try {
-        const url = `http://localhost:3000/api/auth/logout`
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
         const headers = { 'x-auth-token': user.value.token }
         const res = await axios.get(url, { headers })
         if (res.data.ok) {
@@ -509,7 +509,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("../assets/drawer-bg.jpg");
+  background-image: url("@/assets/drawer-bg.jpg");
   background-size: cover;
   background-repeat: no-repeat;
 }

@@ -24,7 +24,7 @@
 <script>
 // Import axios
 import axios from 'axios'
-import AlertView from '@/views/Alert.vue'
+import AlertView from '@/views/AlertView.vue'
 import utility from '@/utility.js'
 
 export default {
@@ -74,7 +74,7 @@ export default {
     ...utility,
     async registerUser () {
       try {
-        const url = `http://localhost:3000/api/users/add`
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/add`
         const data = {
           first_name: this.firstname,
           last_name: this.lastname,

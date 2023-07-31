@@ -73,7 +73,7 @@ export const chat = {
     syncConvoAll: async ({ commit }) => {
       try {
         const token = localStorage.getItem('token')
-        const url = `http://localhost:3000/api/chat/all`
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/all`
         const headers = { 'x-auth-token': token }
         const result = await axios.get(url, { headers })
         if (!result.data.msg) commit('syncConvoAll', result.data)

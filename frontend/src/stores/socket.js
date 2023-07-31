@@ -1,5 +1,5 @@
 import axios from 'axios'
-import utility from '../utility'
+import utility from '@/utility'
 import { createApp } from 'vue'
 import { io } from 'socket.io-client'
 
@@ -19,7 +19,7 @@ export const socket = {
     SOCKET_connect (state) {
       if (!state.isConnected && state.user.id) {
         const app = createApp({})
-        app.config.globalProperties.$socket = io(`http://localhost:3000`)
+        app.config.globalProperties.$socket = io(`${import.meta.env.VITE_APP_API_URL}`)
         app.config.globalProperties.$socket.emit('auth', state.user.id)
         state.isConnected = true
       }
@@ -44,7 +44,7 @@ export const socket = {
                 state.convos[i].message_from = data.id_from
               }
             })
-            const url = `http://localhost:3000/api/chat/update`
+            const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/update`
             const body = { id: state.selectedConvo }
             await axios.post(url, body, { headers })
           }
@@ -61,7 +61,7 @@ export const socket = {
           const { id_from, id_to, id_conversation } = data
           // eslint-disable-next-line camelcase
           const body = { id_to, id_from, type: 'chat', id_conversation }
-          const url = `http://localhost:3000/api/notif/add`
+          const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/add`
           await axios.post(url, body, { headers }) // replaced Vue.http.post with axios.post
         }
       } catch (err) {
@@ -96,7 +96,7 @@ export const socket = {
           match_date: data.date
         })
         if (data.type === 'like_back') {
-          const url = `http://localhost:3000/api/chat/all`
+          const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/all`
           const headers = { 'x-auth-token': state.user.token }
           const result = await axios.get(url, { headers })
           state.convos = result.body
