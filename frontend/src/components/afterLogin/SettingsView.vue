@@ -3,93 +3,40 @@
     <div>{{ user }}</div>
     <div class="parallax" :style="`background-image: url(${coverPhoto});`">
     </div>
-    <q-btn class="cover__btn"
-      color="blue"
-      round
-      dense
-      icon="mdi-image"
-      flat
-      @click.stop="pickFile"
-    >
-      <q-tooltip
-        anchor="bottom middle"
-        self="top middle"
-      >
+    <q-btn class="cover__btn" color="blue" round dense icon="mdi-image" flat @click.stop="pickFile">
+      <q-tooltip anchor="bottom middle" self="top middle">
         Change cover photo
       </q-tooltip>
     </q-btn>
-    <input
-      ref="imageRef"
-      type="file"
-      style="display: none"
-      accept="image/*"
-      @change="onFilePicked"
-    >
+    <input ref="imageRef" type="file" style="display: none" accept="image/*" @change="onFilePicked">
     <div class="q-py-sm strap grey-3">
       <q-card class="q-py-sm">
         <q-card-section>
           <div class="row items-center">
             <div class="col-12 col-sm-8 col-md-4">
               <div class="avatar">
-                <q-avatar
-                  class="mx-auto d-block"
-                  size="200px"
-                >
-                  <img
-                    :src="profileImage"
-                    class="avatar__img"
-                  >
-                  <q-btn
-                    class="avatar__btn"
-                    color="grey-5"
-                    round
-                    dense
-                    icon="mdi-image"
-                    flat
-                    @click.stop="openEditor"
-                  ></q-btn>
+                <q-avatar class="mx-auto d-block" size="200px">
+                  <img :src="profileImage" class="avatar__img">
+                  <q-btn class="avatar__btn" color="grey-5" round dense icon="mdi-image" flat @click.stop="openEditor"></q-btn>
                 </q-avatar>
               </div>
             </div>
-            <profile-tabs
-              settings
-              :active="activeTab"
-              @change-tab="changeTab"
-            ></profile-tabs>
+            <profile-tabs settings :active="activeTab" @change-tab="changeTab"></profile-tabs>
           </div>
         </q-card-section>
       </q-card>
     </div>
-    <q-card
-      class="profile"
-      style="height: calc(100vh - 60px);"
-    >
+    <q-card class="profile" style="height: calc(100vh - 60px);">
       <q-card-section>
         <div class="row q-gutter-md">
           <div class="col-12 col-sm-8 col-md-4">
-            <profile-badge
-              :user="user"
-              settings
-            ></profile-badge>
+            <profile-badge :user="user" settings></profile-badge>
           </div>
           <div class="col-12 col-sm-10 col-md-8 main grey--text">
-            <profile-tabs
-              settings
-              :active="activeTab"
-              mobile
-              @change-tab="changeTab"
-            ></profile-tabs>
-            <q-tab-panels
-              v-model="activeTab"
-              animated
-            >
+            <profile-tabs settings :active="activeTab" mobile @change-tab="changeTab"></profile-tabs>
+            <q-tab-panels v-model="activeTab" animated>
               <q-tab-panel name="tab-profile">
-                <profile-form
-                  ref="form"
-                  :user="user"
-                  @sync-user="syncUser"
-                  @update-user="updateUser"
-                ></profile-form>
+                <profile-form ref="form" :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
               </q-tab-panel>
               <q-tab-panel name="tab-photo">
                 <profile-gallery :images="filteredImages"></profile-gallery>
@@ -106,12 +53,7 @@
       </q-card-section>
     </q-card>
     <alert :data="alert"></alert>
-    <profile-editor
-      ref="profileEditor"
-      @file_error="error = true"
-      @file_succes="error = false"
-      @update-image="updateImage"
-    ></profile-editor>
+    <profile-editor ref="profileEditor" @file_error="error = true" @file_succes="error = false" @update-image="updateImage"></profile-editor>
   </q-layout>
   <loader v-else />
 </template>

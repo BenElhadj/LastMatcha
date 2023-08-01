@@ -243,31 +243,35 @@ export default {
     }
   },
   async created () {
-    const token = localStorage.getItem('token')
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show`
-    const headers = { 'x-auth-token': token }
-    // const res = await axios.post(url, {filter: false}, { headers })
-    const res = await axios.post(url, { filter: false }, { headers })
-    console.log(res)
-    if (!res.data) {
-      this.users = res.data.map(cur => ({
-        ...cur,
-        rating: Number(cur.rating)
-      }))
-      if (this.data.gender || this.data.location) {
-        if (this.data.gender !== 'null') this.gender = this.data.gender
-        if (this.data.location !== 'null') this.location = this.data.location
-        if (this.data.min && this.data.max && !isNaN(this.data.max) && !isNaN(this.data.min) && Number(this.data.max) >= Number(this.data.min)) {
-          this.age = [Number(this.data.min), Number(this.data.max)]
+    try {
+      const token = localStorage.getItem('token')
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show`
+      const headers = { 'x-auth-token': token }
+      // const res = await axios.post(url, {filter: false}, { headers })
+      const res = await axios.post(url, { filter: false }, { headers })
+      console.log(res)
+      if (!res.data) {
+        this.users = res.data.map(cur => ({
+          ...cur,
+          rating: Number(cur.rating)
+        }))
+        if (this.data.gender || this.data.location) {
+          if (this.data.gender !== 'null') this.gender = this.data.gender
+          if (this.data.location !== 'null') this.location = this.data.location
+      {
+            this.age = [Number(this.data.min), Number(this.data.max)]
+          }
+          this.search = true
         }
-        this.search = true
+        this.whoIsUp()
+        this.loaded = true
+      } else {
+        // this.logout(this.user.id)
+        this.$router.push('/login')
       }
-      this.whoIsUp()
-      this.loaded = true
-    } else {
-      // this.logout(this.user.id)
-      this.$router.push('/login')
-    }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des utilisateurs :", error);
+    } 
   },
   methods: {
     ...utility,

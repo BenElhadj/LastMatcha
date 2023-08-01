@@ -9,18 +9,7 @@
                 <h4 class="title mb-4">
                   Afficher
                 </h4>
-                <q-btn-toggle
-        v-model="model"
-        spread
-        no-caps
-        toggle-color="purple"
-        color="white"
-        text-color="black"
-        :options="[
-          {label: 'Option 1', value: 'one'},
-          {label: 'Option 2', value: 'two'}
-        ]"
-      ></q-btn-toggle>
+                <q-btn-toggle v-model="model" spread no-caps toggle-color="purple" color="white" text-color="black" :options="[ {label: 'Option 1', value: 'one'}, {label: 'Option 2', value: 'two'} ]"></q-btn-toggle>
                 <h4 class="title mb-3">
                   Distance
                 </h4>
@@ -260,23 +249,27 @@ export default {
     }
   },
   async created () {
-    const token = localStorage.getItem('token')
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show`
-    const headers = { 'x-auth-token': token }
-    const res = await axios.post(url, { filter: true }, { headers })
-    console.log('hello '+res)
-    if (!res.data.msg) {
-      this.users = res.data.slice(0, 100).map(cur => ({
-        ...cur,
-        rating: Number(cur.rating)
-      }))
-      this.whoIsUp()
-      this.loaded = true
-    } else {
-      // th
-      is.logout(this.user.id)
-      // router.push('/login')
-      console.log(res.data.msg)
+    try {
+      const token = localStorage.getItem('token')
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show`
+      const headers = { 'x-auth-token': token }
+      const res = await axios.post(url, { filter: true }, { headers })
+      console.log('hello '+res)
+      if (!res.data.msg) {
+        this.users = res.data.slice(0, 100).map(cur => ({
+          ...cur,
+          rating: Number(cur.rating)
+        }))
+        this.whoIsUp()
+        this.loaded = true
+      } else {
+        // th
+        is.logout(this.user.id)
+        // router.push('/login')
+        console.log(res.data.msg)
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des utilisateurs :", error);
     }
   },
   methods: {

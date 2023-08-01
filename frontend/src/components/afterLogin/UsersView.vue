@@ -14,19 +14,7 @@
                   <h4 class="mb-4 custom-title">
                     Afficher
                   </h4>
-                  <q-btn-toggle
-        v-model="model"
-        spread
-        no-caps
-        toggle-color="blue"
-        color="white"
-        text-color="black"
-        :options="[
-          {label: 'Hommes', value: 'man'},
-          {label: 'Femmes', value: 'women'}
-        ]"
-      ></q-btn-toggle>
-              
+                  <q-btn-toggle v-model="model" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Hommes', value: 'man'}, {label: 'Femmes', value: 'women'} ]"></q-btn-toggle>
                   <h4 class="mb-4 custom-title">
                     Localisation
                   </h4>
@@ -34,15 +22,7 @@
                   <h4 class="custom-age">
                     Age
                   </h4>
-                  <q-range
-      v-model="age"
-      :min="18"
-      :max="85"
-      :step="1"
-      
-       label-always thumb-label="always"
-      class="custom-slider mx-3 mb-4 pt-3"
-    ></q-range>
+                  <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" class="custom-slider mx-3 mb-4 pt-3"></q-range>
                   <!-- <q-range v-model="age" class="custom-slider mx-3 mb-4 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" label-always thumb-label="always"/> -->
                   <div class="row justify-center">
                     <q-btn outlined color="primary" class="home_clear_btn" @click="mainSearch">

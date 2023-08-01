@@ -13,11 +13,11 @@
       </q-toolbar-title>
       <q-space></q-space>
       <div v-if="status" justify-end class="search-notif-msg">
-        <q-input v-model="searchText" margin-right="37px" class="search-field" dense outlined hide-details placeholder="Recherche">
-          <template #prepend>
-            <q-icon name="mdi-magnify"></q-icon>
-          </template>
-        </q-input>
+        <!-- <q-input v-model="searchText" margin-right="37px" class="search-field" dense outlined hide-details placeholder="Recherche"> -->
+          <!-- <template #prepend> -->
+            <!-- <q-icon name="mdi-magnify"></q-icon> -->
+          <!-- </template> -->
+        <!-- </q-input> -->
         <q-menu v-model="notifMenu" :nudge-width="250">
           <template #activator="{ on }">
             <q-btn text icon large color="grey" v-on="on">
