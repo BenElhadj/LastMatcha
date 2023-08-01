@@ -3,8 +3,9 @@
     <q-toolbar>
       <q-btn v-if="status" flat round dense @click="drawer = true">
       <!-- <q-btn v-if="status" dense flat @click="drawer = !drawer" icon="menu"> -->
-        <q-avatar :src="image" size="42px" alt="Photo de profil" class="icon-size circular-icon"
-        ></q-avatar>
+      <q-avatar size="42px" class="icon-size circular-icon">
+        <q-img :src="image" alt="Photo de profil" />
+      </q-avatar>
       </q-btn>
       <div v-else></div>
       <q-toolbar-title>
@@ -12,8 +13,11 @@
       </q-toolbar-title>
       <q-space></q-space>
       <div v-if="status" justify-end class="search-notif-msg">
-        <q-input v-model="searchText" margin-right="37px" class="search-field" dense outlined hide-details placeholder="Recherche" prefix="mdi-magnify"
-        ></q-input>
+        <q-input v-model="searchText" margin-right="37px" class="search-field" dense outlined hide-details placeholder="Recherche">
+          <template #prepend>
+            <q-icon name="mdi-magnify"></q-icon>
+          </template>
+        </q-input>
         <q-menu v-model="notifMenu" :nudge-width="250">
           <template #activator="{ on }">
             <q-btn text icon large color="grey" v-on="on">
@@ -109,7 +113,7 @@
             <q-item-label>{{ user.username }}</q-item-label>
           </q-item-section>
           <q-item-section side top>
-            <q-icon name="arrow_back_ios" @click="drawer = false"
+            <q-icon name="mdi-hand-pointing-left" @click="drawer = false"
             ></q-icon>
           </q-item-section>
         </q-item>

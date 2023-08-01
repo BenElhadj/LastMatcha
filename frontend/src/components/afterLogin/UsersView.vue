@@ -14,8 +14,19 @@
                   <h4 class="mb-4 custom-title">
                     Afficher
                   </h4>
-                  <q-toggle v-model="gender" color="primary" label="Hommes" left-label value="male"/>
-                  <q-toggle v-model="gender" color="primary" label="Femmes" left-label value="female"/>
+                  <q-btn-toggle
+        v-model="model"
+        spread
+        no-caps
+        toggle-color="blue"
+        color="white"
+        text-color="black"
+        :options="[
+          {label: 'Hommes', value: 'man'},
+          {label: 'Femmes', value: 'women'}
+        ]"
+      ></q-btn-toggle>
+              
                   <h4 class="mb-4 custom-title">
                     Localisation
                   </h4>
@@ -23,7 +34,16 @@
                   <h4 class="custom-age">
                     Age
                   </h4>
-                  <q-range v-model="age" class="custom-slider mx-3 mb-4 pt-3" :min="18" :max="85" label-always :label-size="42"/>
+                  <q-range
+      v-model="age"
+      :min="18"
+      :max="85"
+      :step="1"
+      
+       label-always thumb-label="always"
+      class="custom-slider mx-3 mb-4 pt-3"
+    ></q-range>
+                  <!-- <q-range v-model="age" class="custom-slider mx-3 mb-4 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" label-always thumb-label="always"/> -->
                   <div class="row justify-center">
                     <q-btn outlined color="primary" class="home_clear_btn" @click="mainSearch">
                       <q-icon name="mdi-heart" /><span>Allons y</span>
@@ -40,7 +60,7 @@
 </template>
 
 <script>
-import { reactive, toRefs } from 'vue'
+import { reactive, toRefs, ref} from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 
@@ -53,15 +73,21 @@ export default {
     const state = reactive({
       gender: null,
       location: null,
-      age: [18, 85],
-      tags: store.getters.tags
+      age: [],
+      tags: store.getters.tags      
     })
     const mainSearch = () => {
       router.push(`/search?gender=${state.gender}&location=${state.location}&min=${state.age[0]}&max=${state.age[1]}`)
     }
     return {
       ...toRefs(state),
-      mainSearch
+      mainSearch,
+      model: ref('one'),
+      secondModel: ref('one'),
+      age: ref({
+        min: 18,
+        max: 85
+      })
     }
   }
 }
@@ -76,6 +102,9 @@ export default {
 
 .custom-slider .q-slider__thumb-label, .custom-slider .q-slider__thumb-container .q-slider__thumb-label__container {
   font-size: 27px !important;
+}
+.custom-slider {
+  display: block;
 }
 .custom-title {
   margin-top: 50px !important;

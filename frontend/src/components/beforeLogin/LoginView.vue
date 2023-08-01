@@ -6,7 +6,7 @@
         <q-input v-model="username" color="primary" class="my-5" :rules="usernameRules" label="Username" required></q-input>
         <q-input v-model="password" color="primary" class="my-5" :rules="passRules" label="Password" :type="showPass ? 'text' : 'password'" @keyup.enter="log">
           <template #append>
-            <q-icon :name="showPass ? 'eye-slash' : 'eye'" class="cursor-pointer" @click="showPass = !showPass"/>
+            <q-icon :name="showPass ? 'mdi-eye-off' : 'mdi-eye'" class="cursor-pointer" @click="showPass = !showPass"/>
           </template>
         </q-input>
         <q-btn block large color="primary" class="my-5" type="submit">Login</q-btn>
@@ -75,26 +75,50 @@ export default {
           username: username.value,
           password: password.value
         }
-        const res = await axios.post(url, auth)
-        console.log("===================== Response:", res);
-        if (res.data.msg) {
+        // const res = await axios.post(url, auth)
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(auth)
+        })
+        const data = await res.json()
+        console.log("===================== Response:", data);
+        if (data.msg) {
           alert.value = { state: true, color: 'red', text: data.msg }
-          utility.showAlert('red', res.data.msg, alert)
+          // utility.showAlert('red', data.msg)
         } else {
-          const user = res.data
+          const user = data
           if (user.id) {
             if (user.birthdate) {
               user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
             }
             store.dispatch('login', user)
-            utility.updateLocation()
             router.push('/')
           }
         }
+
+        // console.log("===================== Response:", res);
+        // if (res.data.msg) {
+        //   alert.value = { state: true, color: 'red', text: data.msg }
+        //   utility.showAlert('red', res.data.msg, alert)
+        // } else {
+        //   const user = res.data
+        //   if (user.id) {
+        //     if (user.birthdate) {
+        //       user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+        //     }
+        //     store.dispatch('login', user)
+        //     utility.updateLocation()
+        //     router.push('/')
+        //   }
+        // }
       } catch (err) {
         console.error(err)
       }
     }
+
 
     const checkLogin = async () => {
       try {
@@ -117,11 +141,12 @@ export default {
       valid,
       showPass,
       alert,
-      log,
       nameRules,
       usernameRules,
       emailRules,
-      passRules
+      passRules,
+      checkLogin,
+      log
     }
   }
 }

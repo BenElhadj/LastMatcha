@@ -9,16 +9,18 @@
                 <h4 class="title mb-4">
                   Afficher
                 </h4>
-                <q-btn-toggle v-model="gender" class="mb-5" :disabled="!hasBoth">
-                  <q-btn class="toggle_btn" text color="primary" value="male">
-                    <q-icon name="mdi-gender-male"></q-icon>
-                    <span class="px-1">Hommes</span>
-                  </q-btn>
-                  <q-btn class="toggle_btn" text color="primary" value="female">
-                    <q-icon name="mdi-gender-female"></q-icon>
-                    <span class="px-1">Femmes</span>
-                  </q-btn>
-                </q-btn-toggle>
+                <q-btn-toggle
+        v-model="model"
+        spread
+        no-caps
+        toggle-color="purple"
+        color="white"
+        text-color="black"
+        :options="[
+          {label: 'Option 1', value: 'one'},
+          {label: 'Option 2', value: 'two'}
+        ]"
+      ></q-btn-toggle>
                 <h4 class="title mb-3">
                   Distance
                 </h4>
@@ -27,6 +29,8 @@
                   Age
                 </h4>
                 <q-range v-model="age" class="mx-3 mb-5 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" thumb-label="always"></q-range>
+                <!-- <q-range v-model="age" class="mx-3 mb-5 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" label-always></q-range> -->
+
                 <h4 class="title mb-3">
                   Note
                 </h4>
@@ -93,6 +97,8 @@ import UserCard from '@/components/afterLogin/UserCard.vue'
 import countries from '@/nats.json'
 import utility from '@/utility'
 import axios from 'axios'
+import { matMenu } from '@quasar/extras/material-icons'
+import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 
 export default {
   name: 'DiscoverView',
@@ -102,6 +108,7 @@ export default {
   },
   data () {
     return {
+      model: ref('one'),
       max: 0,
       step: 0,
       sortDir: 1,
@@ -257,6 +264,7 @@ export default {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show`
     const headers = { 'x-auth-token': token }
     const res = await axios.post(url, { filter: true }, { headers })
+    console.log('hello '+res)
     if (!res.data.msg) {
       this.users = res.data.slice(0, 100).map(cur => ({
         ...cur,
@@ -265,7 +273,8 @@ export default {
       this.whoIsUp()
       this.loaded = true
     } else {
-      // this.logout(this.user.id)
+      // th
+      is.logout(this.user.id)
       // router.push('/login')
       console.log(res.data.msg)
     }

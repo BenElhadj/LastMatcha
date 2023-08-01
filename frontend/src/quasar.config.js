@@ -63,7 +63,7 @@ export default ctx => ({
   },
 
   framework: {
-    iconSet: 'svg-mdi-v6',
+    iconSet: 'mdi-v5',
 
     config: {
       loadingBar: {

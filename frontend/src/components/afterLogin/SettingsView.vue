@@ -1,16 +1,9 @@
 <template>
-  <q-layout
-    v-if="loaded"
-    view="hHh LpR lff"
-    class="settings"
-  >
-    <div
-      class="parallax"
-      :style="`background-image: url(${coverPhoto});`"
-    >
+  <q-layout v-if="loaded" view="hHh LpR lff" class="settings">
+    <div>{{ user }}</div>
+    <div class="parallax" :style="`background-image: url(${coverPhoto});`">
     </div>
-    <q-btn
-      class="cover__btn"
+    <q-btn class="cover__btn"
       color="blue"
       round
       dense
@@ -182,6 +175,7 @@ export default {
           const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
           const headers = { 'x-auth-token': token }
           const res = await axios.get(url, { headers })
+          console.log('res ===========> ', res)
           if (!res.data.msg) {
             loaded.value = true
             return
@@ -190,7 +184,7 @@ export default {
           console.error('Setting.js watch.user error ===> ', err)
         }
       }
-      // store.dispatch('logout', newValue.id)
+      store.dispatch('logout', newValue.id)
       router.push('/login')
     }, { immediate: true })
 
