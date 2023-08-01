@@ -3,29 +3,10 @@
     <div class="login mt-5">
       <h1 class="page-header text-h3 text-secondary">Login</h1>
       <q-form @submit.prevent="log" class="my-4">
-        <q-input
-          v-model="username"
-          color="primary"
-          class="my-5"
-          :rules="usernameRules"
-          label="Username"
-          required
-        ></q-input>
-        <q-input
-          v-model="password"
-          color="primary"
-          class="my-5"
-          :rules="passRules"
-          label="Password"
-          :type="showPass ? 'text' : 'password'"
-          @keyup.enter="log"
-        >
+        <q-input v-model="username" color="primary" class="my-5" :rules="usernameRules" label="Username" required></q-input>
+        <q-input v-model="password" color="primary" class="my-5" :rules="passRules" label="Password" :type="showPass ? 'text' : 'password'" @keyup.enter="log">
           <template #append>
-            <q-icon
-              :name="showPass ? 'eye-slash' : 'eye'"
-              class="cursor-pointer"
-              @click="showPass = !showPass"
-            />
+            <q-icon :name="showPass ? 'eye-slash' : 'eye'" class="cursor-pointer" @click="showPass = !showPass"/>
           </template>
         </q-input>
         <q-btn block large color="primary" class="my-5" type="submit">Login</q-btn>

@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/html-quotes -->
 <template>
   <q-layout>
     <q-page>
@@ -15,49 +14,18 @@
                   <h4 class="mb-4 custom-title">
                     Afficher
                   </h4>
-                  <q-toggle
-                    v-model="gender"
-                    color="primary"
-                    label="Hommes"
-                    left-label
-                    value="male"
-                  />
-                  <q-toggle
-                    v-model="gender"
-                    color="primary"
-                    label="Femmes"
-                    left-label
-                    value="female"
-                  />
+                  <q-toggle v-model="gender" color="primary" label="Hommes" left-label value="male"/>
+                  <q-toggle v-model="gender" color="primary" label="Femmes" left-label value="female"/>
                   <h4 class="mb-4 custom-title">
                     Localisation
                   </h4>
-                  <q-input
-                    v-model="location"
-                    class="home_location_input mb-4"
-                    color="primary"
-                    outlined
-                    solo
-                    icon="map_marker"
-                  />
+                  <q-input v-model="location" class="home_location_input mb-4" color="primary" outlined solo icon="map_marker"/>
                   <h4 class="custom-age">
                     Age
                   </h4>
-                  <q-range
-                    v-model="age"
-                    class="custom-slider mx-3 mb-4 pt-3"
-                    min=18
-                    max=75
-                    label-always
-                    label-size=42
-                  />
+                  <q-range v-model="age" class="custom-slider mx-3 mb-4 pt-3" :min="18" :max="85" label-always :label-size="42"/>
                   <div class="row justify-center">
-                    <q-btn
-                      outlined
-                      color="primary"
-                      class="home_clear_btn"
-                      @click="mainSearch"
-                    >
+                    <q-btn outlined color="primary" class="home_clear_btn" @click="mainSearch">
                       <q-icon name="mdi-heart" /><span>Allons y</span>
                     </q-btn>
                   </div>

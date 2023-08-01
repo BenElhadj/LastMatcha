@@ -1,46 +1,19 @@
 <template>
   <q-layout>
-    <v-container
-      v-if="loaded"
-      class="pt-5 px-0 discover"
-    >
-      <v-layout
-        wrap
-        justify-center
-      >
-        <v-flex
-          :xl2="search"
-          :xl4="!search"
-          :md3="search"
-          :md8="!search"
-          sm10
-        >
+    <v-container v-if="loaded" class="pt-5 px-0 discover">
+      <v-layout wrap justify-center>
+        <v-flex :xl2="search" :xl4="!search" :md3="search" :md8="!search" sm10>
           <v-container px-md-5>
             <v-layout column>
               <h4 class="title mb-4">
                 Afficher
               </h4>
-              <v-btn-toggle
-                v-model="gender"
-                class="mb-5"
-              >
-                <v-btn
-                  class="toggle_btn"
-                  text
-                  outlined
-                  color="primary"
-                  value="male"
-                >
+              <v-btn-toggle v-model="gender" class="mb-5">
+                <v-btn class="toggle_btn" text outlined color="primary" value="male">
                   <v-icon>mdi-gender-male</v-icon>
                   <span class="px-1">Hommes</span>
                 </v-btn>
-                <v-btn
-                  class="toggle_btn"
-                  text
-                  outlined
-                  color="primary"
-                  value="female"
-                >
+                <v-btn class="toggle_btn" text outlined color="primary" value="female">
                   <v-icon>mdi-gender-female</v-icon>
                   <span class="px-1">Femmes</span>
                 </v-btn>
@@ -48,144 +21,48 @@
               <h4 class="title mb-3">
                 Distance
               </h4>
-              <v-range-slider
-                v-model="distance"
-                class="mx-3 mb-5 pt-3"
-                hide-details
-                :max="max"
-                min=0
-                :step="step"
-                thumb-label="always"
-                thumb-size="30"
-              ></v-range-slider>
+              <v-range-slider v-model="distance" class="mx-3 mb-5 pt-3" hide-details :min="0" :max="max" :step="step" :thumb-size="30" thumb-label="always"></v-range-slider>
               <h4 class="title mb-3">
                 Age
               </h4>
-              <v-range-slider
-                v-model="age"
-                class="mx-3 mb-4 pt-3"
-                max=85
-                min=18
-                step=1
-                thumb-label="always"
-                thumb-size="25"
-              ></v-range-slider>
+              <v-range-slider v-model="age" class="mx-3 mb-4 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" thumb-label="always"></v-range-slider>
               <h4 class="title mb-3">
                 Note
               </h4>
-              <v-range-slider
-                v-model="rating"
-                class="mx-3 mb-4 pt-3"
-                max=5
-                min=0
-                step=0.5
-                thumb-label="always"
-                thumb-size="25"
-              ></v-range-slider>
+              <v-range-slider v-model="rating" class="mx-3 mb-4 pt-3" :min="0" :max="5" :step="0.5" :thumb-size="25" thumb-label="always"></v-range-slider>
               <h4 class="title mb-4">
                 Location
               </h4>
-              <v-text-field
-                v-model="location"
-                class="loaction_input mb-4"
-                color="primary"
-                outlined
-                solo
-                text
-                append-icon="mdi-map-marker"
-              ></v-text-field>
+              <v-text-field v-model="location" class="loaction_input mb-4" color="primary" outlined solo text append-icon="mdi-map-marker"></v-text-field>
               <h4 class="title mb-4">
                 Interêts
               </h4>
-              <v-autocomplete
-                v-model="interests"
-                :items="allTags"
-                solo
-                text
-                outlined
-                multiple
-                deletable-chips
-                hide-details
-                class="tags_menu mb-5"
-                chips
-              ></v-autocomplete>
-              <v-layout
-                align-center
-                justify-between
-                class="mb-4"
-              >
+              <v-autocomplete v-model="interests" :items="allTags" solo text outlined multiple deletable-chips hide-details class="tags_menu mb-5" chips></v-autocomplete>
+              <v-layout align-center justify-between class="mb-4">
                 <h4 class="title">
                   Trier par
                 </h4>
-                <v-btn
-                  text
-                  icon
-                  class="sort_btn"
-                  color="primary"
-                  @click="changeSort"
-                >
+                <v-btn text icon class="sort_btn" color="primary" @click="changeSort">
                   <v-icon :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`">
                     mdi-sort
                   </v-icon>
                 </v-btn>
               </v-layout>
-              <v-select
-                v-model="sort"
-                outlined
-                solo
-                :items="sortTypes"
-                class="sort_select mb-5"
-              ></v-select>
-              <v-layout
-                :column="search"
-                align-center
-                justify-center
-              >
-                <v-btn
-                  outlined
-                  block
-                  large
-                  color="primary"
-                  :class="`${search ? '' : 'mr-3'} clear_btn`"
-                  @click="reset"
-                >
+              <v-select v-model="sort" outlined solo :items="sortTypes" class="sort_select mb-5"></v-select>
+              <v-layout :column="search" align-center justify-center>
+                <v-btn outlined block large color="primary" :class="`${search ? '' : 'mr-3'} clear_btn`" @click="reset">
                   <v-icon>Actualiser</v-icon>
                 </v-btn>
-                <v-btn
-                  outlined
-                  block
-                  large
-                  color="primary"
-                  :class="`${search ? '' : 'm-3'} clear_btn`"
-                  @click="search = true"
-                >
+                <v-btn outlined block large color="primary" :class="`${search ? '' : 'm-3'} clear_btn`" @click="search = true">
                   <v-icon>Chercher</v-icon>
                 </v-btn>
               </v-layout>
             </v-layout>
           </v-container>
         </v-flex>
-        <v-flex
-          v-if="search"
-          xl10
-          md9
-          sm12
-        >
-          <v-layout
-            row
-            wrap
-            justify-center
-          >
-            <v-flex
-              v-for="user in sorted"
-              :key="user.user_id"
-              class="user"
-              xl2
-              lg3
-              sm3
-              ma-3
-              grow
-            >
+        <v-flex v-if="search" xl10 md9 sm12>
+          <v-layout row wrap justify-center>
+            <v-flex v-for="user in sorted" :key="user.user_id" class="user" xl2 lg3 sm3 ma-3 grow>
               <user-card :user="user" />
             </v-flex>
           </v-layout>
@@ -197,9 +74,9 @@
 </template>
 
 <script>
-import loader from './Loader'
+import loader from '@/views/LoaderView.vue'
 import { mapGetters, mapActions } from 'vuex'
-import UserCard from './UserCard'
+import UserCard from '@/components/afterLogin/UserCard.vue'
 import countries from '@/nats.json'
 import utility from '@/utility'
 import axios from 'axios'

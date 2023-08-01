@@ -1,9 +1,6 @@
 <template>
   <q-layout>
-    <q-page
-      v-if="loaded"
-      class="messenger pa-3"
-    >
+    <q-page v-if="loaded" class="messenger pa-3">
       <div class="parent row">
         <div class="left hidden-xs-only col-md-3 col-sm-1">
           <MessengerList />
@@ -14,10 +11,7 @@
               <MessengerChat ref="chat" />
             </div>
             <div class="bottom col-xs-3">
-              <MessengerForm
-                :to-id="getToId"
-                @msg-sent="messageSent"
-              />
+              <MessengerForm :to-id="getToId" @msg-sent="messageSent"/>
             </div>
           </div>
         </div>
@@ -32,10 +26,10 @@ import { onBeforeUnmount, ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import LoaderView from './Loader'
-import MessengerList from './MessengerList'
-import MessengerChat from './MessengerChat'
-import MessengerForm from './MessengerForm'
+import LoaderView from '@/views/LoaderView.vue'
+import MessengerList from '@/components/afterLogin/MessengerList.vue'
+import MessengerChat from '@/components/afterLogin/MessengerChat.vue'
+import MessengerForm from '@/components/afterLogin/MessengerForm.vue'
 
 export default {
   name: 'MessengerView',

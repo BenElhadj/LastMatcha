@@ -1,13 +1,7 @@
 <template>
   <q-layout>
-    <div
-      v-if="isComplete()"
-      class="discover"
-    >
-      <q-page-container
-        v-if="loaded"
-        class="pt-5 px-0"
-      >
+    <div v-if="isComplete()" class="discover">
+      <q-page-container v-if="loaded" class="pt-5 px-0">
         <div class="row wrap justify-center">
           <div class="col-2">
             <q-page-container class="px-5">
@@ -15,26 +9,12 @@
                 <h4 class="title mb-4">
                   Afficher
                 </h4>
-                <q-btn-toggle
-                  v-model="gender"
-                  class="mb-5"
-                  :disabled="!hasBoth"
-                >
-                  <q-btn
-                    class="toggle_btn"
-                    text
-                    color="primary"
-                    value="male"
-                  >
+                <q-btn-toggle v-model="gender" class="mb-5" :disabled="!hasBoth">
+                  <q-btn class="toggle_btn" text color="primary" value="male">
                     <q-icon name="mdi-gender-male"></q-icon>
                     <span class="px-1">Hommes</span>
                   </q-btn>
-                  <q-btn
-                    class="toggle_btn"
-                    text
-                    color="primary"
-                    value="female"
-                  >
+                  <q-btn class="toggle_btn" text color="primary" value="female">
                     <q-icon name="mdi-gender-female"></q-icon>
                     <span class="px-1">Femmes</span>
                   </q-btn>
@@ -42,99 +22,38 @@
                 <h4 class="title mb-3">
                   Distance
                 </h4>
-                <q-range
-                  v-model="distance"
-                  class="mx-3 mb-5 pt-3"
-                  :max="max"
-                  min=0
-                  :step="step"
-                  thumb-label="always"
-                  thumb-size="30"
-                ></q-range>
+                <q-range v-model="distance" class="mx-3 mb-5 pt-3" :min="0" :max="max" :step="step" :thumb-size="30" thumb-label="always"></q-range>
                 <h4 class="title mb-3">
                   Age
                 </h4>
-                <q-range
-                  v-model="age"
-                  class="mx-3 mb-5 pt-3"
-                  max=85
-                  min=18
-                  step=1
-                  thumb-label="always"
-                  thumb-size="25"
-                ></q-range>
+                <q-range v-model="age" class="mx-3 mb-5 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" thumb-label="always"></q-range>
                 <h4 class="title mb-3">
                   Note
                 </h4>
-                <q-range
-                  v-model="rating"
-                  class="mx-3 mb-5 pt-3"
-                  max=5
-                  min=0
-                  step=0.5
-                  thumb-label="always"
-                  thumb-size="25"
-                ></q-range>
+                <q-range v-model="rating" class="mx-3 mb-5 pt-3" :min="0" :max="5" :step="0.5" :thumb-size="25" thumb-label="always"></q-range>
                 <h4 class="title mb-4">
                   Localisation
                 </h4>
-                <q-input
-                  v-model="location"
-                  class="location_input mb-5"
-                  color="primary"
-                  hide-details
-                  outlined
-                  solo
-                  text
-                  append-icon="mdi-map-marker"
-                ></q-input>
+                <q-input v-model="location" class="location_input mb-5" color="primary" hide-details outlined solo text append-icon="mdi-map-marker"></q-input>
                 <h4 class="title mb-4">
                   Interêts
                 </h4>
-                <q-select
-                  v-model="interests"
-                  :options="allTags"
-                  solo
-                  text
-                  outlined
-                  multiple
-                  hide-details
-                  class="tags_menu mb-5"
-                ></q-select>
+                <q-select v-model="interests" :options="allTags" solo text outlined multiple hide-details class="tags_menu mb-5"></q-select>
                 <div class="row justify-between mb-4">
                   <h4 class="title">
                     Sort by
                   </h4>
-                  <q-btn
-                    text
-                    icon
-                    class="sort_btn"
-                    color="primary"
-                    @click="changeSort"
-                  >
+                  <q-btn text icon class="sort_btn" color="primary" @click="changeSort">
                     <q-icon :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`">
                       mdi-sort
                     </q-icon>
                   </q-btn>
                 </div>
-                <q-select
-                  v-model="sort"
-                  outlined
-                  solo
-                  :options="sortTypes"
-                  class="sort_select mb-5"
-                ></q-select>
+                <q-select v-model="sort" outlined solo :options="sortTypes" class="sort_select mb-5"></q-select>
                 <h4 class="title mb-4">
                   Reset all
                 </h4>
-                <q-btn
-                  outlined
-                  block
-                  large
-                  color="primary"
-                  class="clear_btn"
-                  @click="reset"
-                >
+                <q-btn outlined block large color="primary" class="clear_btn" @click="reset">
                   <q-icon name="mdi-refresh"></q-icon>
                 </q-btn>
               </div>
@@ -142,11 +61,7 @@
           </div>
           <div class="col-10">
             <div class="row wrap justify-center">
-              <div
-                v-for="user in sortedUsers"
-                :key="user.user_id"
-                class="user col-xl2 col-lg3 col-sm3 ma-3 grow"
-              >
+              <div v-for="user in sortedUsers" :key="user.user_id" class="user col-xl2 col-lg3 col-sm3 ma-3 grow">
                 <user-card :user="user" />
               </div>
             </div>
@@ -155,26 +70,14 @@
       </q-page-container>
       <LoaderView v-else />
     </div>
-    <q-page-container
-      v-else
-      class="my-3"
-    >
+    <q-page-container v-else class="my-3">
       <div class="row wrap justify-center">
         <h2 class="text-xs-center pt-4 pb-3 mb-4 grey--text mx-auto">
           Complétez votre profil pour avoir l'opportunité de découvrir des utilisateurs qui vous correspondent !
         </h2>
         <div class="col-6 col-md-4">
-          <q-btn
-            block
-            outlined
-            large
-            to="/settings"
-            color="primary"
-          >
-            <q-icon
-              left
-              name="mdi-chevron-left"
-            ></q-icon>
+          <q-btn block outlined large to="/settings" color="primary">
+            <q-icon left name="mdi-chevron-left"></q-icon>
             <span>Aller au</span>
           </q-btn>
         </div>
@@ -184,9 +87,9 @@
 </template>
 
 <script>
-import LoaderView from './Loader'
+import LoaderView from '@/views/LoaderView.vue'
 import { mapGetters, mapActions } from 'vuex'
-import UserCard from './UserCard'
+import UserCard from '@/components/afterLogin/UserCard.vue'
 import countries from '@/nats.json'
 import utility from '@/utility'
 import axios from 'axios'
@@ -211,7 +114,7 @@ export default {
       loaded: false,
       age: [18, 85],
       rating: [0, 5],
-      distance: [0, 0],
+      distance: [0, 5],
       tags: ['sports', 'cinema', 'music'],
       sortTypes: ['age', 'distance', 'rating', 'interests'],
       nats: countries,

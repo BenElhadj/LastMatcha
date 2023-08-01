@@ -8,21 +8,8 @@
         Veuillez fournir votre adresse e-mail afin de changer votre mot de passe
       </p>
       <div class="row q-gutter-sm">
-        <q-input
-          v-model="email"
-          outlined
-          label="Email"
-          required
-          class="my-5"
-          @keyup.enter="recover"
-        ></q-input>
-        <q-btn
-          large
-          outline
-          color="primary"
-          class="ml-0 py-3 send_btn"
-          @click.prevent="recover"
-        >
+        <q-input v-model="email" outlined label="Email" require class="my-5" @keyup.enter="recover"></q-input>
+        <q-btn large outline color="primary" class="ml-0 py-3 send_btn" @click.prevent="recover">
           Envoyer
         </q-btn>
       </div>
@@ -34,7 +21,7 @@
 <script>
 import { ref } from 'vue'
 import AlertView from '@/views/AlertView.vue'
-import utility from '../utility'
+import utility from '@/utility'
 import axios from 'axios'
 
 export default {

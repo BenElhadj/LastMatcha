@@ -1,8 +1,24 @@
 <script setup>
-import HelloWorld from '@/components/HelloWorld.vue'
-import TheWelcome from '@/components/TheWelcome.vue'
+import { onMounted } from 'vue'
 import NavbarView from '@/views/NavbarView.vue'
 import FooterView from '@/views/FooterView.vue'
+
+const components = {
+  NavbarView,
+  FooterView
+};
+
+onMounted(() => {
+  window.initMap = function () {
+    // Votre code ici
+  }
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_APP_GOOGLE_KEY}&callback=initMap`;
+  
+  script.async = true;
+  script.defer = true;
+  document.body.prepend(script);
+});
 
 </script>
 

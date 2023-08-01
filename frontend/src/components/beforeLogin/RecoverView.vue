@@ -1,11 +1,7 @@
 <template>
   <q-layout>
     <q-container class="recover mt-5">
-      <form
-        v-if="notSubmited && !loading"
-        class="my-4"
-        @submit.prevent="submit"
-      >
+      <form v-if="notSubmited && !loading" class="my-4" @submit.prevent="submit">
         <div class="row justify-center">
           <div class="col-xs-12">
             <h1 class="text-h5 mb-5 font-weight-light text-grey-7">
@@ -13,49 +9,19 @@
             </h1>
           </div>
           <div class="col-md-8 col-sm-10 col-xs-12">
-            <q-input
-              v-model="password"
-              filled
-              :rules="passRules"
-              label="New password"
-              :type="showPass ? 'text' : 'password'"
-              :append="showPass ? 'visibility_off' : 'visibility'"
-              @click:append="showPass = !showPass"
-            ></q-input>
+            <q-input v-model="password" filled :rules="passRules" label="New password" :type="showPass ? 'text' : 'password'" :append="showPass ? 'visibility_off' : 'visibility'" @click:append="showPass = !showPass"></q-input>
           </div>
           <div class="col-md-8 col-sm-10 col-xs-12">
-            <q-input
-              v-model="passwordConfirm"
-              filled
-              :rules="confPassRules"
-              label="Confirm new password"
-              :type="showConfPass ? 'text' : 'password'"
-              :append="showConfPass ? 'visibility_off' : 'visibility'"
-              @click:append="showConfPass = !showConfPass"
-            ></q-input>
+            <q-input v-model="passwordConfirm" filled :rules="confPassRules" label="Confirm new password" :type="showConfPass ? 'text' : 'password'" :append="showConfPass ? 'visibility_off' : 'visibility'" @click:append="showConfPass = !showConfPass"></q-input>
           </div>
           <div class="col-md-8 col-sm-10 col-xs-12">
-            <q-btn
-              color="primary"
-              size="large"
-              block
-              :disable="!valid"
-              class="mt-5 text-white"
-              @click="submit"
-            >
+            <q-btn color="primary" size="large" block :disable="!valid" class="mt-5 text-white" @click="submit">
               Submit
             </q-btn>
           </div>
         </div>
       </form>
-      <q-btn
-        v-if="!notSubmited && !loading"
-        color="primary"
-        large
-        block
-        to="/"
-        class="mt-5 py-3"
-      >
+      <q-btn v-if="!notSubmited && !loading" color="primary" large block to="/" class="mt-5 py-3">
         Go back
       </q-btn>
       <LoaderView v-if="loading" />
@@ -68,7 +34,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import AlertView from '@/views/AlertView.vue'
-import LoaderView from './Loader'
+import LoaderView from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
 import router from '@/router/index'
 import axios from 'axios'

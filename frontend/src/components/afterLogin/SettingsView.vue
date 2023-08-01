@@ -129,15 +129,15 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Alert from '@/views/AlertView.vue'
-import loader from './Loader'
+import loader from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
-import ProfileEditor from './ProfileEditor'
-import ProfileBadge from './ProfileBadge'
-import ProfileTabs from './ProfileTabs'
-import ProfileForm from './ProfileForm'
-import ProfileSettings from './ProfileSettings'
-import ProfileGallery from './ProfileGallery'
-import ProfileHistory from './ProfileHistory'
+import ProfileEditor from '@/components/afterLogin/ProfileEditor.vue'
+import ProfileBadge from '@/components/afterLogin/ProfileBadge.vue'
+import ProfileTabs from '@/components/afterLogin/ProfileTabs.vue'
+import ProfileForm from '@/components/afterLogin/ProfileForm.vue'
+import ProfileSettings from '@/components/afterLogin/ProfileSettings.vue'
+import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue'
+import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue'
 
 export default {
   name: 'SettingsView',
@@ -190,7 +190,7 @@ export default {
           console.error('Setting.js watch.user error ===> ', err)
         }
       }
-      store.dispatch('logout', newValue.id)
+      // store.dispatch('logout', newValue.id)
       router.push('/login')
     }, { immediate: true })
 

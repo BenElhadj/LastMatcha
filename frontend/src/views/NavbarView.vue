@@ -1,8 +1,8 @@
 <template>
   <q-header elevated class="black-text">
     <q-toolbar>
-      <!-- <q-btn v-if="status" flat round dense @click="drawer = true"> -->
-      <q-btn v-if="status" dense flat @click="drawer = !drawer" icon="menu">
+      <q-btn v-if="status" flat round dense @click="drawer = true">
+      <!-- <q-btn v-if="status" dense flat @click="drawer = !drawer" icon="menu"> -->
         <q-avatar :src="image" size="42px" alt="Photo de profil" class="icon-size circular-icon"
         ></q-avatar>
       </q-btn>
@@ -50,7 +50,7 @@
             </q-item>
           </q-list>
         </q-menu>
-        <q-menu v-model="msgMenu" anchor="top-right" :content-class="'grey lighten-5'">
+        <q-menu v-model="msgMenu" anchor="top right" :content-class="'grey lighten-5'">
           <q-btn ripple flat round dense class="icon-size" v-on="on">
             <q-badge :value="!!newMsgNum" color="primary" floating class="mx-2">
               <template #default>
@@ -166,6 +166,7 @@ export default {
     const newMsgNum = ref(0)
     const searchText = ref('')
     const drawer = ref(false)
+    const image = computed(() => store.getters.profileImage)
 
     const links = [
       {
@@ -266,7 +267,7 @@ export default {
       }
     }
 
-    const logout = async () => {
+    const logout = async (userId) => {
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
         const headers = { 'x-auth-token': user.value.token }
@@ -320,13 +321,14 @@ export default {
       notifMenu,
       msgMenu,
       getFullPath,
+      formatNotifDate,
+      image,
       seenNotif,
       syncConvo,
       typingSecClr,
       toUserProfile,
       toUserChat,
       logout,
-      formatNotifDate,
       handleNotifMenu,
       handleMsgMenu
     }

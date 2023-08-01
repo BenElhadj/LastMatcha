@@ -2,112 +2,45 @@
   <q-layout>
     <div>
       <Loader v-if="f" />
-      <v-layout
-        v-else
-        column
-        class="user_profile"
-      >
-        <div
-          class="parallax"
-          :style="`background-image: url(${coverPhoto});`"
-        ></div>
+      <v-layout v-else column class="user_profile">
+        <div class="parallax" :style="`background-image: url(${coverPhoto});`"></div>
         <v-layout class="py-0 strap grey lighten-3">
           <v-container py-0>
             <v-layout>
-              <v-flex
-                xs12
-                sm8
-                md4
-                class="avatar"
-              >
-                <v-avatar
-                  class="mx-auto d-block"
-                  size="200"
-                >
+              <v-flex xs12 sm8 md4 class="avatar">
+                <v-avatar class="mx-auto d-block" size="200">
                   <template #offset>
-                    <img
-                      :src="profileImage"
-                      class="avatar__img"
-                    >
+                    <img :src="profileImage" class="avatar__img">
                   </template>
                 </v-avatar>
               </v-flex>
-              <profile-tabs
-                :active="activeTab"
-                @change-tab="changeTab"
-              ></profile-tabs>
+              <profile-tabs :active="activeTab" @change-tab="changeTab"></profile-tabs>
               <v-tooltip bottom>
                 <template #activator="{ on }">
-                  <v-icon
-                    :color="`${isOnline ? 'green' : 'grey'} lighten-2`"
-                    class="profile-status_icon mx-3 hidden-xs-only"
-                    medium
-                    v-on="on"
-                  >
+                  <v-icon :color="`${isOnline ? 'green' : 'grey'} lighten-2`" class="profile-status_icon mx-3 hidden-xs-only" medium v-on="on">
                     mdi-circle
                   </v-icon>
                 </template>
                 <span>{{ lastSeen }}</span>
               </v-tooltip>
-              <v-chip
-                disabled
-                outlined
-                small
-                color="grey lighten-1"
-                class="mt-3 ml-2 hidden-xs-only"
-              >
+              <v-chip disabled outlined small color="grey lighten-1" class="mt-3 ml-2 hidden-xs-only">
                 {{ distance }}
               </v-chip>
-              <v-btn
-                icon
-                text
-                large
-                color="primary"
-                :disabled="userCantLike"
-                class="hidden-xs-only"
-                @click="match"
-              >
+              <v-btn icon text large color="primary" :disabled="userCantLike" class="hidden-xs-only" @click="match">
                 <v-icon>{{ liked ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
               </v-btn>
-              <v-btn
-                icon
-                text
-                large
-                color="primary"
-                :disabled="!userCanChat"
-                class="hidden-xs-only mx-0"
-                @click="goToChat"
-              >
+              <v-btn icon text large color="primary" :disabled="!userCanChat" class="hidden-xs-only mx-0" @click="goToChat">
                 <v-icon>{{ userCanChat ? 'mdi-chat' : 'mdi-chat-outline' }}</v-icon>
               </v-btn>
-              <v-speed-dial
-                v-model="fab"
-                direction="bottom"
-                transition="slide-y-reverse-transition"
-                class="speed_list"
-              >
+              <v-speed-dial v-model="fab" direction="bottom" transition="slide-y-reverse-transition" class="speed_list">
                 <template #activator>
-                  <v-btn
-                    v-model="fab"
-                    icon
-                    text
-                    small
-                    large
-                    color="primary"
-                  >
+                  <v-btn v-model="fab" icon text small large color="primary">
                     <v-icon>mdi-dots-vertical</v-icon>
                   </v-btn>
                 </template>
                 <v-tooltip left>
                   <template #activator="{ on }">
-                    <v-btn
-                      fab
-                      dark
-                      small
-                      color="primary darken-2"
-                      @click="reportDialog = true"
-                      v-on="on"
-                    >
+                    <v-btn fab dark small color="primary darken-2" @click="reportDialog = true" v-on="on">
                       <v-icon>mdi-alert-octagon</v-icon>
                     </v-btn>
                   </template>
@@ -115,14 +48,7 @@
                 </v-tooltip>
                 <v-tooltip left>
                   <template #activator="{ on }">
-                    <v-btn
-                      fab
-                      dark
-                      small
-                      color="primary darken-2"
-                      @click="blockDialog = true"
-                      v-on="on"
-                    >
+                    <v-btn fab dark small color="primary darken-2" @click="blockDialog = true" v-on="on">
                       <v-icon>mdi-cancel</v-icon>
                     </v-btn>
                   </template>
@@ -132,32 +58,12 @@
             </v-layout>
           </v-container>
         </v-layout>
-        <v-container
-          fill-height
-          grid-list-xl
-          class="profile"
-        >
-          <v-layout
-            justify-center
-            wrap
-          >
-            <v-flex
-              xs12
-              sm8
-              md4
-            >
-              <profile-badge
-                :user="user"
-                :like="likedBy"
-                :match="userCanChat"
-              ></profile-badge>
+        <v-container fill-height grid-list-xl class="profile">
+          <v-layout justify-center wrap>
+            <v-flex xs12 sm8 md4>
+              <profile-badge :user="user" :like="likedBy" :match="userCanChat"></profile-badge>
             </v-flex>
-            <v-flex
-              xs12
-              sm10
-              md8
-              class="pa-0 grey--text main"
-            >
+            <v-flex xs12 sm10 md8 class="pa-0 grey--text main">
               <v-tabs-items v-model="activeTab">
                 <v-tab-item value="tab-profile">
                   <v-container>
@@ -172,47 +78,24 @@
                     <h1 class="py-3 mb-4">
                       Informations
                     </h1>
-                    <v-layout
-                      column
-                      class="title text-capitalize infos"
-                    >
-                      <div
-                        v-for="item in informations"
-                        :key="item.label"
-                      >
-                        <v-container
-                          v-if="item.content"
-                          py-3
-                        >
+                    <v-layout column class="title text-capitalize infos">
+                      <div v-for="item in informations" :key="item.label">
+                        <v-container v-if="item.content" py-3>
                           <v-layout>
                             <v-flex xs6>
                               {{ `${item.label}:` }}
                             </v-flex>
-                            <v-flex
-                              xs6
-                              class="infos"
-                            >
+                            <v-flex xs6 class="infos">
                               {{ item.content }}
                             </v-flex>
                           </v-layout>
                         </v-container>
                       </div>
-                      <v-container
-                        v-if="!!userTags.length"
-                        py-3
-                        px-2
-                      >
+                      <v-container v-if="!!userTags.length" py-3 px-2>
                         <h1 class="py-3 mb-4">
                           Interêts
                         </h1>
-                        <v-chip
-                          v-for="(tag, i) in userTags"
-                          :key="i"
-                          color="primary"
-                          class="user_tags"
-                          dark
-                          label
-                        >
+                        <v-chip v-for="(tag, i) in userTags" :key="i" color="primary" class="user_tags" dark label>
                           {{ tag }}
                         </v-chip>
                       </v-container>
@@ -227,10 +110,7 @@
           </v-layout>
         </v-container>
       </v-layout>
-      <v-dialog
-        v-model="reportDialog"
-        max-width="600px"
-      >
+      <v-dialog v-model="reportDialog" max-width="600px">
         <v-card class="pa-2">
           <v-card-title>
             <span class="headline">Signaler comme faux</span>
@@ -240,10 +120,7 @@
               <p class="subheading d-inline">
                 Êtes-vous sûr de vouloir signaler
               </p>
-              <router-link
-                :to="`/user/${user.id}`"
-                class="px-1 user_link"
-              >
+              <router-link :to="`/user/${user.id}`" class="px-1 user_link">
                 {{ user.username }}
               </router-link>
               <p class="subheading d-inline">
@@ -253,27 +130,16 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              text
-              @click="reportDialog = false"
-            >
+            <v-btn color="primary" text @click="reportDialog = false">
               Fermer
             </v-btn>
-            <v-btn
-              color="primary"
-              text
-              @click="reportUser"
-            >
+            <v-btn color="primary" text @click="reportUser">
               Signaler
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog
-        v-model="blockDialog"
-        max-width="600px"
-      >
+      <v-dialog v-model="blockDialog" max-width="600px">
         <v-card class="pa-2">
           <v-card-title>
             <span class="headline">Bloquer</span>
@@ -283,10 +149,7 @@
               <p class="subheading d-inline">
                 Êtes-vous sûr de vouloir bloquer
               </p>
-              <router-link
-                :to="`/user/${user.id}`"
-                class="px-1 user_link"
-              >
+              <router-link :to="`/user/${user.id}`" class="px-1 user_link">
                 {{ user.username }}
               </router-link>
               <p class="subheading d-inline">
@@ -296,18 +159,10 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              text
-              @click="blockDialog = false"
-            >
+            <v-btn color="primary" text @click="blockDialog = false">
               Fermer
             </v-btn>
-            <v-btn
-              color="primary"
-              text
-              @click="block"
-            >
+            <v-btn color="primary" text @click="block">
               Bloquer
             </v-btn>
           </v-card-actions>
@@ -321,15 +176,15 @@
 <script>
 import Alert from '@/views/AlertView.vue'
 import moment from 'moment'
-import loader from './Loader'
+import loader from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
-import ProfileTabs from './ProfileTabs'
-// import ProfileForm from './ProfileForm'
-import ProfileBadge from './ProfileBadge'
-import ProfileGallery from './ProfileGallery'
+import ProfileTabs from '@/components/afterLogin/ProfileTabs.vue'
+// import ProfileForm from '@/components/afterLogin/ProfileForm.vue'
+import ProfileBadge from '@/components/afterLogin/ProfileBadge.vue'
+import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue'
 import { mapGetters, mapActions } from 'vuex'
 import axios from 'axios'
-// import ProfileSettings from './ProfileSettings'
+// import ProfileSettings from '@/components/afterLogin/ProfileSettings.vue'
 
 export default {
   name: 'UserProfile',
