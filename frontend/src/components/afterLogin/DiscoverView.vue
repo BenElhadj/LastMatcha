@@ -1,6 +1,6 @@
 <template>
   <q-layout>
-    <div v-if="isComplete()" class="discover">
+    <div v-if="isComplete" class="discover">
       <q-page-container v-if="loaded" class="pt-5 px-0">
         <div class="row wrap justify-center">
           <div class="col-2">
@@ -9,21 +9,20 @@
                 <h4 class="title mb-4">
                   Afficher
                 </h4>
-                <q-btn-toggle v-model="model" spread no-caps toggle-color="purple" color="white" text-color="black" :options="[ {label: 'Option 1', value: 'one'}, {label: 'Option 2', value: 'two'} ]"></q-btn-toggle>
+                <q-btn-toggle v-model="model" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Male', value: 'male', icon: 'mdi-gender-male'}, {label: 'Female', value: 'female', icon: 'mdi-gender-female'} ]"></q-btn-toggle>
                 <h4 class="title mb-3">
                   Distance
                 </h4>
-                <q-range v-model="distance" class="mx-3 mb-5 pt-3" :min="0" :max="max" :step="step" :thumb-size="30" thumb-label="always"></q-range>
+                <q-range v-model="distance" :min="0" :max="max" :step="step" label-always thumb-label="always" thumb-size="30" class="mx-3 mb-5 pt-3"></q-range>
                 <h4 class="title mb-3">
                   Age
                 </h4>
-                <q-range v-model="age" class="mx-3 mb-5 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" thumb-label="always"></q-range>
-                <!-- <q-range v-model="age" class="mx-3 mb-5 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" label-always></q-range> -->
-
+                <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
+                <!-- <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" class="custom-slider mx-3 mb-5 pt-3" thumb-size="25"></q-range> -->
                 <h4 class="title mb-3">
                   Note
                 </h4>
-                <q-range v-model="rating" class="mx-3 mb-5 pt-3" :min="0" :max="5" :step="0.5" :thumb-size="25" thumb-label="always"></q-range>
+                <q-range v-model="rating" :min="0" :max="5" :step="0.5" label-always thumb-label="always" thumb-size="25" class="mx-3 mb-5 pt-3"></q-range>
                 <h4 class="title mb-4">
                   Localisation
                 </h4>
@@ -54,7 +53,7 @@
           </div>
           <div class="col-10">
             <div class="row wrap justify-center">
-              <div v-for="user in sortedUsers" :key="user.user_id" class="user col-xl2 col-lg3 col-sm3 ma-3 grow">
+              <div v-for="user in sorted" :key="user.user_id" class="user col-xl2 col-lg3 col-sm3 ma-3 grow">
                 <user-card :user="user" />
               </div>
             </div>
@@ -79,225 +78,206 @@
   </q-layout>
 </template>
 
-<script>
-import LoaderView from '@/views/LoaderView.vue'
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useStore } from 'vuex'
+import axios from 'axios'
 import UserCard from '@/components/afterLogin/UserCard.vue'
+import LoaderView from '@/views/LoaderView.vue'
 import countries from '@/nats.json'
 import utility from '@/utility'
-import axios from 'axios'
 import { matMenu } from '@quasar/extras/material-icons'
 import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 
-export default {
-  name: 'DiscoverView',
-  components: {
-    UserCard,
-    LoaderView
-  },
-  data () {
-    return {
-      model: ref('one'),
-      max: 0,
-      step: 0,
-      sortDir: 1,
-      sort: null,
-      users: [],
-      interests: [],
-      gender: null,
-      location: null,
-      hasBoth: false,
-      loaded: false,
-      age: [18, 85],
-      rating: [0, 5],
-      distance: [0, 5],
-      tags: ['sports', 'cinema', 'music'],
-      sortTypes: ['age', 'distance', 'rating', 'interests'],
-      nats: countries,
-      filters: {
-        self: val => val.user_id !== this.user.id,
-        blocked: val => !this.blocked.includes(val.user_id),
-        blockedBy: val => !this.blockedBy.includes(val.user_id),
-        rating: val => val.rating >= this.rating[0] && val.rating <= this.rating[1],
-        gender: val => !this.gender || val.gender === this.gender,
-        location: val => !this.location || [val.country, val.address, val.city].some(cur => typeof cur === 'string' && cur.toLowerCase().indexOf(this.location.toLowerCase()) !== -1),
-        distance: val => {
-          if (this.distance[0] === this.distance[1]) return true
-          if (val.lat && val.lng) {
-            const { lat, lng } = val
-            const distance = this.calculateDistance(this.userLocation, { lat, lng })
-            return distance >= this.distance[0] && distance <= this.distance[1]
-          }
-        },
-        age: val => {
-          const year = new Date(val.birthdate).getFullYear()
-          const now = new Date().getFullYear()
-          return year >= now - this.age[1] && year <= now - this.age[0]
-        },
-        interest: val => {
-          if (!this.interests.length) return true
-          for (const interest of this.interests) if (val.tags.split(',').includes(interest)) return true
-          return false
-        }
-      }
+const store = useStore()
+const { user, allTags, status, online, blocked, userLocation, blockedBy } = store.getters
+// const { user, allTags, status, online, blocked, userLocation, blockedBy, logout } = { ...store.getters, ...store.actions }
+
+const model = ref(null)
+const max = ref(0)
+const step = ref(0)
+const sortDir = ref(1)
+const sort = ref(null)
+const users = ref([])
+const interests = ref([])
+const gender = ref(null)
+const location = ref(null)
+const hasBoth = ref(false)
+const loaded = ref(false)
+const age = ref({min: 18, max: 85})
+const rating = ref({min: 0, max: 5})
+// const rating = ref([0, 5])
+const distance = ref({min: 0, max: max})
+// const distance = ref([0, 0])
+const tags = ['sports', 'cinema', 'music']
+const sortTypes = ['age', 'distance', 'rating', 'interests']
+const nats = countries
+
+const filters = {
+  self: val => val.user_id !== user.id,
+  blocked: val => !blocked.includes(val.user_id),
+  blockedBy: val => !blockedBy.includes(val.user_id),
+  rating: val => val.rating >= rating.value[0] && val.rating <= rating.value[1],
+  gender: val => !gender.value || val.gender === gender.value,
+  location: val => !location.value || [val.country, val.address, val.city].some(cur => cur.includes(location.value)),
+  distance: val => {
+    if (distance.value[0] === distance.value[1]) return true
+    if (val.lat && val.lng) {
+      const { lat, lng } = val
+      const distanceCalc = utility.calculateDistance(userLocation, { lat, lng })
+      return distanceCalc >= distance.value[0] && distanceCalc <= distance.value[1]
     }
   },
-  computed: {
-    ...mapGetters({
-      user: 'user',
-      allTags: 'tags',
-      status: 'status',
-      online: 'online',
-      blocked: 'blocked',
-      userLocation: 'location',
-      blockedBy: 'blockedBy'
-    }),
-    filteredUsers () {
-      return this.users
-        .filter(this.filters.self)
-        .filter(this.filters.blocked)
-        .filter(this.filters.blockedBy)
-        .filter(this.filters.rating)
-        .filter(this.filters.gender)
-        .filter(this.filters.location)
-        .filter(this.filters.age)
-        .filter(this.filters.distance)
-        .filter(this.filters.interest)
-    },
-    sortedUsers () {
-      if (!this.sort || this.sort === 'distance') {
-        return this.sortDir < 0 ? [...this.filteredUsers].reverse() : this.filteredUsers
-      }
-      let sortFunc
-      const age = (bd) => new Date() - new Date(bd)
-      const commonTags = a => {
-        if (!a || !a.length) return 0
-        const tags = a.split(',')
-        return this.user.tags.split(',').filter(val => tags.indexOf(val) !== -1).length
-      }
-      switch (this.sort) {
-        case 'age':
-          sortFunc = (a, b) => this.sortDir * (age(a.birthdate) - age(b.birthdate))
-          break
-        case 'rating':
-          sortFunc = (a, b) => this.sortDir * (b.rating - a.rating)
-          break
-        case 'interests':
-          sortFunc = (a, b) => this.sortDir * (commonTags(b.tags) - commonTags(a.tags))
-          break
-      }
-      return [...this.filteredUsers].sort(sortFunc)
-    },
-    maxDis () {
-      if (this.sort === null && this.sortDir === 1 && this.users.length) {
-        const { lat, lng } = this.users[this.users.length - 1]
-        const to = {
-          lat: Number(lat),
-          lng: Number(lng)
-        }
-        return Math.ceil(this.calculateDistance(this.userLocation, to))
-      }
-      return 0
-    }
+  age: val => {
+    const year = new Date(val.birthdate).getFullYear()
+    const now = new Date().getFullYear()
+    return year >= now - age.value[1] && year <= now - age.value[0]
   },
-  watch: {
-    user: {
-      immediate: true,
-      handler () {
-        if (this.user.looking && this.user.looking === 'both') {
-          this.hasBoth = true
-        }
-      }
-    },
-    online: {
-      immediate: true,
-      handler () {
-        this.whoIsUp()
-      }
-    },
-    age () {
-      if (this.age[0] > this.age[1]) {
-        const temp = this.age[0]
-        this.age[0] = this.age[1]
-        this.age[1] = temp
-      }
-    },
-    rating () {
-      if (this.rating[0] > this.rating[1]) {
-        const temp = this.rating[0]
-        this.rating[0] = this.rating[1]
-        this.rating[1] = temp
-      }
-    },
-    distance () {
-      if (this.distance[0] > this.distance[1]) {
-        const temp = this.distance[0]
-        this.distance[0] = this.distance[1]
-        this.distance[1] = temp
-      }
-    },
-    maxDis: {
-      immediate: true,
-      handler () {
-        const distance = this.maxDis
-        if (distance) {
-          this.distance[1] = distance
-          this.max = distance
-          this.step = Math.ceil(distance / 30)
-        }
-      }
-    }
-  },
-  async created () {
-    try {
-      const token = localStorage.getItem('token')
-      const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show`
-      const headers = { 'x-auth-token': token }
-      const res = await axios.post(url, { filter: true }, { headers })
-      console.log('hello '+res)
-      if (!res.data.msg) {
-        this.users = res.data.slice(0, 100).map(cur => ({
-          ...cur,
-          rating: Number(cur.rating)
-        }))
-        this.whoIsUp()
-        this.loaded = true
-      } else {
-        // th
-        is.logout(this.user.id)
-        // router.push('/login')
-        console.log(res.data.msg)
-      }
-    } catch (error) {
-      console.error("Erreur lors de la récupération des utilisateurs :", error);
-    }
-  },
-  methods: {
-    ...utility,
-    ...mapActions(['logout']),
-    reset () {
-      this.sortDir = 1
-      this.sort = null
-      this.gender = null
-      this.age = [18, 85]
-      this.rating = [0, 5]
-      this.distance = [0, this.maxDis]
-      this.location = null
-    },
-    changeSort () {
-      this.sortDir = -this.sortDir
-    },
-    whoIsUp () {
-      this.users.forEach((user, i) => {
-        this.users[i].lastSeen = this.users[i].status
-        this.users[i].status = this.online.includes(user.user_id)
-      })
-    },
-    isComplete () {
-      return this.user.gender && this.user.gender.length && this.user.looking && this.user.biography && this.user.tags && this.user.images.length && this.user.city && this.user.country && this.user.postal_code
-    }
+  interest: val => {
+    if (!interests.value.length) return true
+    for (const interest of interests.value) if (val.tags.split(',').includes(interest)) return true
+    return false
   }
 }
+
+const filtered = computed(() => {
+  return users.value
+    .filter(filters.self)
+    .filter(filters.blocked)
+    .filter(filters.blockedBy)
+    .filter(filters.rating)
+    .filter(filters.gender)
+    .filter(filters.location)
+    .filter(filters.age)
+    .filter(filters.distance)
+    .filter(filters.interest)
+})
+
+const sorted = computed(() => {
+  if (!sort.value || sort.value === 'distance') {
+    return sortDir.value < 0 ? [...filtered.value].reverse() : filtered.value
+  }
+  let sortFunc
+  const ageCalc = (bd) => new Date() - new Date(bd)
+  const commonTags = a => {
+    if (!a || !a.length) return 0
+    const tags = a.split(',')
+    return user.tags.split(',').filter(val => tags.indexOf(val) !== -1).length
+  }
+  switch (sort.value) {
+    case 'age':
+      sortFunc = (a, b) => sortDir.value * (ageCalc(a.birthdate) - ageCalc(b.birthdate))
+      break
+    case 'rating':
+      sortFunc = (a, b) => sortDir.value * (b.rating - a.rating)
+      break
+    case 'interests':
+      sortFunc = (a, b) => sortDir.value * (commonTags(b.tags) - commonTags(a.tags))
+      break
+  }
+  return [...filtered.value].sort(sortFunc)
+})
+
+const maxDis = computed(() => {
+  if (sort.value === null && sortDir.value === 1 && users.value.length) {
+    const { lat, lng } = users.value[users.value.length - 1]
+    const to = {
+      lat: Number(lat),
+      lng: Number(lng)
+    }
+    return Math.ceil(utility.calculateDistance(userLocation, to))
+  }
+  return 0
+})
+
+
+watch(user, (newUser, oldUser) => {
+  if (newUser.looking && newUser.looking === 'both') {
+    hasBoth.value = true
+  }
+})
+
+watch(online, () => {
+  whoIsUp()
+})
+
+watch(age, () => {
+  if (age.value[0] > age.value[1]) {
+    const temp = age.value[0]
+    age.value[0] = age.value[1]
+    age.value[1] = temp
+  }
+})
+
+watch(rating, () => {
+  if (rating.value[0] > rating.value[1]) {
+    const temp = rating.value[0]
+    rating.value[0] = rating.value[1]
+    rating.value[1] = temp
+  }
+})
+
+watch(distance, () => {
+  if (distance.value[0] > distance.value[1]) {
+    const temp = distance.value[0]
+    distance.value[0] = distance.value[1]
+    distance.value[1] = temp
+  }
+})
+
+watch(maxDis, (newMaxDis) => {
+  const distanceVal = newMaxDis
+  if (distanceVal) {
+    distance.value[1] = distanceVal
+    max.value = distanceVal
+    step.value = Math.ceil(distanceVal / 30)
+  }
+})
+
+function reset() {
+  sortDir.value = 1
+  sort.value = null
+  gender.value = null
+  age.value = [18, 85]
+  rating.value = [0, 5]
+  distance.value = [0, maxDis.value]
+  location.value = null
+}
+
+function changeSort() {
+  sortDir.value = -sortDir.value
+}
+
+function whoIsUp() {
+  users.value.forEach((user, i) => {
+    users.value[i].lastSeen = users.value[i].status
+    users.value[i].status = online.includes(user.user_id)
+  })
+}
+
+const isComplete = computed(() => {
+  return user.gender && user.gender.length && user.looking && user.biography && user.tags && user.images.length && user.city && user.country && user.postal_code
+})
+
+async function created() {
+  const token = localStorage.getItem('token')
+  const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show`
+  const headers = { 'x-auth-token': token }
+  const res = await axios.post(url, { filter: true }, { headers })
+  if (!res.data.msg) {
+    users.value = res.data.slice(0, 100).map(cur => ({
+      ...cur,
+      rating: Number(cur.rating)
+    }));
+    whoIsUp()
+    loaded.value = true
+  } else {
+    console.log('=== add logout here === res.data.msg => ', res.data.msg)
+    // logout(user.id)
+    // Redirect to login page or handle error
+  }
+}
+created()
 </script>
 
 <style scoped>

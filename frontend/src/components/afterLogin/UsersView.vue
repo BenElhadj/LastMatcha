@@ -14,7 +14,7 @@
                   <h4 class="mb-4 custom-title">
                     Afficher
                   </h4>
-                  <q-btn-toggle v-model="model" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Hommes', value: 'man'}, {label: 'Femmes', value: 'women'} ]"></q-btn-toggle>
+                  <q-btn-toggle v-model="model" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Hommes', value: 'man', icon: 'mdi-gender-male'}, {label: 'Femmes', value: 'women', icon: 'mdi-gender-female'} ]"></q-btn-toggle>
                   <h4 class="mb-4 custom-title">
                     Localisation
                   </h4>
@@ -53,7 +53,7 @@ export default {
     const state = reactive({
       gender: null,
       location: null,
-      age: [],
+      age: [18, 85],
       tags: store.getters.tags      
     })
     const mainSearch = () => {
