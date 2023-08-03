@@ -53,7 +53,7 @@ export default {
     ])
     const usernameRules = ref([
       v => !!v || 'This field is required',
-      v => (v.length >= 8 && v.length <= 25) || 'Username must be between 8 and 25 characters long',
+      v => (v.length >= 7 && v.length <= 25) || 'Username must be between 8 and 25 characters long',
       v => !(/[^a-zA-Z0-9]+/.test(v)) || 'Username can contain only letters and numbers'
     ])
     const emailRules = ref([
@@ -84,10 +84,10 @@ export default {
           body: JSON.stringify(auth)
         })
         const data = await res.json()
-        // console.log("===================== Response:", data);
         if (data.msg) {
+          console.log("Response: ", data.msg);
           alert.value = { state: true, color: 'red', text: data.msg }
-          // utility.showAlert('red', data.msg)
+          utility.showAlert('red', data.msg)
         } else {
           const user = data
           if (user.id) {
@@ -115,6 +115,7 @@ export default {
         //   }
         // }
       } catch (err) {
+        console.log('Got error here -->', err)
         console.error(err)
       }
     }
@@ -124,7 +125,7 @@ export default {
       try {
         const token = localStorage.getItem('token')
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-        // console.log("====================== URL for checking login status:", import.meta.env.VITE_APP_API_URL)
+        console.log("====================== URL for checking login status:", import.meta.env.VITE_APP_API_URL)
         const headers = { 'x-auth-token': token }
         const res = await axios.get(url, { headers })
         if (!res.data.msg) router.push('/')

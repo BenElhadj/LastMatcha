@@ -56,7 +56,7 @@ export default {
       ],
       username: [
         v => !!v || 'This field is required',
-        v => (v.length >= 8 && v.length <= 25) || 'Le nom d\'utilisateur doit contenir entre 8 et 25 caractères',
+        v => (v.length >= 7 && v.length <= 25) || 'Le nom d\'utilisateur doit contenir entre 8 et 25 caractères',
         v => !(/[^a-zA-Z0-9]+/.test(v)) || 'Le nom d\'utilisateur doit contenir des lettres et des chiffres uniquement'
       ],
       email: [

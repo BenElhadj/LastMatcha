@@ -7,6 +7,7 @@
     <title>Matcha-42</title>
     <link rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js"></script>
   </head>
   <body>
@@ -101,8 +102,10 @@
   
       document.getElementById('userCreationForm').addEventListener('submit', function(event) {
         event.preventDefault();
-  
+      
+        const salt = dcodeIO.bcrypt.genSaltSync(10);
         const userCount = document.getElementById('userCount').value;
+
         const imageCount = document.getElementById('imageCount').value;
         const sqlFileName = document.getElementById('sqlFileName').value;
         const malePercentage = document.getElementById('malePercentage').value / 100;
@@ -119,16 +122,25 @@
         const uniqueUsernames = new Set();
         for (let i = 0; i < userCount; i++) {
 
-          let username;
+          let firstName, lastName, username;
           do {
             username = cleanString(faker.internet.userName());
           } while (uniqueUsernames.has(username));
 
-          const firstName = cleanString(faker.name.firstName());
-          const lastName = cleanString(faker.name.lastName());
+          do {
+            firstName = cleanString(faker.name.firstName());
+            lastName = cleanString(faker.name.lastName());
+          } while (!(/^[a-zA-Z \-]+$/).test(firstName) || !(/^[a-zA-Z \-]+$/).test(lastName) || firstName.length < 3 || firstName.length > 25 || lastName.length < 3 || lastName.length > 25);
+        
+          do {
+            username = cleanString(faker.internet.userName());
+          } while (uniqueUsernames.has(username) || !(/^[a-zA-Z0-9]+$/).test(username) || username.length < 7 || username.length > 25);
+        
           uniqueUsernames.add(username);
           const email = `${username}@matcha.com`;
-          const password = CryptoJS.MD5('Motdepasse123').toString();
+
+          const password = dcodeIO.bcrypt.hashSync('Motdepasse@123', salt);
+
           const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
           const gender = (Math.random() < malePercentage) ? 'male' : 'female';
           const looking = faker.random.arrayElement(['male', 'female', 'both']);

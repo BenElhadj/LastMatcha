@@ -6,6 +6,9 @@
         <q-img :src="image" alt="Photo de profil" />
       </q-avatar>
       </q-btn>
+      <!-- <q-toolbar-title>
+        <span>{{ user.username }}</span>
+      </q-toolbar-title> -->
       <div v-else></div>
       <q-toolbar-title>
         <span>MATCHA </span>
@@ -24,7 +27,7 @@
           <q-menu v-model="notifMenu" :nudge-width="250">
             <template #activator="{ on }">
               <q-btn text icon large color="grey" v-on="on">
-                <q-badge overlap :value="!!notifNum" color="primary" class="mx-2 q-ml-xl" right>
+                <q-badge overlap :value="!!notifNum" color="primary" floating class="mx-2 q-ml-xl" right>
                   <template #badge>
                     <span>{{ notifNum }}</span>
                   </template>
@@ -63,14 +66,14 @@
           <q-menu v-model="msgMenu" anchor="top right" :content-class="'grey lighten-5'">
             <template #activator="{ on }">
               <q-btn ripple flat round dense class="icon-size" v-on="on">
-                <q-badge :value="!!newMsgNum" color="primary" floating class="mx-2">
+                <q-badge :value="!!newMsgNum" color="primary" floating class="mx-2 q-ml-xl">
                   <template #default>
                     <span>{{ newMsgNum }}</span>
                   </template>
                 </q-badge>
               </q-btn>
             </template>
-            <q-list padding class="pa-0 message_list">
+            <q-list padding class="pa-0 q-ml-xl ">
               <q-item v-for="(item, i) in menuConvos" :key="i" clickable @click="toUserChat(item)">
                 <q-item-section avatar>
                   <q-avatar :src="getFullPath(item.profile_image)"></q-avatar>

@@ -182,7 +182,7 @@ onBeforeUnmount(() => {
 }
 
 .bottom-container {
-  font-size: clamp(22px, 1em, 28px);
+  font-size: clamp(16px, 1em, 22px);
   text-align: center;
 }
 
