@@ -113,7 +113,6 @@ export default {
   /* font-size: 30px;
   font-weight: 300px; */
   height: calc(100vh - 64px);
-  background-image: url(@/assets/bg.jpg);
   background-position: center;
   background-size: cover;
 }

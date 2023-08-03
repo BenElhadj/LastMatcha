@@ -67,10 +67,10 @@ export default {
     ])
 
     const log = async () => {
-      console.log("================== VUE_APP_API_URL:", import.meta.env.VITE_APP_API_URL)
+      // console.log("================== VUE_APP_API_URL:", import.meta.env.VITE_APP_API_URL)
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/login`
-        console.log("====================== URL for login: ", url)
+        // console.log("====================== URL for login: ", url)
         const auth = {
           username: username.value,
           password: password.value
@@ -84,7 +84,7 @@ export default {
           body: JSON.stringify(auth)
         })
         const data = await res.json()
-        console.log("===================== Response:", data);
+        // console.log("===================== Response:", data);
         if (data.msg) {
           alert.value = { state: true, color: 'red', text: data.msg }
           // utility.showAlert('red', data.msg)
@@ -124,7 +124,7 @@ export default {
       try {
         const token = localStorage.getItem('token')
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-        console.log("====================== URL for checking login status:", import.meta.env.VITE_APP_API_URL)
+        // console.log("====================== URL for checking login status:", import.meta.env.VITE_APP_API_URL)
         const headers = { 'x-auth-token': token }
         const res = await axios.get(url, { headers })
         if (!res.data.msg) router.push('/')
@@ -133,7 +133,7 @@ export default {
       }
     }
 
-    checkLogin()
+    // checkLogin()
 
     return {
       username,

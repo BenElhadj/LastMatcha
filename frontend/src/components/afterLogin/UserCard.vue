@@ -7,9 +7,10 @@
         </q-chip>
         <q-tooltip>
           <template #activator="{ on }">
-            <q-icon :color="`${user.status ? 'green' : 'grey'}-2`" size="xs" v-on="on">
-              mdi-circle
-            </q-icon>
+           <q-icon :color="`${user.status ? 'green' : 'grey'}-2`" size="xs" v-on="on">
+            mdi-circle
+          </q-icon>
+
           </template>
           <span>{{ lastSeen }}</span>
         </q-tooltip>
@@ -27,13 +28,11 @@
         <!-- Quasar does not have a rating component, you need to use a third party library or build your own -->
       </div>
       <div class="row justify-center align-center bottom mb-0 mt-auto py-2 px-4 grey-2">
-        <q-icon v-if="user.birthdate" color="primary" size="xs">
-          mdi-cake
-        </q-icon>
+        <q-icon v-if="user.birthdate" color="primary" size="xs" name="mdi-cake"></q-icon>
+
         <span v-if="user.birthdate" class="pr-1">{{ age }}</span>
-        <q-icon color="primary" size="xs">
-          mdi-map-marker
-        </q-icon>
+        <q-icon color="primary" size="xs" name="mdi-map-marker"></q-icon>
+
         <span v-if="user.city && user.country" class="text-truncate">{{ `${user.city}, ${user.country}` }}</span>
         <span v-else class="text-truncate">Earth</span>
       </div>

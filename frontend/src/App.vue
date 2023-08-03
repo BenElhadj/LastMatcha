@@ -28,13 +28,17 @@ onMounted(() => {
     <q-page-container>
       <router-view />
     </q-page-container>
-    <FooterView class="footer" />
+    <FooterView />
   </q-layout>
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
+}
+
+.q-page-container {
+  padding-bottom: 30vh;
 }
 
 .logo {

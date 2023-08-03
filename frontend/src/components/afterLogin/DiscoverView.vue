@@ -18,7 +18,6 @@
                   Age
                 </h4>
                 <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
-                <!-- <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" class="custom-slider mx-3 mb-5 pt-3" thumb-size="25"></q-range> -->
                 <h4 class="title mb-3">
                   Note
                 </h4>
@@ -26,7 +25,11 @@
                 <h4 class="title mb-4">
                   Localisation
                 </h4>
-                <q-input v-model="location" class="location_input mb-5" color="primary" hide-details outlined solo text append-icon="mdi-map-marker"></q-input>
+                <q-input v-model="location" class="location_input mb-5" color="primary" hide-details outlined solo text>
+                  <template v-slot:append>
+                    <q-icon name="mdi-map-marker" />
+                  </template>
+                </q-input>
                 <h4 class="title mb-4">
                   Interêts
                 </h4>
@@ -36,9 +39,8 @@
                     Sort by
                   </h4>
                   <q-btn text icon class="sort_btn" color="primary" @click="changeSort">
-                    <q-icon :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`">
-                      mdi-sort
-                    </q-icon>
+                    <q-icon :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`" name="mdi-sort"></q-icon>
+
                   </q-btn>
                 </div>
                 <q-select v-model="sort" outlined solo :options="sortTypes" class="sort_select mb-5"></q-select>
@@ -70,6 +72,7 @@
         <div class="col-6 col-md-4">
           <q-btn block outlined large to="/settings" color="primary">
             <q-icon left name="mdi-chevron-left"></q-icon>
+
             <span>Aller au</span>
           </q-btn>
         </div>
@@ -91,7 +94,6 @@ import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 
 const store = useStore()
 const { user, allTags, status, online, blocked, userLocation, blockedBy } = store.getters
-// const { user, allTags, status, online, blocked, userLocation, blockedBy, logout } = { ...store.getters, ...store.actions }
 
 const model = ref(null)
 const max = ref(0)
@@ -106,9 +108,7 @@ const hasBoth = ref(false)
 const loaded = ref(false)
 const age = ref({min: 18, max: 85})
 const rating = ref({min: 0, max: 5})
-// const rating = ref([0, 5])
-const distance = ref({min: 0, max: max})
-// const distance = ref([0, 0])
+const distance = ref({min: 0, max: 0})
 const tags = ['sports', 'cinema', 'music']
 const sortTypes = ['age', 'distance', 'rating', 'interests']
 const nats = countries
@@ -117,21 +117,21 @@ const filters = {
   self: val => val.user_id !== user.id,
   blocked: val => !blocked.includes(val.user_id),
   blockedBy: val => !blockedBy.includes(val.user_id),
-  rating: val => val.rating >= rating.value[0] && val.rating <= rating.value[1],
+  rating: val => val.rating >= rating.value.min && val.rating <= rating.value.max,
   gender: val => !gender.value || val.gender === gender.value,
   location: val => !location.value || [val.country, val.address, val.city].some(cur => cur.includes(location.value)),
   distance: val => {
-    if (distance.value[0] === distance.value[1]) return true
+    if (distance.value.min === distance.value.max) return true
     if (val.lat && val.lng) {
       const { lat, lng } = val
       const distanceCalc = utility.calculateDistance(userLocation, { lat, lng })
-      return distanceCalc >= distance.value[0] && distanceCalc <= distance.value[1]
+      return distanceCalc >= distance.value.min && distanceCalc <= distance.value.max
     }
   },
   age: val => {
     const year = new Date(val.birthdate).getFullYear()
     const now = new Date().getFullYear()
-    return year >= now - age.value[1] && year <= now - age.value[0]
+    return year >= now - age.value.max && year <= now - age.value.min
   },
   interest: val => {
     if (!interests.value.length) return true
@@ -351,5 +351,8 @@ created()
 
 .v-slider__thumb-label > span {
   font-size: .8em;
+}
+.flip {
+  transform: rotate(180deg);
 }
 </style>

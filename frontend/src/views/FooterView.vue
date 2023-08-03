@@ -1,8 +1,8 @@
 <template>
   <div class="footer">
     <div class="back-to-top-container">
-      <img class="back-to-top" src="@/assets/Footer/back-to-top.png" alt="Back to top" @click="moveUp" :style="{ opacity: backToTopOpacity }" :disabled="isTop"/>
-      <div class="divider"></div>
+      <img class="back-to-top" src="@/assets/Footer/back-to-top.png" alt="Back to top" @click="moveUp" :style="{ opacity: updateScroll() }"/>
+      <div class="divider" :style="{ bottom: '-17px' }"></div>
     </div>
     <div class="full-container">
       <div class="top-container">
@@ -55,35 +55,31 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'FooterView',
-  data() {
-    return {
-      scrollPosition: null,
-      backToTopOpacity: 0,
-      isTop: true,
-    };
-  },
-  mounted() {
-    window.addEventListener('scroll', this.updateScroll);
-    this.updateScroll();
-  },
-  beforeUnmount() {
-    window.removeEventListener('scroll', this.updateScroll);
-  },
-  methods: {
-    updateScroll() {
-      this.scrollPosition = window.scrollY;
-      this.backToTopOpacity = Math.min(this.scrollPosition / 1000, 1);
-      this.isTop = this.scrollPosition === 0;
-    },
-    moveUp() {
-      window.scroll({ top: 0, behavior: 'smooth' })
-    }
-  }
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+const scrollPosition = ref(0)
+
+const updateScroll = () => {
+  scrollPosition.value = window.scrollY
+  return Math.min(scrollPosition.value / 1000, 1)
 }
+
+const moveUp = () => {
+  window.scroll({ top: 0, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', updateScroll)
+  updateScroll()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', updateScroll)
+})
+
 </script>
+
 
 <style scoped>
 * {
@@ -92,23 +88,12 @@ export default {
   text-align: center;
   font-size: clamp(12px, 1em, 18px);
   max-height: fit-content;
+  z-index: 10;
 }
 
 .footer,
 .footer::before {
   background: linear-gradient(to top, #000 0%, #fff 91%, rgba(255, 255, 255, 0) 100%);
-}
-
-.footer {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-}
-
-.footer::before {
-  position: absolute;
-  pointer-events: none;
 }
 
 .back-to-top-container,
@@ -118,11 +103,11 @@ export default {
 
 .back-to-top {
   position: absolute;
-  max-height: 15vh;
-  min-height: 13vh;
+  max-height: 9vh;
+  min-height: 6vh;
   cursor: pointer;
   right: 23px;
-  bottom: 0px;
+  bottom: -15px;
   z-index: 2;
 }
 
@@ -167,8 +152,8 @@ export default {
 
 .logo-container img {
   max-height: 11vh;
-  min-height: 9vh;
-  height: auto;
+  min-height: 7vh;
+  height: 50px;
 }
 
 .follow-container {
@@ -182,15 +167,7 @@ export default {
 .links-follow-container img {
   max-height: 5vh;
   min-height: 3vh;
-}
-
-.links-contact-container img {
-  margin-right: 50px;
-  border-right: 50px;
-}
-
-.links-follow-container img {
-  height: 40px;
+  height: 21px;
 }
 
 .link-box,
@@ -207,15 +184,13 @@ export default {
 .bottom-container {
   font-size: clamp(22px, 1em, 28px);
   text-align: center;
-  margin-bottom: 17px;
 }
 
 .divider {
   position: relative;
   width: 100%;
-  height: 1px;
+  height: 2px;
   background: rgba(128, 128, 128, 0.467);
-  margin-top: 17px;
   margin-bottom: 17px;
 }
 

@@ -59,6 +59,28 @@
         <input type="number" id="userCount" name="userCount" min="1" max="100" placeholder="Entrez un nombre (max 100)" style="width: 185px;" required>
       </div>
       <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
+        <label for="malePercentage" style="margin-right: 180px;">Pourcentage d'hommes :</label>
+        <input type="range" id="malePercentage" name="malePercentage" min="0" max="100" value="50" style="width: 195px;">
+        <span id="malePercentageLabel">50%</span>
+      </div>
+      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
+        <label for="countrySelect" style="margin-right: 195px;">Sélectionnez un pays :</label>
+        <select id="countrySelect" name="countrySelect" style="width: 186px;">
+          <option value="France">France</option>
+          <option value="Germany">Italie</option>
+          <option value="Germany">Germany</option>
+          <option value="Germany">Suisse</option>
+          <option value="Germany">Pays-Bas</option>
+          <option value="Germany">Belgique</option>
+          <option value="Germany">Luxembourg</option>
+          <option value="Germany">Espagne</option>
+          <option value="Germany">Portugal</option>
+          <option value="Germany">Tunise</option>
+          <option value="Germany">Algerie</option>
+          <option value="Germany">Maroc</option>
+        </select>
+      </div>
+      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
         <label for="imageCount" style="margin-right: 25px;">Nombre d'images à créer par utilisateur (max 5) :</label>
         <input type="number" id="imageCount" name="imageCount" min="1" max="5" placeholder="Entrez un nombre (max 5)" style="width: 185px;" required>
       </div>
@@ -73,12 +95,19 @@
     <p id="status"></p>
 
     <script>
+      document.getElementById('malePercentage').addEventListener('input', function(event) {
+        document.getElementById('malePercentageLabel').innerText = event.target.value + '%';
+      });
+  
       document.getElementById('userCreationForm').addEventListener('submit', function(event) {
         event.preventDefault();
   
         const userCount = document.getElementById('userCount').value;
         const imageCount = document.getElementById('imageCount').value;
         const sqlFileName = document.getElementById('sqlFileName').value;
+        const malePercentage = document.getElementById('malePercentage').value / 100;
+        const selectedCountry = document.getElementById('countrySelect').value;
+
         
         function cleanString(input) {
           var output = input.replace(/[^\w\s]/gi, '');
@@ -87,21 +116,28 @@
   
         let sql = 'INSERT INTO `users` (`first_name`, `last_name`, `username`, `email`, `password`, `created_at`, `gender`, `looking`, `birthdate`, `biography`, `tags`, `address`, `city`, `country`, `postal_code`, `phone`, `status`, `lat`, `lng`, `vkey`, `rkey`, `verified`, `google_id`, `reports`) VALUES\n';
   
+        const uniqueUsernames = new Set();
         for (let i = 0; i < userCount; i++) {
+
+          let username;
+          do {
+            username = cleanString(faker.internet.userName());
+          } while (uniqueUsernames.has(username));
+
           const firstName = cleanString(faker.name.firstName());
           const lastName = cleanString(faker.name.lastName());
-          const username = cleanString(faker.internet.userName());
+          uniqueUsernames.add(username);
           const email = `${username}@matcha.com`;
           const password = CryptoJS.MD5('Motdepasse123').toString();
           const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
-          const gender = faker.random.arrayElement(['male', 'female']);
+          const gender = (Math.random() < malePercentage) ? 'male' : 'female';
           const looking = faker.random.arrayElement(['male', 'female', 'both']);
           const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
           const biography = "I am a fake user";
           const tags = cleanString(faker.lorem.words());
           const address = cleanString(faker.address.streetAddress());
           const city = cleanString(faker.address.city());
-          const country = cleanString(faker.address.country());
+          const country = selectedCountry;
           const postal_code = cleanString(faker.address.zipCode());
           const phone = cleanString(faker.phone.phoneNumber());
           const status = createdAt;
@@ -125,6 +161,7 @@
             const userId = i + 1; 
             const url = `https://picsum.photos/200/300?random=${i * imageCount + j + 1}`;
             const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
+            const isCover = (j === 0) ? '1' : '0';
 
             sql += `('${userId}', '${url}','1','0', '${createdAt}'),\n`;
           }
