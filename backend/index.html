@@ -1,5 +1,24 @@
 <!DOCTYPE html>
 <html>
+  <script>
+    function getLastUserId() {
+      return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/backend/get_last_user_id", true);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            const userId = parseInt(xhr.responseText);
+            resolve(userId);
+          }
+        };
+        xhr.onerror = function() {
+          reject(new Error("Request failed"));
+        };
+        xhr.send();
+      });
+    }    
+  </script>
+
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -17,78 +36,84 @@
 
     <h2>Les routes</h2>
     <pre style="font-weight: bold;">
-*  (POST): http://localhost:3000/login ============> Connectez-vous avec les informations d'identification fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/logout ===========> Déconnectez-vous de votre session utilisateur.
-*  (GET) : http://localhost:3000/isLoggedin =======> Vérifiez si l'utilisateur est connecté.
-*  (POST): http://localhost:3000/forget_password ==> Envoyez une demande de réinitialisation de mot de passe avec les informations fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/recover/:key =====> Récupérez la page de récupération de mot de passe avec la clé fournie dans l'URL.
-*  (POST): http://localhost:3000/rkeycheck ========> Vérifiez si la clé de récupération de mot de passe fournie dans le corps de la requête est valide.
-*  (GET) : http://localhost:3000/destroykey =======> Détruisez la clé de récupération de mot de passe.
-*  (GET) : http://localhost:3000/history ==========> Obtenez l'historique de navigation de l'utilisateur connecté.
-*  (GET) : http://localhost:3000/tags =============> Obtenez les tags disponibles pour le filtrage des utilisateurs.
-*  (GET) : http://localhost:3000/all ==============> Obtenez toutes les conversations de chat de l'utilisateur connecté.
-*  (POST): http://localhost:3000/messages =========> Obtenez les messages d'une conversation spécifique avec l'identifiant de conversation fourni dans le corps de la requête.
-*  (POST): http://localhost:3000/update ===========> Mettez à jour les informations d'une conversation spécifique avec l'identifiant de conversation et les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/send =============> Envoyez un message dans une conversation spécifique avec l'identifiant de conversation et le message fournis dans le corps de la requête.
-*  (POST): http://localhost:3000/match ============> Effectuez un matching entre l'utilisateur connecté et d'autres utilisateurs.
-*  (GET) : http://localhost:3000/getmatches =======> Obtenez les correspondances de l'utilisateur connecté.
-*  (POST): http://localhost:3000/add ==============> Ajoutez une notification de chat avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/update ===========> Mettez à jour une notification avec les informations fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/all ==============> Obtenez toutes les notifications de l'utilisateur connecté.
-*  (POST): http://localhost:3000/add ==============> Ajoutez un utilisateur avec les informations fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/verify/:key ======> Vérifiez l'adresse e-mail de l'utilisateur avec la clé fournie dans l'URL.
-*  (POST): http://localhost:3000/updateprofile ====> Mettez à jour le profil de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/changeemail ======> Changez l'adresse e-mail de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/changepassword ===> Changez le mot de passe de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/show =============> Obtenez la liste des utilisateurs correspondant aux critères de recherche fournis dans le corps de la requête.
-*  (GET) : http://localhost:3000/show/:id =========> Obtenez les informations d'un utilisateur spécifique avec l'identifiant d'utilisateur fourni dans l'URL.
-*  (POST): http://localhost:3000/report ===========> Signalez un utilisateur avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/block ============> Bloquez un utilisateur avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/unblock ==========> Débloquez un utilisateur avec les informations fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/getblocked =======> Obtenez la liste des utilisateurs bloqués par l'utilisateur connecté.
-*  (POST): http://localhost:3000/blacklisted ======> Ajoutez un utilisateur à la liste noire de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/location =========> Mettez à jour la localisation de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/image ============> Ajoutez une image à la galerie de l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
-*  (POST): http://localhost:3000/image/cover ======> Ajoutez une image de couverture à l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
-*  (POST): http://localhost:3000/image/del ========> Supprimez une image de la galerie de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/login ============> Connectez-vous avec les informations d'identification fournies dans le corps de la requête.
+      *  (GET) : http://localhost:3000/logout ===========> Déconnectez-vous de votre session utilisateur.
+      *  (GET) : http://localhost:3000/isLoggedin =======> Vérifiez si l'utilisateur est connecté.
+      *  (POST): http://localhost:3000/forget_password ==> Envoyez une demande de réinitialisation de mot de passe avec les informations fournies dans le corps de la requête.
+      *  (GET) : http://localhost:3000/recover/:key =====> Récupérez la page de récupération de mot de passe avec la clé fournie dans l'URL.
+      *  (POST): http://localhost:3000/rkeycheck ========> Vérifiez si la clé de récupération de mot de passe fournie dans le corps de la requête est valide.
+      *  (GET) : http://localhost:3000/destroykey =======> Détruisez la clé de récupération de mot de passe.
+      *  (GET) : http://localhost:3000/history ==========> Obtenez l'historique de navigation de l'utilisateur connecté.
+      *  (GET) : http://localhost:3000/tags =============> Obtenez les tags disponibles pour le filtrage des utilisateurs.
+      *  (GET) : http://localhost:3000/all ==============> Obtenez toutes les conversations de chat de l'utilisateur connecté.
+      *  (POST): http://localhost:3000/messages =========> Obtenez les messages d'une conversation spécifique avec l'identifiant de conversation fourni dans le corps de la requête.
+      *  (POST): http://localhost:3000/update ===========> Mettez à jour les informations d'une conversation spécifique avec l'identifiant de conversation et les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/send =============> Envoyez un message dans une conversation spécifique avec l'identifiant de conversation et le message fournis dans le corps de la requête.
+      *  (POST): http://localhost:3000/match ============> Effectuez un matching entre l'utilisateur connecté et d'autres utilisateurs.
+      *  (GET) : http://localhost:3000/getmatches =======> Obtenez les correspondances de l'utilisateur connecté.
+      *  (POST): http://localhost:3000/add ==============> Ajoutez une notification de chat avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/update ===========> Mettez à jour une notification avec les informations fournies dans le corps de la requête.
+      *  (GET) : http://localhost:3000/all ==============> Obtenez toutes les notifications de l'utilisateur connecté.
+      *  (POST): http://localhost:3000/add ==============> Ajoutez un utilisateur avec les informations fournies dans le corps de la requête.
+      *  (GET) : http://localhost:3000/verify/:key ======> Vérifiez l'adresse e-mail de l'utilisateur avec la clé fournie dans l'URL.
+      *  (POST): http://localhost:3000/updateprofile ====> Mettez à jour le profil de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/changeemail ======> Changez l'adresse e-mail de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/changepassword ===> Changez le mot de passe de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/show =============> Obtenez la liste des utilisateurs correspondant aux critères de recherche fournis dans le corps de la requête.
+      *  (GET) : http://localhost:3000/show/:id =========> Obtenez les informations d'un utilisateur spécifique avec l'identifiant d'utilisateur fourni dans l'URL.
+      *  (POST): http://localhost:3000/report ===========> Signalez un utilisateur avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/block ============> Bloquez un utilisateur avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/unblock ==========> Débloquez un utilisateur avec les informations fournies dans le corps de la requête.
+      *  (GET) : http://localhost:3000/getblocked =======> Obtenez la liste des utilisateurs bloqués par l'utilisateur connecté.
+      *  (POST): http://localhost:3000/blacklisted ======> Ajoutez un utilisateur à la liste noire de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/location =========> Mettez à jour la localisation de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+      *  (POST): http://localhost:3000/image ============> Ajoutez une image à la galerie de l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
+      *  (POST): http://localhost:3000/image/cover ======> Ajoutez une image de couverture à l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
+      *  (POST): http://localhost:3000/image/del ========> Supprimez une image de la galerie de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
     </pre>
 
     <h2>Création d'utilisateurs et d'images aléatoires</h2>
     <form id="userCreationForm" style="display: flex; flex-direction: column; align-items: flex-start; align-items: flex-start;">
+
       <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
         <label for="userCount" style="margin-right: 77px;">Nombre d'utilisateurs à créer (max 100) :</label>
-        <input type="number" id="userCount" name="userCount" min="1" max="100" placeholder="Entrez un nombre (max 100)" style="width: 185px;" required>
+        <input type="number" id="userCount" name="userCount" min="1" max="100" value="100" style="width: 185px;" required>
       </div>
+
+      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
+        <label for="imageCount" style="margin-right: 25px;">Nombre d'images à créer par utilisateur (max 5) :</label>
+        <input type="number" id="imageCount" name="imageCount" min="1" max="5" value="5" style="width: 185px;" required>
+      </div>
+
       <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
         <label for="malePercentage" style="margin-right: 180px;">Pourcentage d'hommes :</label>
         <input type="range" id="malePercentage" name="malePercentage" min="0" max="100" value="50" style="width: 195px;">
         <span id="malePercentageLabel">50%</span>
       </div>
+
       <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-        <label for="countrySelect" style="margin-right: 195px;">Sélectionnez un pays :</label>
-        <select id="countrySelect" name="countrySelect" style="width: 186px;">
+        <label for="countrySelect" style="margin-right: 197px;">Sélectionnez un pays :</label>
+        <select id="countrySelect" name="countrySelect" style="width: 190px;">
           <option value="France">France</option>
-          <option value="Germany">Italie</option>
+          <option value="Italie">Italie</option>
           <option value="Germany">Germany</option>
-          <option value="Germany">Suisse</option>
-          <option value="Germany">Pays-Bas</option>
-          <option value="Germany">Belgique</option>
-          <option value="Germany">Luxembourg</option>
-          <option value="Germany">Espagne</option>
-          <option value="Germany">Portugal</option>
-          <option value="Germany">Tunise</option>
-          <option value="Germany">Algerie</option>
-          <option value="Germany">Maroc</option>
+          <option value="Suisse">Suisse</option>
+          <option value="Pays-Bas">Pays-Bas</option>
+          <option value="Belgique">Belgique</option>
+          <option value="Luxembourg">Luxembourg</option>
+          <option value="Espagne">Espagne</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Tunisie">Tunisie</option>
+          <option value="Algerie">Algerie</option>
+          <option value="Maroc">Maroc</option>
         </select>
       </div>
-      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-        <label for="imageCount" style="margin-right: 25px;">Nombre d'images à créer par utilisateur (max 5) :</label>
-        <input type="number" id="imageCount" name="imageCount" min="1" max="5" placeholder="Entrez un nombre (max 5)" style="width: 185px;" required>
-      </div>
-      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
+
+      <!-- <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
         <label for="sqlFileName" style="margin-right: 152px;">Nom du fichier SQL à créer :</label>
         <input type="sql" id="sqlFileName" name="sqlFileName" placeholder="Entrez un Nom pour votre BDD" style="width: 185px;" required>
-      </div>
+      </div> -->
+      <span>----------------------------------------------------------------------------------------------------</span>
     
       <button type="submit" id="createUsersButton" style="margin-left: 137px;">Créer des utilisateurs et des images</button>
     </form>
@@ -96,18 +121,19 @@
     <p id="status"></p>
 
     <script>
+        
       document.getElementById('malePercentage').addEventListener('input', function(event) {
         document.getElementById('malePercentageLabel').innerText = event.target.value + '%';
       });
   
-      document.getElementById('userCreationForm').addEventListener('submit', function(event) {
+      document.getElementById('userCreationForm').addEventListener('submit', async function(event) {
         event.preventDefault();
       
         const salt = dcodeIO.bcrypt.genSaltSync(10);
         const userCount = document.getElementById('userCount').value;
 
         const imageCount = document.getElementById('imageCount').value;
-        const sqlFileName = document.getElementById('sqlFileName').value;
+        const sqlFileName = document.getElementById('countrySelect').value + 'BDD';
         const malePercentage = document.getElementById('malePercentage').value / 100;
         const selectedCountry = document.getElementById('countrySelect').value;
 
@@ -117,66 +143,78 @@
           return output;
         }
   
-        let sql = 'INSERT INTO `users` (`first_name`, `last_name`, `username`, `email`, `password`, `created_at`, `gender`, `looking`, `birthdate`, `biography`, `tags`, `address`, `city`, `country`, `postal_code`, `phone`, `status`, `lat`, `lng`, `vkey`, `rkey`, `verified`, `google_id`, `reports`) VALUES\n';
+        let sql = 'INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `email`, `password`, `created_at`, `gender`, `looking`, `birthdate`, `biography`, `tags`, `address`, `city`, `country`, `postal_code`, `phone`, `status`, `lat`, `lng`, `vkey`, `rkey`, `verified`, `google_id`, `reports`) VALUES\n';
   
         const uniqueUsernames = new Set();
-        for (let i = 0; i < userCount; i++) {
+        try {
+          let id = await getLastUserId() + 1;
+          for (let i = 0; i < userCount; i++) {
 
-          let firstName, lastName, username;
-          do {
-            username = cleanString(faker.internet.userName());
-          } while (uniqueUsernames.has(username));
+            let firstName, lastName, username;
+            do {
+              username = cleanString(faker.internet.userName());
+            } while (uniqueUsernames.has(username));
 
-          do {
-            firstName = cleanString(faker.name.firstName());
-            lastName = cleanString(faker.name.lastName());
-          } while (!(/^[a-zA-Z \-]+$/).test(firstName) || !(/^[a-zA-Z \-]+$/).test(lastName) || firstName.length < 3 || firstName.length > 25 || lastName.length < 3 || lastName.length > 25);
-        
-          do {
-            username = cleanString(faker.internet.userName());
-          } while (uniqueUsernames.has(username) || !(/^[a-zA-Z0-9]+$/).test(username) || username.length < 7 || username.length > 25);
-        
-          uniqueUsernames.add(username);
-          const email = `${username}@matcha.com`;
+            do {
+              firstName = cleanString(faker.name.firstName());
+              lastName = cleanString(faker.name.lastName());
+            } while (!(/^[a-zA-Z \-]+$/).test(firstName) || !(/^[a-zA-Z \-]+$/).test(lastName) || firstName.length < 3 || firstName.length > 25 || lastName.length < 3 || lastName.length > 25);
+          
+            do {
+              username = cleanString(faker.internet.userName());
+            } while (uniqueUsernames.has(username) || !(/^[a-zA-Z0-9]+$/).test(username) || username.length < 7 || username.length > 25);
+          
+            uniqueUsernames.add(username);
+            const email = `${username}@matcha.com`;
 
-          const password = dcodeIO.bcrypt.hashSync('Motdepasse@123', salt);
+            const password = dcodeIO.bcrypt.hashSync('Motdepasse@123', salt);
 
-          const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
-          const gender = (Math.random() < malePercentage) ? 'male' : 'female';
-          const looking = faker.random.arrayElement(['male', 'female', 'both']);
-          const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
-          const biography = "I am a fake user";
-          const tags = cleanString(faker.lorem.words());
-          const address = cleanString(faker.address.streetAddress());
-          const city = cleanString(faker.address.city());
-          const country = selectedCountry;
-          const postal_code = cleanString(faker.address.zipCode());
-          const phone = cleanString(faker.phone.phoneNumber());
-          const status = createdAt;
-          const lat = faker.address.latitude();
-          const lng = faker.address.longitude();
-          const vkey = faker.random.alphaNumeric(20);
-          const rkey = null;
-          const verified = 1;
-          const google_id = null;
-          const reports = 0;
+            const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
+            const gender = (Math.random() < malePercentage) ? 'male' : 'female';
+            const looking = faker.random.arrayElement(['male', 'female', 'both']);
+            const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
+            const biography = "I am a fake user";
+            const tags = cleanString(faker.lorem.words());
+            const address = cleanString(faker.address.streetAddress());
+            const city = cleanString(faker.address.city());
+            const country = selectedCountry;
+            const postal_code = cleanString(faker.address.zipCode());
+            const phone = cleanString(faker.phone.phoneNumber());
+            const status = createdAt;
+            const lat = faker.address.latitude();
+            const lng = faker.address.longitude();
+            const vkey = faker.random.alphaNumeric(20);
+            const rkey = null;
+            const verified = 1;
+            const google_id = null;
+            const reports = 0;
 
-          sql += `('${firstName}', '${lastName}', '${username}', '${email}', '${password}', '${createdAt}', '${gender}', '${looking}', '${birthdate}', '${biography}', '${tags}', '${address}', '${city}', '${country}', '${postal_code}', '${phone}', '${status}', '${lat}', '${lng}', '${vkey}', '${rkey}', '${verified}', '${google_id}', '${reports}'),\n`;
+            sql += `('${id + i}', '${firstName}', '${lastName}', '${username}', '${email}', '${password}', '${createdAt}', '${gender}', '${looking}', '${birthdate}', '${biography}', '${tags}', '${address}', '${city}', '${country}', '${postal_code}', '${phone}', '${status}', '${lat}', '${lng}', '${vkey}', '${rkey}', '${verified}', '${google_id}', '${reports}'),\n`;
+          } 
+        } catch (error) {
+          console.error("INSERT INTO users ===> Échec de la récupération du dernier user_id :", error);
         }
 
         sql = sql.slice(0, -2) + ';\n\n';
 
         sql += 'INSERT INTO `images` (`user_id`, `name`,`profile`,`cover`,`created_at`) VALUES\n';
 
-        for (let i = 0; i < userCount; i++) {
-          for (let j = 0; j < imageCount; j++) {
-            const userId = i + 1; 
-            const url = `https://picsum.photos/200/300?random=${i * imageCount + j + 1}`;
-            const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
-            const isCover = (j === 0) ? '1' : '0';
-
-            sql += `('${userId}', '${url}','1','0', '${createdAt}'),\n`;
+        try {
+          let user_id = await getLastUserId();
+          let userId = user_id + 1;
+          for (let i = 0; i < userCount; i++) {
+            for (let j = 0; j < imageCount; j++) {
+              const url = `https://picsum.photos/200/300?random=${userId * imageCount + j + user_id + 1}`;
+              const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
+              const cover = (j === 0) ? '1' : '0';
+              const profile = (j === 1) ? '1' : '0'; 
+              
+              sql += `('${userId}', '${url}','${profile}','${cover}', '${createdAt}'),\n`;
+            }
+            userId++;
           }
+        } catch (error) {
+          console.error("INSERT INTO images ===> Échec de la récupération du dernier user_id :", error);
         }
 
         sql = sql.slice(0, -2) + ';';

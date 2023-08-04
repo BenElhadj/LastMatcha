@@ -3,6 +3,7 @@
     <div v-if="isComplete" class="discover">
       <q-page-container v-if="loaded" class="pt-5 px-0">
         <div class="row wrap justify-center">
+          
           <div class="col-2">
             <q-page-container class="px-5">
               <div class="column">
@@ -53,17 +54,20 @@
               </div>
             </q-page-container>
           </div>
-          <div class="col-10">
+
+          <div class="col-10 md9 sm12">
             <div class="row wrap justify-center">
-              <div v-for="user in sorted" :key="user.user_id" class="user col-xl2 col-lg3 col-sm3 ma-3 grow">
+              <div v-for="user in sorted" :key="user.user_id" class="user" col-xl2 col-lg3 col-sm3 ma-3 grow>
                 <user-card :user="user" />
               </div>
             </div>
           </div>
         </div>
+
       </q-page-container>
       <LoaderView v-else />
     </div>
+
     <q-page-container v-else class="my-3">
       <div class="row wrap justify-center">
         <h2 class="text-xs-center pt-4 pb-3 mb-4 grey--text mx-auto">

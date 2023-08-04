@@ -41,11 +41,12 @@
 </template>
 
 <script>
+import { computed, defineComponent } from 'vue'
+import { useStore } from 'vuex'
 import moment from 'moment'
-import { mapGetters } from 'vuex'
 import utility from '@/utility.js'
 
-export default {
+export default defineComponent({
   name: 'UserCard',
   props: {
     user: {
@@ -53,32 +54,41 @@ export default {
       default: () => { return {} }
     }
   },
-  computed: {
-    ...mapGetters(['location']),
-    age () {
-      return new Date().getFullYear() - new Date(this.user.birthdate).getFullYear()
-    },
-    distance () {
-      const from = this.location
+  setup(props) {
+    const store = useStore()
+    const location = computed(() => store.getters['location'])
+
+    const age = computed(() => {
+      return new Date().getFullYear() - new Date(props.user.birthdate).getFullYear()
+    })
+
+    const distance = computed(() => {
+      const from = location.value
       const to = {
-        lat: this.user.lat,
-        lng: this.user.lng
+        lat: props.user.lat,
+        lng: props.user.lng
       }
-      return `${Math.round(this.calculateDistance(from, to))} kms away`
-    },
-    lastSeen () {
-      if (this.user.status) return 'online'
-      if (this.user.lastSeen) return moment(this.user.lastSeen).utc().fromNow()
-      return moment(this.user.created_at).utc().fromNow()
+      return `${Math.round(utility.calculateDistance(from, to))} kms away`
+    })
+
+    const lastSeen = computed(() => {
+      if (props.user.status) return 'online'
+      if (props.user.lastSeen) return moment(props.user.lastSeen).utc().fromNow()
+      return moment(props.user.created_at).utc().fromNow()
+    })
+
+    const profileImage = (image) => {
+      return utility.getFullPath(image)
     }
-  },
-  methods: {
-    ...utility,
-    profileImage (image) {
-      return this.getFullPath(image)
+
+    return {
+      age,
+      distance,
+      lastSeen,
+      profileImage
     }
   }
-}
+})
 </script>
 
 <style>

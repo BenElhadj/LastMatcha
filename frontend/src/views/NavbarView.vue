@@ -1,18 +1,26 @@
 <template>
   <q-header class="black-text">
     <q-toolbar>
-      <q-btn v-if="status" flat round dense @click="drawer = !drawer">
-      <q-avatar size="60px">
-        <q-img :src="image" alt="Photo de profil" />
-      </q-avatar>
-      </q-btn>
-      <!-- <q-toolbar-title>
-        <span>{{ user.username }}</span>
-      </q-toolbar-title> -->
-      <div v-else></div>
-      <q-toolbar-title>
-        <span>MATCHA </span>
-      </q-toolbar-title>
+
+      <div v-if="status" @click="drawer = true">
+        <q-item>
+          <q-btn flat round dense>
+            <q-avatar size="60px">
+              <q-img :src="image" alt="Photo de profil" />
+            </q-avatar>
+          </q-btn>
+          <q-toolbar-title>
+            <q-item-label>{{ user.username }}</q-item-label>
+          </q-toolbar-title>
+        </q-item>
+      </div>
+
+      <div v-else>
+        <q-toolbar-title>
+          <span>MATCHA </span>
+        </q-toolbar-title>
+      </div>
+
       <q-space></q-space>
       <div v-if="status" justify-end class="search-notif-msg">
         
@@ -113,18 +121,21 @@
       
     </q-toolbar>
 
-    <q-drawer v-if="status" v-model="drawer" bordered :content-class="'primary'" @click-outside="drawer = false">
+    <q-drawer v-if="status" v-model="drawer" overlay bordered :content-class="'primary'">
       <div class="drawer-bg"></div>
       <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label>{{ user.username }}</q-item-label>
-          </q-item-section>
-          <q-item-section side top>
-            <q-icon name="mdi-hand-pointing-left" @click="drawer = false"
-            ></q-icon>
-          </q-item-section>
-        </q-item>
+        <div @click="drawer = !drawer">
+          <q-item>
+            <q-btn flat round dense>
+              <q-avatar size="60px">
+                <q-img :src="image" alt="Photo de profil" />
+              </q-avatar>
+            </q-btn>
+            <q-item-section>
+              <q-item-label>{{ user.username }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </div>
         <q-separator></q-separator>
         <div v-for="link in links" :key="link.text">
           <q-item v-if="link.public || status" clickable @click="$router.push(link.route)">
@@ -142,12 +153,13 @@
         </q-item>
       </q-list>
     </q-drawer>
+
   </q-header>
 </template>
 
 <script>
 import utility from '@/utility.js'
-import { computed, watch, ref } from 'vue'
+import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -252,6 +264,22 @@ export default {
         console.log('Error navigating to user profile:', error)
       }
     }
+
+    const handleClickOutside = (e) => {
+      const drawerElement = document.querySelector('.q-drawer')
+      if (drawerElement && drawer.value && !drawerElement.contains(e.target)) {
+        drawer.value = false
+      }
+    }
+
+    onMounted(() => {
+      document.body.addEventListener('click', handleClickOutside, true)
+    })
+
+    onUnmounted(() => {
+      document.body.removeEventListener('click', handleClickOutside, true)
+    })
+
 
     const toUserChat = (convo) => {
       try {
@@ -386,16 +414,6 @@ export default {
 
 .circular-icon {
   border-radius: 50%;
-}
-
-.drawer-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-repeat: no-repeat;
 }
 
 .text-link {

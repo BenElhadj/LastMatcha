@@ -1,5 +1,7 @@
+
 require('dotenv').config()
 let bodyParser = require('body-parser')
+const mysql = require('mysql')
 const express = require('express')
 const http = require('http')
 const app = express()
@@ -39,6 +41,25 @@ app.use('/api/browse/', require('./src/routes/browsingRoutes'))
 app.use('/api/chat/', require('./src/routes/chatRoutes'))
 app.use('/api/notif/', require('./src/routes/notifRoutes'))
 app.use('/api/matching/', require('./src/routes/matchingRoutes'))
+
+
+app.get('/backend/get_last_user_id', (req, res) => {
+    const connection = mysql.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASS,
+        database: process.env.DB_NAME
+    });
+
+    connection.connect();
+
+    connection.query('SELECT user_id FROM images ORDER BY user_id DESC LIMIT 1;', (error, results, fields) => {
+        if (error) throw error;
+        res.send(results[0].user_id.toString());
+    });
+
+    connection.end();
+});
 
 app.get(/.*/, (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
 
