@@ -186,42 +186,36 @@ export default {
 
     const links = [
       {
-        icon: 'mdi-home-circle',
         text: 'Accueil',
         route: '/',
         public: true,
         image: acceilImage
       },
       {
-        icon: 'mdi-account-group',
         text: 'Découvrir',
         route: '/discover',
         public: false,
         image: decouvrirImage
       },
       {
-        icon: 'mdi-account-search',
         text: 'Recherche',
         route: '/search',
         public: false,
         image: rechercheImage
       },
       {
-        icon: 'mdi-chat',
         text: 'Chat',
         route: '/chat',
         public: false,
         image: chatImage
       },
       {
-        icon: 'mdi-bell',
         text: 'Notifications',
         route: '/notifications',
         public: false,
         image: notificationImage
       },
       {
-        icon: 'mdi-account-cog',
         text: 'Paramètres',
         route: '/settings',
         public: false,

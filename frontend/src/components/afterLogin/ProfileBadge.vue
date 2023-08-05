@@ -19,10 +19,10 @@
       </h4>
       <div v-for="field in fields" :key="field.icon" class="font-weight-light text-truncate">
         <p v-if="field.exist" class="my-2">
-          <q-icon small>
-            {{ field.icon }}
-          </q-icon>
-          <span class="ml-2">{{ field.text }}</span>
+        <div>
+    <q-icon v-if="field.icon" :name="field.icon" small />
+    <span class="ml-2">{{ field.text }}</span>
+  </div>
         </p>
       </div>
     </q-col>

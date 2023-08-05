@@ -1,9 +1,8 @@
 <template>
   <q-layout v-if="loaded" view="hHh LpR lff" class="settings">
-    <div>{{ user }}</div>
     <div class="parallax" :style="`background-image: url(${coverPhoto});`">
     </div>
-    <q-btn class="cover__btn" color="blue" round dense icon="mdi-image" flat @click.stop="pickFile">
+  <q-btn class="cover__btn" color="blue" round dense icon="mdi-image" flat @click.stop="pickFile" >
       <q-tooltip anchor="bottom middle" self="top middle">
         Change cover photo
       </q-tooltip>
@@ -88,13 +87,12 @@ export default {
     ProfileSettings
   },
   setup () {
-    const store = useStore()
+const store = useStore()
+const { user, allTags, status, online, blocked, userLocation, blockedBy } = store.getters
     const router = useRouter()
     const profileEditor = ref(null)
-    const user = computed(() => store.state.user)
-    const status = computed(() => store.state.status)
-    const coverPhoto = computed(() => store.state.coverPhoto)
-    const profileImage = computed(() => store.state.profileImage)
+    const coverPhoto = computed(() => store.state.cover)
+    const profileImage = computed(() => store.state.profile)
     const error = ref(null)
     const formRef = ref(null)
     const loaded = ref(false)
@@ -105,13 +103,15 @@ export default {
       color: '',
       text: ''
     })
+
+    console.log('ProfileImage ==========> ', user)
     const filteredImages = computed(() => {
-      if (!user.value.images) return []
-      return user.value.images.filter(cur => !cur.cover)
+      if (!user.images) return []
+      return user.images.filter(cur => !cur.cover)
     })
 
     watch(user, async (newValue, oldValue) => {
-      const token = user.value.token || localStorage.getItem('token')
+      const token = user.token || localStorage.getItem('token')
       if (token) {
         try {
           const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
@@ -131,9 +131,9 @@ export default {
     }, { immediate: true })
 
     onMounted(() => {
-      if (user.value.id) {
-        store.dispatch('syncHistory', user.value.id)
-        store.dispatch('syncMatches', user.value.id)
+      if (user.id) {
+        store.dispatch('syncHistory', user.id)
+        store.dispatch('syncMatches', user.id)
       }
     })
 
@@ -141,12 +141,12 @@ export default {
       try {
         let msg
         const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
-        const headers = { 'x-auth-token': user.value.token }
-        const res = await axios.post(url, user.value, { headers })
+        const headers = { 'x-auth-token': user.token }
+        const res = await axios.post(url, user, { headers })
         if (res && res.data && !res.data.msg) {
           msg = 'Your account has been updated successfuly'
           utility.showAlert('green', msg, this)
-          store.dispatch('updateUser', user.value)
+          store.dispatch('updateUser', user)
           formRef.value.toggleEdit()
         } else {
           msg = res.data.msg ? res.data.msg : 'Ouups something went wrong!'
@@ -164,7 +164,7 @@ export default {
           const fd = new FormData()
           fd.append('image', data)
           const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
-          const headers = { 'x-auth-token': user.value.token }
+          const headers = { 'x-auth-token': user.token }
           const res = await axios.post(url, fd, { headers })
           if (res && res.data && !res.data.msg) {
             msg = 'You profile image has been updated successfully'
@@ -217,7 +217,7 @@ export default {
             const fd = new FormData()
             fd.append('image', imageFile)
             const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
-            const headers = { 'x-auth-token': user.value.token }
+            const headers = { 'x-auth-token': user.token }
             const res = await axios.post(url, fd, { headers })
             if (res && res.body && !res.body.msg) {
               msg = 'You cover image has been updated successfully'

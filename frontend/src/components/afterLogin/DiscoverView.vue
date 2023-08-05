@@ -20,7 +20,7 @@
                 </h4>
                 <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
                 <h4 class="title mb-3">
-                  Note
+                  Note 
                 </h4>
                 <q-range v-model="rating" :min="0" :max="5" :step="0.5" label-always thumb-label="always" thumb-size="25" class="mx-3 mb-5 pt-3"></q-range>
                 <h4 class="title mb-4">
@@ -34,8 +34,20 @@
                 <h4 class="title mb-4">
                   Interêts
                 </h4>
-                <q-select v-model="interests" :options="allTags" solo text outlined multiple hide-details class="tags_menu mb-5"></q-select>
-                <div class="row justify-between mb-4">
+                <!-- <q-select v-model="interests" :options="allTags" solo text outlined multiple hide-details class="tags_menu mb-5"></q-select> -->
+                <q-select
+                  v-model="interests"
+                  :options="allTags"
+                  use-input
+                  multiple
+                  hide-dropdown-icon
+                  input-debounce="0"
+                  chips
+                  outlined
+                  class="tags_menu mb-5"
+                  @filter="filterTags"
+                />
+                              <div class="row justify-between mb-4">
                   <h4 class="title">
                     Sort by
                   </h4>
@@ -44,7 +56,7 @@
 
                   </q-btn>
                 </div>
-                <q-select v-model="sort" outlined solo :options="sortTypes" class="sort_select mb-5"></q-select>
+                <q-select v-model="sort" outlined solo hide-dropdown-icon :options="sortTypes" class="sort_select "></q-select>
                 <h4 class="title mb-4">
                   Reset all
                 </h4>
@@ -57,8 +69,11 @@
 
           <div class="col-10 md9 sm12">
             <div class="row wrap justify-center">
-              <div v-for="user in sorted" :key="user.user_id" class="user" col-xl2 col-lg3 col-sm3 ma-3 grow>
-                <user-card :user="user" />
+                <div v-for="user in sorted" :key="user.user_id" class="user col-xl-2 col-lg-3 col-sm-3 ma-3 grow">
+                <router-link :to="{ name: 'userprofile', params: { id: user.user_id } }">
+  <user-card :user="user" />
+</router-link>
+
               </div>
             </div>
           </div>
@@ -282,9 +297,17 @@ async function created() {
   }
 }
 created()
+
 </script>
 
 <style scoped>
+a{
+  text-decoration: none;
+  color: inherit;
+}
+.discover {
+  margin-left: 80px;
+}
 .v-slider {
   opacity: .7;
 }
@@ -297,9 +320,7 @@ created()
 .tags_menu > .v-input__control > .v-input__slot,
 .loaction_input > .v-input__control > .v-input__slot,
 .sort_select > .v-input__control > .v-input__slot {
-  box-shadow: none !important;
-  border: 2px solid var(--color-primary) !important;
-  opacity: .5;
+ 
 }
 
 .v-slider.v-slider--is-active,
@@ -358,5 +379,12 @@ created()
 }
 .flip {
   transform: rotate(180deg);
+}
+.user {
+  margin: 16px; /* ajustez cette valeur selon vos besoins */
+}
+
+.filters-container {
+  margin-bottom: 32px; /* ajustez cette valeur selon vos besoins */
 }
 </style>

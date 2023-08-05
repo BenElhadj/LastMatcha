@@ -1,30 +1,24 @@
 <template>
-  <q-card to="`/user/${user.user_id}`">
-    <div class="column justify-center align-center pt-1">
-      <div class="row justify-between top pa-2">
-        <q-chip outline small text-color="grey-7">
-          {{ distance }}
-        </q-chip>
-        <q-tooltip>
-          <template #activator="{ on }">
-           <q-icon :color="`${user.status ? 'green' : 'grey'}-2`" size="xs" v-on="on">
-            mdi-circle
-          </q-icon>
-
+  <q-card :to="`/user/${user.user_id}`">
+    <div column justify-center align-center class="pt-1">
+      <div class="row top pa-2" justify-space-between>
+        <q-chip outline small text-color="grey-7">{{ distance }}</q-chip>
+        <q-tooltip bottom class="status_container">
+          <template v-slot:activator="{ on }">
+            <q-icon :color="`${user.status ? 'green' : 'grey'} lighten-2`" class="status_icon mr-3" small v-on="on">mdi-circle</q-icon>
           </template>
           <span>{{ lastSeen }}</span>
         </q-tooltip>
       </div>
+
       <q-avatar size="120">
-        <img :src="profileImage(user.name)" />
+        <img :src="profileImage(user.name)" aspect-ratio="1"/>
       </q-avatar>
-      <h5 class="text-h5 text-capitalize mt-2 mb-4">
-        {{ user.first_name }}
-      </h5>
-      <div class="row align-start justify-center">
-        <p class="caption text-capitalize rating_value">
-          {{ user.rating.toFixed(1) }}
-        </p>
+
+      <h5 class="name headline text-capitalize mt-2 mb-4">{{ user.first_name }}</h5>
+      <div align-start justify-center>
+        <p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
+          <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :value="user.rating" half-increments class="rating"/>
         <!-- Quasar does not have a rating component, you need to use a third party library or build your own -->
       </div>
       <div class="row justify-center align-center bottom mb-0 mt-auto py-2 px-4 grey-2">
@@ -41,12 +35,11 @@
 </template>
 
 <script>
-import { computed, defineComponent } from 'vue'
-import { useStore } from 'vuex'
 import moment from 'moment'
+import { mapGetters } from 'vuex'
 import utility from '@/utility.js'
 
-export default defineComponent({
+export default {
   name: 'UserCard',
   props: {
     user: {
@@ -54,41 +47,43 @@ export default defineComponent({
       default: () => { return {} }
     }
   },
-  setup(props) {
-    const store = useStore()
-    const location = computed(() => store.getters['location'])
-
-    const age = computed(() => {
-      return new Date().getFullYear() - new Date(props.user.birthdate).getFullYear()
-    })
-
-    const distance = computed(() => {
-      const from = location.value
+  computed: {
+    ...mapGetters(['location']),
+    age () {
+      return new Date().getFullYear() - new Date(this.user.birthdate).getFullYear()
+    },
+    distance () {
+      const from = this.location
       const to = {
-        lat: props.user.lat,
-        lng: props.user.lng
+        lat: this.user.lat,
+        lng: this.user.lng
       }
-      return `${Math.round(utility.calculateDistance(from, to))} kms away`
-    })
-
-    const lastSeen = computed(() => {
-      if (props.user.status) return 'online'
-      if (props.user.lastSeen) return moment(props.user.lastSeen).utc().fromNow()
-      return moment(props.user.created_at).utc().fromNow()
-    })
-
-    const profileImage = (image) => {
-      return utility.getFullPath(image)
+      return `${Math.round(this.calculateDistance(from, to))} kms away`
+    },
+    lastSeen () {
+      if (this.user.status) return 'online'
+      if (this.user.lastSeen) return moment(this.user.lastSeen).utc().fromNow()
+      return moment(this.user.created_at).utc().fromNow()
     }
-
-    return {
-      age,
-      distance,
-      lastSeen,
-      profileImage
+  },
+  methods: {
+    ...utility,
+    profileImage (image) {
+      return this.getFullPath(image)
     }
-  }
-})
+  },
+  // setup () {
+  //   const model3 = ref(4.5)
+
+  //   return {
+  //     model3,
+
+  //     resetModels () {
+  //       model3.value = 4.5
+  //     }
+  //   }
+  // }
+}
 </script>
 
 <style>

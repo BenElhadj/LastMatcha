@@ -1,18 +1,12 @@
 <template>
-  <div v-if="isDesktop" class="col-md-8">
-    <q-tabs v-model="activeTab" :align="center" active-color="primary">
-      <q-tab v-for="link in links" :key="link.route" :name="link.route" :label="link.text">
-        <q-icon :name="link.icon"></q-icon>
+  <q-flex md="8" :class="mobile ? 'hidden-md-and-up pb-0 mt-5' : 'hidden-sm-and-down'">
+    <q-tabs v-model="activeTab" :color="`grey lighten-${mobile ? 5 : 3}`" slider-color="primary">
+      <q-tab v-for="link in links" :key="link.route">
+        <q-icon v-if="!mobile" left>{{ link.icon }}</q-icon>
+        <span :class="mobile ? 'pl-3 hidden-xs-only' : ''">{{ link.text }}</span>
       </q-tab>
     </q-tabs>
-  </div>
-  <div v-else class="col-md-8 mt-5 d-none d-md-block">
-    <q-tabs v-model="activeTab" :align="center" active-color="primary">
-      <q-tab v-for="link in links" :key="link.route" :name="link.route" :label="link.text">
-        <q-icon :name="link.icon"></q-icon>
-      </q-tab>
-    </q-tabs>
-  </div>
+  </q-flex>
 </template>
 
 <script>
