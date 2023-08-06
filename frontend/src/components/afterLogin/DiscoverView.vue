@@ -26,7 +26,8 @@
                 <h4 class="title mb-4">Interêts</h4>
 
                 <!-- <q-select v-model="interests" :options="allTags" solo text outlined multiple hide-details class="tags_menu mb-5"></q-select> -->
-                <q-select v-model="allTags" multiple hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined @filter="filterTags"/>
+                <q-select v-model="allTags" multiple hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined/>
+                <!-- <q-select v-model="allTags" multiple hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined @filter="filterTags"/> -->
   
                 <div class="row justify-between mb-4">
                   <h4 class="title">Sort by</h4>
@@ -148,21 +149,21 @@ const filtered = computed(() => {
     .filter(filters.interest)
 })
 
-function filterTags (val, update) {
-  if (val === '') {
-    update(() => {
-      return [{
-        label: 'No results found',
-        value: null,
-        disable: true
-      }]
-    })
-    return
-  }
-  update(() => {
-    return alltags.filter(e => e.toLowerCase().indexOf(val.toLowerCase()) > -1)
-  })
-}
+// function filterTags (val, update) {
+//   if (val === '') {
+//     update(() => {
+//       return [{
+//         label: 'No results found',
+//         value: null,
+//         disable: true
+//       }]
+//     })
+//     return
+//   }
+//   update(() => {
+//     return alltags.filter(e => e.toLowerCase().indexOf(val.toLowerCase()) > -1)
+//   })
+// }
 
 const sorted = computed(() => {
   if (!sort.value || sort.value === 'distance') {
@@ -292,16 +293,39 @@ async function created() {
     console.log('=============== add logout here === res.data.msg => ', res.data.msg)
     // logout(user.id)
     // Redirect to login page or handle error
+    router.push('/login')
   }
-  const tagsUrl = `${import.meta.env.VITE_APP_API_URL}/api/tags`
-  const tagsRes = await axios.get(tagsUrl, { headers: { 'x-auth-token': token } })
+  
+  // Fetch tags
+  const tagsUrl = `${import.meta.env.VITE_APP_API_URL}/tags`
+  const tagsRes = await axios.get(tagsUrl, { headers })
   if (!tagsRes.data.msg) {
     alltags.value = tagsRes.data
+    console.log('+++++++++++++++ fetching tags === tagsRes.data => ', alltags.value)
   } else {
     console.log('=============== Error fetching tags === tagsRes.data.msg => ', tagsRes.data.msg)
   }
 }
-created()
+
+onMounted(async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
+    const headers = { 'x-auth-token': token }
+    const res = await axios.get(url, { headers })
+    if (!res.data.msg) {
+      const user = res.data
+      if (user.birthdate) {
+        user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+      }
+      store.dispatch('login', user)
+    }
+  } catch (err) {
+    console.log('Got error here -->', err)
+  }
+})
+
+onMounted(created)
 
 </script>
 

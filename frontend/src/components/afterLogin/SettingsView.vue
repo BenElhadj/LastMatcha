@@ -136,6 +136,24 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
         store.dispatch('syncMatches', user.id)
       }
     })
+    
+    onMounted(async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
+      const headers = { 'x-auth-token': token }
+      const res = await axios.get(url, { headers })
+      if (!res.data.msg) {
+        const user = res.data
+        if (user.birthdate) {
+          user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+        }
+        store.dispatch('login', user)
+      }
+    } catch (err) {
+      console.log('Got error here -->', err)
+    }
+  })
 
     const updateUser = async () => {
       try {

@@ -226,7 +226,8 @@ export default {
     const user = computed(() => store.getters.user)
     const notif = computed(() => store.getters.notif)
     const notifs = computed(() => store.getters.notifs)
-    const status = computed(() => store.getters.status)
+    // const status = computed(() => store.getters.status)
+    const status = computed(() => store.getters.status || localStorage.getItem('token'))
     const convos = computed(() => store.getters.convos)
     const typingSec = computed(() => store.getters.typingSec)
     const profileImage = computed(() => store.getters.profileImage)
@@ -234,8 +235,8 @@ export default {
 
     const getFullPath = utility.getFullPath
 
-    console.log('Store:', store);
-    console.log('Getters:', store.getters);
+    // console.log('Store:', store);
+    // console.log('Getters:', store.getters);
     const seenNotif = async () => {
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/update`
@@ -274,6 +275,23 @@ export default {
       document.body.removeEventListener('click', handleClickOutside, true)
     })
 
+    onMounted(async () => {
+      try {
+        const token = localStorage.getItem('token')
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
+        const headers = { 'x-auth-token': token }
+        const res = await axios.get(url, { headers })
+        if (!res.data.msg) {
+          const user = res.data
+          if (user.birthdate) {
+            user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+          }
+          store.dispatch('login', user)
+        }
+      } catch (err) {
+        console.log('Got error here -->', err)
+      }
+    })
 
     const toUserChat = (convo) => {
       try {

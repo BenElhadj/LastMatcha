@@ -55,7 +55,7 @@ const router = createRouter({
     },
     {
       path: '/settings',
-      name: '',
+      name: 'settings',
       component: () => import('@/components/afterLogin/SettingsView.vue')
     },
     {
@@ -80,6 +80,18 @@ const router = createRouter({
       redirect: '/404'
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  const publicPages = ['/login', '/register', '/forgot', '/recover']
+  const authRequired = !publicPages.includes(to.path)
+  const loggedIn = !!localStorage.getItem('token')
+
+  if (authRequired && !loggedIn) {
+    next('/login')
+  } else {
+    next()
+  }
 })
 
 export default router

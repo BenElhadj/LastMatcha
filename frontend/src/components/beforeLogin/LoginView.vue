@@ -125,16 +125,17 @@ export default {
       try {
         const token = localStorage.getItem('token')
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-        console.log("====================== URL for checking login status:", import.meta.env.VITE_APP_API_URL)
+        // console.log("====================== URL for checking login status:", import.meta.env.VITE_APP_API_URL)
         const headers = { 'x-auth-token': token }
         const res = await axios.get(url, { headers })
+        console.log("--- Response res ===> ", res);
         if (!res.data.msg) router.push('/')
       } catch (err) {
         console.log('Got error here -->', err)
       }
     }
 
-    // checkLogin()
+    checkLogin()
 
     return {
       username,
