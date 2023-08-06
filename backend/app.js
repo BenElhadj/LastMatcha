@@ -16,13 +16,6 @@ const server = http.createServer(app)
 
 app.use(cors())
 
-// app.use(
-// 	cors({
-// 		origin: process.env.APP_URL,
-// 		credentials: true, // Allow cookies and other credentials to be included
-// 	})
-// );
-
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 app.use(bodyParser.json({ limit: '50mb', extended: true }))
 
@@ -53,11 +46,15 @@ app.get('/backend/get_last_user_id', (req, res) => {
 
     connection.connect();
 
-    connection.query('SELECT user_id FROM images ORDER BY user_id DESC LIMIT 1;', (error, results, fields) => {
+    connection.query('SELECT user_id FROM images ORDER BY user_id DESC LIMIT 1;', (error, results) => {
         if (error) throw error;
-        res.send(results[0].user_id.toString());
+        if (results.length === 0) {
+          res.send(0);
+        } else {
+          res.send(results[0].user_id.toString());
+        }
     });
-
+    
     connection.end();
 });
 

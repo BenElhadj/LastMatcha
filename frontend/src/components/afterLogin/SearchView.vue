@@ -320,7 +320,7 @@ export default {
 }
 
 .sort_btn {
-  margin: 0 0 0 auto !important;
+  margin: auto !important;
   padding: 0 !important;
 }
 

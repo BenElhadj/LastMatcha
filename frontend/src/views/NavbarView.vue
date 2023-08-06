@@ -121,7 +121,7 @@
       
     </q-toolbar>
 
-    <q-drawer v-if="status" v-model="drawer" overlay bordered :content-class="'primary'">
+    <q-drawer v-if="status" v-model="drawer" overlay>
       <div class="drawer-bg"></div>
       <q-list padding>
         <div @click="drawer = !drawer">
@@ -375,6 +375,19 @@ export default {
   font-size: x-large;
   align-items: center;
   color: black;
+}
+
+q-drawer {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.drawer-bg {
+  background-color: white;
+  opacity: 0.9;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
 .search-notif-msg {

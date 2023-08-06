@@ -94,27 +94,14 @@
       <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
         <label for="countrySelect" style="margin-right: 197px;">Sélectionnez un pays :</label>
         <select id="countrySelect" name="countrySelect" style="width: 190px;">
-          <option value="France">France</option>
-          <option value="Italie">Italie</option>
-          <option value="Germany">Germany</option>
-          <option value="Suisse">Suisse</option>
-          <option value="Pays-Bas">Pays-Bas</option>
-          <option value="Belgique">Belgique</option>
-          <option value="Luxembourg">Luxembourg</option>
-          <option value="Espagne">Espagne</option>
-          <option value="Portugal">Portugal</option>
-          <option value="Tunisie">Tunisie</option>
-          <option value="Algerie">Algerie</option>
-          <option value="Maroc">Maroc</option>
+          <option value="France" countryName="fr">France</option>
+          <option value="Italie" countryName="it">Italie</option>
+          <option value="Germany" countryName="de">Germany</option>
+          <option value="Pays-Bas" countryName="nl">Pays-Bas</option>
+          <option value="Espagne" countryName="es">Espagne</option>
         </select>
       </div>
 
-      <!-- <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-        <label for="sqlFileName" style="margin-right: 152px;">Nom du fichier SQL à créer :</label>
-        <input type="sql" id="sqlFileName" name="sqlFileName" placeholder="Entrez un Nom pour votre BDD" style="width: 185px;" required>
-      </div> -->
-      <span>----------------------------------------------------------------------------------------------------</span>
-    
       <button type="submit" id="createUsersButton" style="margin-left: 137px;">Créer des utilisateurs et des images</button>
     </form>
 
@@ -136,11 +123,43 @@
         const sqlFileName = document.getElementById('countrySelect').value + 'BDD';
         const malePercentage = document.getElementById('malePercentage').value / 100;
         const selectedCountry = document.getElementById('countrySelect').value;
+        const countryName = document.getElementById('countrySelect').options[document.getElementById('countrySelect').selectedIndex].getAttribute('countryName');
 
         
         function cleanString(input) {
           var output = input.replace(/[^\w\s]/gi, '');
           return output;
+        }
+
+        const defaultTags = ['ecole-42-Paris', 'Validate-at-125', 'RNCP-5', 'RNCP-7', 'Development', 'Front-end', 'Back-end', 'Sports', 'Cinema', 'Music'];
+
+        function getRandomTags() {
+          const pickaxe = [...defaultTags];
+          const randomTags = [];
+          for (let i = 0; i < 3; i++) {
+            const randomIndex = Math.floor(Math.random() * pickaxe.length);
+            randomTags.push(pickaxe[randomIndex]);
+            pickaxe.splice(randomIndex, 1);
+          }
+          return randomTags.join(',');
+        }
+
+        function generateAddressForCountry(countryName) {
+          faker.locale = countryName; 
+      
+          const address = faker.address.streetAddress();
+          const city = faker.address.city();
+          const postal_code = faker.address.zipCode();
+          const lat = faker.address.latitude();
+          const lng = faker.address.longitude();
+      
+          return {
+              address,
+              city,
+              postal_code,
+              lat,
+              lng,
+          };
         }
   
         let sql = 'INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `email`, `password`, `created_at`, `gender`, `looking`, `birthdate`, `biography`, `tags`, `address`, `city`, `country`, `postal_code`, `phone`, `status`, `lat`, `lng`, `vkey`, `rkey`, `verified`, `google_id`, `reports`) VALUES\n';
@@ -149,6 +168,8 @@
         try {
           let id = await getLastUserId() + 1;
           for (let i = 0; i < userCount; i++) {
+
+            const generatedAddress = generateAddressForCountry(countryName);
 
             let firstName, lastName, username;
             do {
@@ -174,15 +195,18 @@
             const looking = faker.random.arrayElement(['male', 'female', 'both']);
             const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
             const biography = "I am a fake user";
-            const tags = cleanString(faker.lorem.words());
-            const address = cleanString(faker.address.streetAddress());
-            const city = cleanString(faker.address.city());
+            const tags = getRandomTags();
+
             const country = selectedCountry;
-            const postal_code = cleanString(faker.address.zipCode());
+            const address = cleanString(generatedAddress.address);
+            const city = cleanString(generatedAddress.city);
+            const postal_code = cleanString(generatedAddress.postal_code);
+            const lat = generatedAddress.lat;
+            const lng = generatedAddress.lng;
+            
+
             const phone = cleanString(faker.phone.phoneNumber());
             const status = createdAt;
-            const lat = faker.address.latitude();
-            const lng = faker.address.longitude();
             const vkey = faker.random.alphaNumeric(20);
             const rkey = null;
             const verified = 1;

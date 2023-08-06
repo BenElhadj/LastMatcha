@@ -18,7 +18,9 @@
       <h5 class="name headline text-capitalize mt-2 mb-4">{{ user.first_name }}</h5>
       <div align-start justify-center>
         <p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
-          <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :value="user.rating" half-increments class="rating"/>
+          <!-- <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :value="user.rating" half-increments class="rating"/> -->
+          <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :modelValue="user.rating" half-increments class="rating"/>
+
         <!-- Quasar does not have a rating component, you need to use a third party library or build your own -->
       </div>
       <div class="row justify-center align-center bottom mb-0 mt-auto py-2 px-4 grey-2">

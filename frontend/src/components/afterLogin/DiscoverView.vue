@@ -1,69 +1,44 @@
 <template>
-  <q-layout>
+  <q-page>
     <div v-if="isComplete" class="discover">
       <q-page-container v-if="loaded" class="pt-5 px-0">
-        <div class="row wrap justify-center">
+        <q-layout class="row wrap justify-center">
           
           <div class="col-2">
             <q-page-container class="px-5">
-              <div class="column">
-                <h4 class="title mb-4">
-                  Afficher
-                </h4>
-                <q-btn-toggle v-model="model" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Male', value: 'male', icon: 'mdi-gender-male'}, {label: 'Female', value: 'female', icon: 'mdi-gender-female'} ]"></q-btn-toggle>
-                <h4 class="title mb-3">
-                  Distance
-                </h4>
-                <q-range v-model="distance" :min="0" :max="max" :step="step" label-always thumb-label="always" thumb-size="30" class="mx-3 mb-5 pt-3"></q-range>
-                <h4 class="title mb-3">
-                  Age
-                </h4>
+              <q-layout class="column">
+                <h4 class="title mb-4">Afficher</h4>
+                <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/>
+                <h4 class="title mb-3">Distance</h4>
+
+                <q-range v-model="distance" :min="0" :max="maxDis" :step="step" label-always thumb-label="always" thumb-size="30" class="mx-3 mb-5 pt-3"></q-range>
+                
+                <h4 class="title mb-3">Age</h4>
                 <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
-                <h4 class="title mb-3">
-                  Note 
-                </h4>
+                <h4 class="title mb-3">Note</h4>
                 <q-range v-model="rating" :min="0" :max="5" :step="0.5" label-always thumb-label="always" thumb-size="25" class="mx-3 mb-5 pt-3"></q-range>
-                <h4 class="title mb-4">
-                  Localisation
-                </h4>
+                <h4 class="title mb-4">Localisation</h4>
                 <q-input v-model="location" class="location_input mb-5" color="primary" hide-details outlined solo text>
                   <template v-slot:append>
                     <q-icon name="mdi-map-marker" />
                   </template>
                 </q-input>
-                <h4 class="title mb-4">
-                  Interêts
-                </h4>
-                <!-- <q-select v-model="interests" :options="allTags" solo text outlined multiple hide-details class="tags_menu mb-5"></q-select> -->
-                <q-select
-                  v-model="interests"
-                  :options="allTags"
-                  use-input
-                  multiple
-                  hide-dropdown-icon
-                  input-debounce="0"
-                  chips
-                  outlined
-                  class="tags_menu mb-5"
-                  @filter="filterTags"
-                />
-                              <div class="row justify-between mb-4">
-                  <h4 class="title">
-                    Sort by
-                  </h4>
-                  <q-btn text icon class="sort_btn" color="primary" @click="changeSort">
-                    <q-icon :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`" name="mdi-sort"></q-icon>
+                <h4 class="title mb-4">Interêts</h4>
 
-                  </q-btn>
+                <!-- <q-select v-model="interests" :options="allTags" solo text outlined multiple hide-details class="tags_menu mb-5"></q-select> -->
+                <q-select v-model="allTags" multiple hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined @filter="filterTags"/>
+  
+                <div class="row justify-between mb-4">
+                  <h4 class="title">Sort by</h4>
+                  <q-btn @click="changeSort" flat round style="width: 10px" color="primary" icon="mdi-sort" :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`" class="clear_btn"/>
                 </div>
-                <q-select v-model="sort" outlined solo hide-dropdown-icon :options="sortTypes" class="sort_select "></q-select>
-                <h4 class="title mb-4">
-                  Reset all
-                </h4>
-                <q-btn outlined block large color="primary" class="clear_btn" @click="reset">
-                  <q-icon name="mdi-refresh"></q-icon>
-                </q-btn>
-              </div>
+                <q-select v-model="sort" outlined solo hide-dropdown-icon :options="sortTypes" label="Sort by" class="sort_select"/>
+                
+                <div class="row justify-between mb-4">
+                  <h4 class="title mb-4">Reset all</h4>
+                  <q-btn @click="reset" flat round style="width: 10px" class="clear_btn" color="primary" icon="mdi-refresh"/>
+                </div>
+              </q-layout>
             </q-page-container>
           </div>
 
@@ -71,13 +46,13 @@
             <div class="row wrap justify-center">
                 <div v-for="user in sorted" :key="user.user_id" class="user col-xl-2 col-lg-3 col-sm-3 ma-3 grow">
                 <router-link :to="{ name: 'userprofile', params: { id: user.user_id } }">
-  <user-card :user="user" />
-</router-link>
-
+                  <user-card :user="user" />
+                </router-link>
               </div>
             </div>
           </div>
-        </div>
+
+        </q-layout>
 
       </q-page-container>
       <LoaderView v-else />
@@ -97,11 +72,11 @@
         </div>
       </div>
     </q-page-container>
-  </q-layout>
+  </q-page>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
 import UserCard from '@/components/afterLogin/UserCard.vue'
@@ -128,9 +103,10 @@ const loaded = ref(false)
 const age = ref({min: 18, max: 85})
 const rating = ref({min: 0, max: 5})
 const distance = ref({min: 0, max: 0})
-const tags = ['sports', 'cinema', 'music']
+const alltags = ref([])
+const multiple = ref(null)
 const sortTypes = ['age', 'distance', 'rating', 'interests']
-const nats = countries
+const nats = ref(countries)
 
 const filters = {
   self: val => val.user_id !== user.id,
@@ -172,6 +148,22 @@ const filtered = computed(() => {
     .filter(filters.interest)
 })
 
+function filterTags (val, update) {
+  if (val === '') {
+    update(() => {
+      return [{
+        label: 'No results found',
+        value: null,
+        disable: true
+      }]
+    })
+    return
+  }
+  update(() => {
+    return alltags.filter(e => e.toLowerCase().indexOf(val.toLowerCase()) > -1)
+  })
+}
+
 const sorted = computed(() => {
   if (!sort.value || sort.value === 'distance') {
     return sortDir.value < 0 ? [...filtered.value].reverse() : filtered.value
@@ -209,6 +201,18 @@ const maxDis = computed(() => {
   return 0
 })
 
+watch(maxDis, (newMaxDis) => {
+  const distanceVal = newMaxDis
+  if (distanceVal) {
+    distance.value[1] = distanceVal
+    max.value = distanceVal
+    step.value = Math.ceil(distanceVal / 30)
+    if (shouldReset.value) {
+      distance.value = [0, maxDis.value]
+      shouldReset.value = false
+    }
+  }
+})
 
 watch(user, (newUser, oldUser) => {
   if (newUser.looking && newUser.looking === 'both') {
@@ -244,23 +248,17 @@ watch(distance, () => {
   }
 })
 
-watch(maxDis, (newMaxDis) => {
-  const distanceVal = newMaxDis
-  if (distanceVal) {
-    distance.value[1] = distanceVal
-    max.value = distanceVal
-    step.value = Math.ceil(distanceVal / 30)
-  }
-})
+const shouldReset = ref(false)
 
 function reset() {
   sortDir.value = 1
   sort.value = null
   gender.value = null
-  age.value = [18, 85]
-  rating.value = [0, 5]
-  distance.value = [0, maxDis.value]
+  age.value = {min: 18, max: 85}
+  rating.value = {min: 0, max: 5}
+  distance.value = {min: 0, max: maxDis.value}
   location.value = null
+  multiple.value = null
 }
 
 function changeSort() {
@@ -291,9 +289,16 @@ async function created() {
     whoIsUp()
     loaded.value = true
   } else {
-    console.log('=== add logout here === res.data.msg => ', res.data.msg)
+    console.log('=============== add logout here === res.data.msg => ', res.data.msg)
     // logout(user.id)
     // Redirect to login page or handle error
+  }
+  const tagsUrl = `${import.meta.env.VITE_APP_API_URL}/api/tags`
+  const tagsRes = await axios.get(tagsUrl, { headers: { 'x-auth-token': token } })
+  if (!tagsRes.data.msg) {
+    alltags.value = tagsRes.data
+  } else {
+    console.log('=============== Error fetching tags === tagsRes.data.msg => ', tagsRes.data.msg)
   }
 }
 created()
@@ -354,6 +359,7 @@ a{
 }
 
 .clear_btn {
+  margin: auto !important;
   align-self: flex-end;
 }
 
@@ -369,9 +375,14 @@ a{
   transform: rotate(180deg);
 }
 
+.icon-size {
+  width: 42px;
+  margin: 7px;
+}
+
 .sort_btn {
-  margin: 0 0 0 auto !important;
-  padding: 0 !important;
+  margin: auto !important;
+  padding: auto !important;
 }
 
 .v-slider__thumb-label > span {
