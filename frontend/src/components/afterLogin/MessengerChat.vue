@@ -1,42 +1,40 @@
 <template>
-  <q-page v-if="selectedConvo" class="chat_container" >
+  <q-layout v-if="selectedConvo" class="column chat_container">
     <q-img v-if="!limit && selectedConvo" class="chat_load" :src="loadGif"></q-img>
-    <div v-for="(msg, i) in messages" :key="i + key">
-      <h3 v-if="newConvo(msg, i)" class="date_spacer text-subtitle2 mb-2 mt-4">
-        {{ formatTime(msg.created_at) }}
-      </h3>
-      <div :class="layoutClass(msg, i)" class="row items-start" >
-        <q-tooltip z-index="2" anchor="bottom left" self="top left">
-          <template #activator="{on}">
-            <router-link v-if="showAvatar(msg, i)" :to="`/user/${msg.id_from}`" :class="avatarClass(msg, i)">
-              <q-avatar size="40">
-                <img :src="getFullPath(imageConvo)" :alt="usernameConvo" v-on="on">
-              </q-avatar>
-            </router-link>
-          </template>
-          <span>{{ usernameConvo }}</span>
-        </q-tooltip>
-        <div :class="pushClass(msg, i)"></div>
-        <q-avatar v-if="seen(msg, i)" size="20" class="mt-2">
-          <img :src="getFullPath(imageConvo)" :alt="usernameConvo">
-        </q-avatar>
-        <q-tooltip z-index="2" :anchor="msg.id_from === user.id ? 'bottom right' : 'bottom left'" :self="msg.id_from !== user.id ? 'top right' : 'top left'">
-          <template #activator="{on}">
-            <div :class="bubbleClass(msg)" v-on="on">
-              {{ msg.message }}
-            </div>
-          </template>
-          <span>{{ formatTime(msg.created_at) }}</span>
-        </q-tooltip>
-      </div>
-    </div>
-    <div v-if="typing">
-      <div class="to py-0 px-2 top_msg bottom_msg row items-start">
-        <router-link to="/" class="pull_up_single">
+    <q-item v-for="(msg, i) in messages" :key="i + key">
+      <q-item-section>
+        <h3 class="date_spacer subheading mb-2 mt-4" v-if="newConvo(msg, i)">{{ formatTime(msg.created_at) }}</h3>
+        <div :class="layoutClass(msg, i)" align-start>
+          <q-tooltip>
+            <template v-slot:activator="{ on }">
+              <q-btn :to="`/user/${msg.id_from}`" v-if="showAvatar(msg, i)" :class="avatarClass(msg, i)">
+                <q-avatar size="40">
+                  <img v-on="on" :src="getFullPath(imageConvo)" :alt="usernameConvo">
+                </q-avatar>
+              </q-btn>
+            </template>
+            <span>{{ usernameConvo }}</span>
+          </q-tooltip>
+          <div :class="pushClass(msg, i)"></div>
+          <q-avatar size="20" v-if="seen(msg, i)" class="mt-2">
+            <img :src="getFullPath(imageConvo)" :alt="usernameConvo">
+          </q-avatar>
+          <q-tooltip :left="msg.id_from === user.id" :right="msg.id_from != user.id">
+            <template v-slot:activator="{ on }">
+              <div :class="bubbleClass(msg)" v-on="on">{{msg.message}}</div>
+            </template>
+            <span>{{ formatTime(msg.created_at) }}</span>
+          </q-tooltip>
+        </div>
+      </q-item-section>
+    </q-item>
+    <q-item v-if="typing">
+      <q-item-section class="to py-0 px-2 top_msg bottom_msg" align-start>
+        <q-btn to="/" class="pull_up_single">
           <q-avatar size="40">
             <img :src="getFullPath(imageConvo)" :alt="usernameConvo">
           </q-avatar>
-        </router-link>
+        </q-btn>
         <div class="mx-2 chat_bubble grey lighten-3">
           <div class="typing">
             <div class="typing_point"></div>
@@ -44,13 +42,12 @@
             <div class="typing_point"></div>
           </div>
         </div>
-      </div>
-    </div>
-  </q-page>
-  <h2 v-else class="text-center text-md-left pt-4 pb-3 mb-4 text-primary">
-    matcher-vous avec des autrui pour commencer à discuter avec d'autres utilisateurs
-  </h2>
+      </q-item-section>
+    </q-item>
+  </q-layout>
+  <h2 v-else class="text-xs-center text-md-left pt-4 pb-3 mb-4 hidden-sm-and-down grey--text">matcher-vous avec des autrui pour commencer à discuter avec d'autres utilisateurs</h2>
 </template>
+
 
 <script>
 import { ref, watch, computed, nextTick } from 'vue'
@@ -62,7 +59,8 @@ import axios from 'axios'
 
 export default {
   name: 'MessengerChat',
-  setup () {
+  props: ['selectedConvo'],
+  setup (props, { emit }) {
     const store = useStore()
     const key = ref(0)
     const messages = ref([])
@@ -71,7 +69,10 @@ export default {
     const limit = ref(false)
     const loadGif = ref('https://i.giphy.com/media/uyCJt0OOhJBiE/giphy.webp')
 
-    // Define socket connection
+    const selectedConvo = ref(null);
+    const newMessage = ref(null);
+    const seenConvo = ref(false);
+
     const socket = io(import.meta.env.VITE_APP_API_URL)
     const typing = computed(() => store.getters.typingSec.status && store.getters.typingSec.convos.find(cur => cur.id_conversation === store.getters.selectedConvo))
     const scroll = () => {
@@ -117,6 +118,7 @@ export default {
       messageClr: () => store.dispatch('messageClr'),
       seenConvoClr: () => store.dispatch('seenConvoClr'),
       typingSecClr: () => store.dispatch('typingSecClr'),
+      
       checkLimit: (res) => {
         if (res.length < 50) {
           limit.value = true
@@ -124,6 +126,7 @@ export default {
           page.value++
         }
       },
+
       msgSent (msg) {
         messages.value.push(msg)
       },
@@ -198,34 +201,63 @@ export default {
       }
     }
 
-    // Define your watchers
-    watch(() => getters.value.selectedConvo, async (newValue, oldValue) => {
-      if (newValue) {
-        page.value = 0
-        limit.value = false
+    watch(selectedConvo, async (newVal) => {
+      if (newVal) {
+        page.value = 0;
+        limit.value = false;
         try {
-          const result = await getChat()
-          methods.checkLimit(result.body)
-          messages.value = result.body
-          methods.syncNotif()
+          const result = await getChat();
+          checkLimit(result.body);
+          messages.value = result.body;
+          syncNotif();
           socket.emit('seenConvo', {
-            user: getters.value.idUserConvo,
-            convo: newValue
-          })
+            user: idUserConvo,
+            convo: selectedConvo.value
+          });
         } catch (err) {
-          console.log('Got error here --> ', err)
+          console.log('Got error here --> ', err);
         }
       }
-    }, { immediate: true })
+    }, { immediate: true });
+
+    watch(messages, () => {
+      if (page.value < 2) nextTick(scroll);
+    });
+
+    watch(newMessage, (newVal) => {
+      if (newVal && selectedConvo.value === newVal.id_conversation) {
+        messages.value.push(newVal);
+        messageClr();
+      }
+    });
+
+    watch(typing, (newVal) => {
+      if (newVal) {
+        nextTick(scroll);
+      }
+    });
+
+    watch(seenConvo, (newVal) => {
+      if (newVal) {
+        messages.value.forEach((cur, i) => {
+          if (cur.id_from === user.id && !cur.is_read) {
+            messages.value[i].is_read = 1;
+            // Pour forcer le re-render, vous pouvez utiliser une clé avec ref et incrémenter sa valeur.
+            // Cependant, cela peut ne pas être nécessaire dans Vue 3 avec la Composition API.
+          }
+        });
+        seenConvoClr();
+      }
+    });
 
     const seenConvoClr = () => {
       store.dispatch('seenConvoClr')
     }
 
-    // Watch for changes
-    watch(() => page.value, () => {
-      if (page.value < 2) nextTick(scroll)
-    })
+    // // Watch for changes
+    // watch(() => page.value, () => {
+    //   if (page.value < 2) nextTick(scroll)
+    // })
 
     watch(() => store.getters.newMessage, (newMessage) => {
       if (newMessage && store.getters.selectedConvo === newMessage.id_conversation) {
@@ -255,9 +287,13 @@ export default {
     // Define the rest of your watchers here...
 
     return {
+      newMessage,
+      seenConvo,
+      utility,
       key,
       messages,
       page,
+      typing,
       timer,
       limit,
       loadGif,

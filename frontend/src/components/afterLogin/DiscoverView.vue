@@ -11,7 +11,7 @@
                 <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/>
                 <h4 class="title mb-3">Distance</h4>
 
-                <q-range v-model="distance" :min="0" :max="maxDis" :step="step" label-always thumb-label="always" thumb-size="30" class="mx-3 mb-5 pt-3"></q-range>
+                <q-range v-model="distance" :min="0" :max="maxDis" :step="step" label-always thumb-label="always" thumb-size="30" class="custom-slider mx-3 mb-5 pt-3"></q-range>
                 
                 <h4 class="title mb-3">Age</h4>
                 <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
@@ -26,7 +26,7 @@
                 <h4 class="title mb-4">Interêts</h4>
 
                 <!-- <q-select v-model="interests" :options="allTags" solo text outlined multiple hide-details class="tags_menu mb-5"></q-select> -->
-                <q-select v-model="allTags" multiple hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined/>
+                <q-select v-model="allTags" hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined/>
                 <!-- <q-select v-model="allTags" multiple hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined @filter="filterTags"/> -->
   
                 <div class="row justify-between mb-4">
@@ -88,7 +88,12 @@ import { matMenu } from '@quasar/extras/material-icons'
 import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 
 const store = useStore()
-const { user, allTags, status, online, blocked, userLocation, blockedBy } = store.getters
+const { user, status, online, blocked, blockedBy } = store.getters
+const allTags = store.getters.allTags
+const userLocation = store.state.location
+
+console.log("======= userrLocation ===> ", userLocation)
+console.log("======= store.getters ===> ", store.getters)
 
 const model = ref(null)
 const max = ref(0)
@@ -105,7 +110,6 @@ const age = ref({min: 18, max: 85})
 const rating = ref({min: 0, max: 5})
 const distance = ref({min: 0, max: 0})
 const alltags = ref([])
-const multiple = ref(null)
 const sortTypes = ['age', 'distance', 'rating', 'interests']
 const nats = ref(countries)
 
@@ -117,7 +121,7 @@ const filters = {
   gender: val => !gender.value || val.gender === gender.value,
   location: val => !location.value || [val.country, val.address, val.city].some(cur => cur.includes(location.value)),
   distance: val => {
-    if (distance.value.min === distance.value.max) return true
+    // if (distance.value.min === distance.value.max) return true
     if (val.lat && val.lng) {
       const { lat, lng } = val
       const distanceCalc = utility.calculateDistance(userLocation, { lat, lng })
@@ -148,22 +152,6 @@ const filtered = computed(() => {
     .filter(filters.distance)
     .filter(filters.interest)
 })
-
-// function filterTags (val, update) {
-//   if (val === '') {
-//     update(() => {
-//       return [{
-//         label: 'No results found',
-//         value: null,
-//         disable: true
-//       }]
-//     })
-//     return
-//   }
-//   update(() => {
-//     return alltags.filter(e => e.toLowerCase().indexOf(val.toLowerCase()) > -1)
-//   })
-// }
 
 const sorted = computed(() => {
   if (!sort.value || sort.value === 'distance') {
@@ -197,23 +185,27 @@ const maxDis = computed(() => {
       lat: Number(lat),
       lng: Number(lng)
     }
+    console.log('maxDis ===> ', Math.ceil(utility.calculateDistance(userLocation, to)))
     return Math.ceil(utility.calculateDistance(userLocation, to))
   }
-  return 0
+  // return 77
 })
 
-watch(maxDis, (newMaxDis) => {
-  const distanceVal = newMaxDis
-  if (distanceVal) {
-    distance.value[1] = distanceVal
-    max.value = distanceVal
-    step.value = Math.ceil(distanceVal / 30)
-    if (shouldReset.value) {
-      distance.value = [0, maxDis.value]
-      shouldReset.value = false
-    }
-  }
-})
+console.log('maxDis toto===> ',  distance.value)
+distance.value.max =  maxDis.value
+
+// watch(maxDis, (newMaxDis) => {
+//   const distanceVal = newMaxDis
+//   if (distanceVal) {
+//     distance.value[1] = distanceVal
+//     max.value = distanceVal
+//     step.value = Math.ceil(distanceVal / 30)
+//     if (shouldReset.value) {
+//       distance.value = [0, maxDis.value]
+//       shouldReset.value = false
+//     }
+//   }
+// })
 
 watch(user, (newUser, oldUser) => {
   if (newUser.looking && newUser.looking === 'both') {
@@ -259,7 +251,6 @@ function reset() {
   rating.value = {min: 0, max: 5}
   distance.value = {min: 0, max: maxDis.value}
   location.value = null
-  multiple.value = null
 }
 
 function changeSort() {
@@ -283,27 +274,16 @@ async function created() {
   const headers = { 'x-auth-token': token }
   const res = await axios.post(url, { filter: true }, { headers })
   if (!res.data.msg) {
-    users.value = res.data.slice(0, 100).map(cur => ({
+      distance.value.max = maxDis.value
+      users.value = res.data.slice(0, 100).map(cur => ({
       ...cur,
       rating: Number(cur.rating)
     }));
     whoIsUp()
     loaded.value = true
   } else {
-    console.log('=============== add logout here === res.data.msg => ', res.data.msg)
-    // logout(user.id)
-    // Redirect to login page or handle error
+    console.log('res.data.msg => ', res.data.msg)
     router.push('/login')
-  }
-  
-  // Fetch tags
-  const tagsUrl = `${import.meta.env.VITE_APP_API_URL}/tags`
-  const tagsRes = await axios.get(tagsUrl, { headers })
-  if (!tagsRes.data.msg) {
-    alltags.value = tagsRes.data
-    console.log('+++++++++++++++ fetching tags === tagsRes.data => ', alltags.value)
-  } else {
-    console.log('=============== Error fetching tags === tagsRes.data.msg => ', tagsRes.data.msg)
   }
 }
 
@@ -314,6 +294,7 @@ onMounted(async () => {
     const headers = { 'x-auth-token': token }
     const res = await axios.get(url, { headers })
     if (!res.data.msg) {
+      distance.value.max = maxDis.value
       const user = res.data
       if (user.birthdate) {
         user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)

@@ -1,15 +1,15 @@
 <template>
-  <q-layout v-if="selectedConvo" :align="center" justify="center" row class="messenger_form px-3 chat_layout">
-    <q-input v-model="msg" outlined class="ma-4 send_msg" label="Type a message..." @keyup.enter="sendMsg" @input="emitTyping"/>
+  <q-layout v-if="selectedConvo" align="center" justify="center" class="messenger_form px-3 chat_layout">
+    <q-input rows="1" filled dense class="ma-4 send_msg" append-icon="mdi-send" @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.enter="sendMsg"></q-input>
   </q-layout>
 </template>
 
 <script>
-import { computed, ref } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { useQuasar } from 'quasar'
 import axios from 'axios'
 import { io } from 'socket.io-client'
-const socket = io(import.meta.env.VITE_APP_API_URL)
 
 export default {
   name: 'MessengerForm',
@@ -19,21 +19,38 @@ export default {
       default: -1
     }
   },
-  setup (props) {
+  setup(props) {
     const store = useStore()
+    const $q = useQuasar()
     const msg = ref(null)
-    const user = computed(() => store.state.user)
-    const selectedConvo = computed(() => store.state.selectedConvo)
+    const user = store.getters['user']
+    const selectedConvo = store.getters['selectedConvo']
+    let socket = null
+
+    onMounted(() => {
+      socket = io(import.meta.env.VITE_APP_URL)
+    })
+
+    watch(msg, () => {
+      if (msg.value.length) {
+        const data = {
+          id_conversation: selectedConvo,
+          id_from: user.id,
+          id_to: props.toId
+        }
+        socket.emit('typing', data)
+      }
+    })
 
     const sendMsg = async (e) => {
       if (msg.value && msg.value.trim()) {
         if (!e.shiftKey) {
           try {
             const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/send`
-            const headers = { 'x-auth-token': user.value.token }
+            const headers = { 'x-auth-token': user.token }
             const data = {
-              id_conversation: selectedConvo.value,
-              id_from: user.value.id,
+              id_conversation: selectedConvo,
+              id_from: user.id,
               id_to: props.toId,
               message: msg.value
                 .trim()
@@ -59,32 +76,17 @@ export default {
       }
     }
 
-    const emitTyping = () => {
-      if (msg.value.length) {
-        const data = {
-          id_conversation: selectedConvo.value,
-          id_from: user.value.id,
-          id_to: props.toId
-        }
-        socket.emit('typing', data)
-      }
-    }
-
-    return {
-      msg,
-      sendMsg,
-      emitTyping
-    }
+    return { msg, selectedConvo, sendMsg }
   }
 }
 </script>
 
-<style scoped>
-.q-input--outline.q-input--single-line input {
+<style>
+.q-field--filled.q-field--dense input {
   margin-top: 0 !important;
 }
 
-.send_msg > .v-input__control > .v-input__slot > .q-input__slot > textarea {
+.send_msg > .q-field__control > .q-field__append > textarea {
   resize: none !important;
   overflow-y: hidden;
   margin-top: 5px;

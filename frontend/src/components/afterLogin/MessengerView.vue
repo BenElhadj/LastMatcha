@@ -11,7 +11,7 @@
               <MessengerChat ref="chat" />
             </div>
             <div class="bottom col-xs-3">
-              <MessengerForm :to-id="getToId" @msg-sent="messageSent"/>
+              <MessengerForm :to-id="getToId()" @msgSent="messageSent" />
             </div>
           </div>
         </div>

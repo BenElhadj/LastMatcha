@@ -1,39 +1,46 @@
 <template>
-  <q-list>
-    <q-item-header class="hidden-sm-and-down">
-      Discussions récentes
-    </q-item-header>
-    <q-item v-for="convo in convos" :key="convo.id_conversation" @click="syncConvo(convo)">
-      <q-item-section avatar>
-        <q-avatar>
-          <img :src="getFullPath(convo.profile_image)">
-          <q-badge floating color="primary" :label="unRead(convo)"/>
-        </q-avatar>
-      </q-item-section>
-      <q-item-section class="hidden-sm-and-down">
-        <q-item-label>{{ convo.username }}</q-item-label>
-      </q-item-section>
-      <q-item-section side>
-        <q-icon v-if="notTyping(convo)" small :color="convo.status ? 'green' : 'grey'">
-          mdi-circle
-        </q-icon>
-        <div v-else class="typing">
-          <div class="typing_point"></div>
-          <div class="typing_point"></div>
-          <div class="typing_point"></div>
-        </div>
-      </q-item-section>
-    </q-item>
-    <p v-if="convos.length == 0">
-      Pas de conversations
-    </p>
-  </q-list>
+  <div class="q-pa-md" style="max-width: 350px">
+    <q-list style="background-color: WhiteSmoke">
+
+      <q-item>
+        <q-item-section>Discussions récentes</q-item-section>
+      </q-item>
+      <q-item v-if="convos.length == 0" style="align-items: center, justify-content: center, display: flex">
+        <q-item-section >Pas de conversations</q-item-section>
+      </q-item>
+
+      <q-item clickable v-ripple v-for="convo in convos" :key="convo.id_conversation" @click="syncConvo(convo)">
+        <q-item-section :value="!!unRead(convo)" overlap color="primary" class="mx-2" left>
+            <template v-slot:badge>
+              <span>{{ unRead(convo) }}</span>
+            </template>
+            <q-avatar>
+              <img :src="getFullPath(convo.profile_image)">
+            </q-avatar>
+        </q-item-section>
+        <q-item-section class="hidden-sm-and-down">
+          <q-item-label>{{ convo.username }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-badge v-if="notTyping(convo)" small rounded :color="convo.status ? 'green' : 'grey'" />
+          <div v-else class="typing">
+            <div class="typing_point"></div>
+            <div class="typing_point"></div>
+            <div class="typing_point"></div>
+          </div>
+        </q-item-section>
+      </q-item>
+
+    </q-list>
+  </div>
 </template>
 
 <script>
 import utility from '@/utility.js'
 import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
+import { matMenu } from '@quasar/extras/material-icons'
+import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 
 export default {
   name: 'MessengerList',

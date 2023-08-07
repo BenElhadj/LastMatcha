@@ -173,6 +173,7 @@ import parametreImage from '@/assets/Navbar/parametre.png'
 export default {
   name: 'NavbarView',
   setup (_, { app }) {
+    // console.log('*** Setting up NavbarView ***')
     const store = useStore()
     const router = useRouter()
     const timer = {}
@@ -238,6 +239,7 @@ export default {
     // console.log('Store:', store);
     // console.log('Getters:', store.getters);
     const seenNotif = async () => {
+      // console.log('*** Seen notification called ***')
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/update`
         const headers = { 'x-auth-token': user.value.token }
@@ -253,6 +255,7 @@ export default {
     }
 
     const toUserProfile = (id) => {
+      // console.log('*** Navigating to user profile ***')
       try {
         router.push(`/user/${id}`)
       } catch (error) {
@@ -276,6 +279,7 @@ export default {
     })
 
     onMounted(async () => {
+      // console.log('*** NavbarView mounted ***')
       try {
         const token = localStorage.getItem('token')
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
@@ -302,6 +306,7 @@ export default {
     }
 
     const syncConvo = async (convo) => {
+      // console.log('*** Syncing conversation ***')
       try {
         store.dispatch('syncConvo', convo)
         router.push('/chat').catch(err => {
@@ -313,6 +318,7 @@ export default {
     }
 
     const logout = async (userId) => {
+      // console.log('*** Logging out ***')
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
         const headers = { 'x-auth-token': user.value.token }

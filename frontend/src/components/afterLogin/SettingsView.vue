@@ -54,7 +54,7 @@
     <alert :data="alert"></alert>
     <profile-editor ref="profileEditor" @file_error="error = true" @file_succes="error = false" @update-image="updateImage"></profile-editor>
   </q-layout>
-  <loader v-else />
+  <LoaderView v-else />
 </template>
 
 <script>
@@ -63,7 +63,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Alert from '@/views/AlertView.vue'
-import loader from '@/views/LoaderView.vue'
+import LoaderView from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
 import ProfileEditor from '@/components/afterLogin/ProfileEditor.vue'
 import ProfileBadge from '@/components/afterLogin/ProfileBadge.vue'
@@ -77,7 +77,7 @@ export default {
   name: 'SettingsView',
   components: {
     Alert,
-    loader,
+    LoaderView,
     ProfileTabs,
     ProfileForm,
     ProfileBadge,

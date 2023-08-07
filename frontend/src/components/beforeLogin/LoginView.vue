@@ -67,15 +67,12 @@ export default {
     ])
 
     const log = async () => {
-      // console.log("================== VUE_APP_API_URL:", import.meta.env.VITE_APP_API_URL)
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/login`
-        // console.log("====================== URL for login: ", url)
         const auth = {
           username: username.value,
           password: password.value
         }
-        // const res = await axios.post(url, auth)
         const res = await fetch(url, {
           method: 'POST',
           headers: {
@@ -99,21 +96,6 @@ export default {
           }
         }
 
-        // console.log("===================== Response:", res);
-        // if (res.data.msg) {
-        //   alert.value = { state: true, color: 'red', text: data.msg }
-        //   utility.showAlert('red', res.data.msg, alert)
-        // } else {
-        //   const user = res.data
-        //   if (user.id) {
-        //     if (user.birthdate) {
-        //       user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
-        //     }
-        //     store.dispatch('login', user)
-        //     utility.updateLocation()
-        //     router.push('/')
-        //   }
-        // }
       } catch (err) {
         console.log('Got error here -->', err)
         console.error(err)
@@ -125,10 +107,8 @@ export default {
       try {
         const token = localStorage.getItem('token')
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-        // console.log("====================== URL for checking login status:", import.meta.env.VITE_APP_API_URL)
         const headers = { 'x-auth-token': token }
         const res = await axios.get(url, { headers })
-        console.log("--- Response res ===> ", res);
         if (!res.data.msg) router.push('/')
       } catch (err) {
         console.log('Got error here -->', err)

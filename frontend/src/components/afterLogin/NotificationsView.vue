@@ -98,7 +98,7 @@ export default {
 
     const logout = async (userId) => {
       try {
-        const url = `${import.meta.env.VUE_APP_API_URL}/logout`
+        const url = `${import.meta.env.VITE_APP_API_URL}/logout`
         const res = await axios.post(url, { userId })
         if (res.data.ok) {
           store.dispatch('logout')
@@ -114,7 +114,7 @@ export default {
       const token = newUser.token || localStorage.getItem('token')
       if (token) {
         try {
-          const url = `${import.meta.env.VUE_APP_API_URL}/api/auth/isloggedin`
+          const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
           const headers = { 'x-auth-token': token }
           const res = await axios.get(url, { headers })
           if (!res.data.msg) return
@@ -123,7 +123,6 @@ export default {
         }
       }
       await logout(newUser.id)
-      router.push('/login')
     }, { immediate: true })
 
     return {

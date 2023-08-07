@@ -49,7 +49,8 @@
           <q-input v-model="user.postal_code" :disable="!isEditing" color="primary" label="Postal Code" type="number"/>
         </q-col>
         <q-col cols="12">
-          <!-- Replace vue-tags-input with Quasar's q-chips-input -->
+          <q-chips-input v-model='tags' :disable='!isEditing' color='primary' label='Tags'></q-chips-input>
+          <q-select v-model='newTag' use-input :disable='!isEditing' color='primary' @new-value='addTag' label='Add Tag'></q-select>
           <!-- This may require some extra work to integrate -->
         </q-col>
         <q-col cols="12">
