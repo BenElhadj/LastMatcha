@@ -32,28 +32,28 @@ const insertNotifConv = (type, id_from, id_to, id_conversation) => {
 
 const getNotif = (id) => {
 	let request = `SELECT
-											notifications.id,
-											notifications.id_from as id_from,
-											notifications.created_at as date,
-											notifications.is_read as is_read,
-											notifications.type as type,
-											users.username as username,
-											images.name as profile_image,
-											images.profile as profile,
-											images.cover as cover
-									FROM notifications
-										INNER JOIN users
-										ON 
-											notifications.id_from = users.id
-										LEFT JOIN images
-										ON 
-											notifications.id_from = images.user_id
-										where 
-											notifications.id_to = ?
-										AND users.id NOT IN (
-												SELECT blocker FROM blocked WHERE blocked = ? 
-											UNION 
-												SELECT blocked FROM blocked WHERE blocker = ?)`
+				notifications.id,
+				notifications.id_from as id_from,
+				notifications.created_at as date,
+				notifications.is_read as is_read,
+				notifications.type as type,
+				users.username as username,
+				images.name as profile_image,
+				images.profile as profile,
+				images.cover as cover
+		FROM notifications
+			INNER JOIN users
+			ON 
+				notifications.id_from = users.id
+			LEFT JOIN images
+			ON 
+				notifications.id_from = images.user_id
+			where 
+				notifications.id_to = ?
+			AND users.id NOT IN (
+					SELECT blocker FROM blocked WHERE blocked = ? 
+				UNION 
+					SELECT blocked FROM blocked WHERE blocker = ?)`
 	return db.query(request, [id, id, id])
 }
 

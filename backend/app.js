@@ -27,7 +27,7 @@ app.use('/uploads', express.static('uploads'));
 
 // routes 
 
-app.use(express.static(`${path.dirname(path.dirname(__dirname))}/client/dist`)      )
+app.use(express.static(`${path.dirname(path.dirname(__dirname))}/client/dist`))
 app.use('/api/users/', require('./src/routes/userRoutes'))
 app.use('/api/auth/', require('./src/routes/authRoutes'))
 app.use('/api/browse/', require('./src/routes/browsingRoutes'))
@@ -36,7 +36,7 @@ app.use('/api/notif/', require('./src/routes/notifRoutes'))
 app.use('/api/matching/', require('./src/routes/matchingRoutes'))
 
 
-app.get('/backend/get_last_user_id', (req, res) => {
+app.get('/get_last_user_id', (req, res) => {
     const connection = mysql.createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -58,7 +58,37 @@ app.get('/backend/get_last_user_id', (req, res) => {
     connection.end();
 });
 
-app.get(/.*/, (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
+app.get('/allTags', (req, res) => {
+    if (req.headers['x-requested-with'] !== 'XMLHttpRequest') {
+        return res.status(403).send('Forbidden');
+    }
+    const connection = mysql.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASS,
+        database: process.env.DB_NAME
+    });
+
+    connection.connect();
+
+    connection.query('SELECT value FROM tags', (err, results) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error retrieving data from database');
+        return;
+      }
+      res.json(results.map(row => row.value));
+    });
+});
+
+
+app.get('/api/', (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
+
+
+app.use((req, res, next) => {
+    res.status(404).sendFile(path.resolve(__dirname, '404.html'));
+});
+
 
 const io = socketIo(server, {
 	cors: {

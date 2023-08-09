@@ -10,6 +10,15 @@ const getTags = (callback) => {
 	})
 }
 
+// GET ALL TAGS
+
+const getAllTags = (callback) => {
+	let request = `SELECT value FROM tags`
+	db.query(request, (error, results) => {
+		if (error) throw error
+		callback(results)
+	})
+}
 
 // INSERT TAGS 
 
@@ -22,5 +31,6 @@ const insertTags = (tag) => {
 
 module.exports = {
 	getTags,
+	getAllTags,
 	insertTags
 }

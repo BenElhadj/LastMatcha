@@ -5,38 +5,38 @@ const db = require('../utility/database')
 
 const getFollowing = (user_id) => {
 	let request = `SELECT
-									matches.matched as matched_id,
-									matches.created_at as match_date,
-									users.username as username,
-									images.name as profile_image,
-									images.profile as profile
-								FROM matches
-								INNER JOIN users
-								ON 
-									matches.matched = users.id
-								LEFT JOIN images
-								ON 
-									matches.matched = images.user_id
-								WHERE 
-									matches.matcher = ?`
+			matches.matched as matched_id,
+			matches.created_at as match_date,
+			users.username as username,
+			images.name as profile_image,
+			images.profile as profile
+		FROM matches
+		INNER JOIN users
+		ON 
+			matches.matched = users.id
+		LEFT JOIN images
+		ON 
+			matches.matched = images.user_id
+		WHERE 
+			matches.matcher = ?`
 	return db.query(request, [user_id])
 }
 
 const getFollowers = (user_id) => {
 	let request = `SELECT
-										matches.matcher as matcher_id,
-										matches.created_at as match_date,
-										users.username as username,
-										images.name as profile_image,
-										images.profile as profile
-								FROM matches
-								INNER JOIN users
-								ON 
-									matches.matcher = users.id
-								LEFT JOIN images
-								ON 
-									matches.matcher = images.user_id
-								WHERE matches.matched = ?`
+				matches.matcher as matcher_id,
+				matches.created_at as match_date,
+				users.username as username,
+				images.name as profile_image,
+				images.profile as profile
+		FROM matches
+		INNER JOIN users
+		ON 
+			matches.matcher = users.id
+		LEFT JOIN images
+		ON 
+			matches.matcher = images.user_id
+		WHERE matches.matched = ?`
 	return db.query(request, [user_id])
 }
 

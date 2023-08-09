@@ -4,12 +4,12 @@ const db = require('../utility/database')
 
 const addUser = (user, callback) => {
 	let request = `INSERT INTO users (first_name, last_name, username, email, password, vkey) VALUES
-								('${user.first_name}',
-								'${user.last_name}',
-								'${user.username}',
-								'${user.email}',
-								'${user.password}',
-								'${user.vkey}')`
+		('${user.first_name}',
+		'${user.last_name}',
+		'${user.username}',
+		'${user.email}',
+		'${user.password}',
+		'${user.vkey}')`
 	db.query(request, (error, results) => {
 		if (error) throw error
 		callback(results)
@@ -40,8 +40,8 @@ const getUserByemail = (email, callback) => {
 
 const getUserBrow = () => {
 	let request = `SELECT *, GET_RATING(users.id) AS rating FROM users, images
-									WHERE users.id = images.user_id
-									AND images.profile = 1 ORDER BY rating DESC`
+		WHERE users.id = images.user_id
+		AND images.profile = 1 ORDER BY rating DESC`
 	return db.query(request)
 }
 
@@ -49,8 +49,8 @@ const getUserBrow = () => {
 
 const getUserbyIdBrow = (id, user_id) => {
 	let request = `SELECT *, GET_RATING(users.id) AS rating FROM users WHERE id = ?
-	AND id NOT IN (SELECT blocked FROM blocked WHERE blocker = ?)
-	AND ? NOT IN (SELECT blocked FROM blocked WHERE blocker = ?)`
+		AND id NOT IN (SELECT blocked FROM blocked WHERE blocker = ?)
+		AND ? NOT IN (SELECT blocked FROM blocked WHERE blocker = ?)`
 	return db.query(request, [id, user_id, user_id, id])
 }
 
@@ -146,21 +146,22 @@ const getUserByUsername = (username, callback) => {
 
 const updateProfile = (user, callback) => {
 	let request = ` UPDATE users SET 
-									first_name = ?,
-									last_name = ?,
-									username = ?,
-									email = ?,
-									gender = ?,
-									looking = ?,
-									birthdate = ?,
-									biography = ?, 
-									tags = ?,
-									\`address\` = ?,
-									city = ?,
-									country = ?,
-									postal_code = ?,
-									phone = ?
-									WHERE id = ?
+		first_name = ?,
+		last_name = ?,
+		username = ?,
+		email = ?,
+		gender = ?,
+		looking = ?,
+		birthdate = ?,
+		biography = ?, 
+		tags = ?,
+		allTags = ?,
+		\`address\` = ?,
+		city = ?,
+		country = ?,
+		postal_code = ?,
+		phone = ?
+		WHERE id = ?
 	`
 	db.query(request, Object.values(user), (error, results) => {
 		if (error) throw error

@@ -4,7 +4,7 @@
     function getLastUserId() {
       return new Promise((resolve, reject) => {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/backend/get_last_user_id", true);
+        xhr.open("GET", "/get_last_user_id", true);
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4 && xhr.status === 200) {
             const userId = parseInt(xhr.responseText);
@@ -44,7 +44,8 @@
       *  (POST): http://localhost:3000/rkeycheck ========> Vérifiez si la clé de récupération de mot de passe fournie dans le corps de la requête est valide.
       *  (GET) : http://localhost:3000/destroykey =======> Détruisez la clé de récupération de mot de passe.
       *  (GET) : http://localhost:3000/history ==========> Obtenez l'historique de navigation de l'utilisateur connecté.
-      *  (GET) : http://localhost:3000/tags =============> Obtenez les tags disponibles pour le filtrage des utilisateurs.
+      *  (GET) : http://localhost:3000/tags =============> Obtenez les tags de l'utilisateur connecté
+      *  (GET) : http://localhost:3000/allTags ==========> Obtenez les toutes les tags disponibles.
       *  (GET) : http://localhost:3000/all ==============> Obtenez toutes les conversations de chat de l'utilisateur connecté.
       *  (POST): http://localhost:3000/messages =========> Obtenez les messages d'une conversation spécifique avec l'identifiant de conversation fourni dans le corps de la requête.
       *  (POST): http://localhost:3000/update ===========> Mettez à jour les informations d'une conversation spécifique avec l'identifiant de conversation et les informations fournies dans le corps de la requête.
@@ -141,7 +142,7 @@
             randomTags.push(pickaxe[randomIndex]);
             pickaxe.splice(randomIndex, 1);
           }
-          return randomTags.join(',');
+          return randomTags.join(', ');
         }
 
         function generateAddressForCountry(countryName) {
