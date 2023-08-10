@@ -9,25 +9,25 @@
               <q-layout class="column">
                 <h4 class="title mb-4">Afficher</h4>
                 <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/>
+                
                 <h4 class="title mb-3">Distance</h4>
-
-                <q-range v-model="distance" :min="0" :max="maxDis" :step="step" label-always thumb-label="always" thumb-size="30" class="custom-slider mx-3 mb-5 pt-3"></q-range>
+                <q-range v-model="distance" :min="0" :max="maxDis.value" :step="step" label-always thumb-label="always" thumb-size="30" class="custom-slider mx-3 mb-5 pt-3"></q-range>
                 
                 <h4 class="title mb-3">Age</h4>
                 <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
+                
                 <h4 class="title mb-3">Note</h4>
                 <q-range v-model="rating" :min="0" :max="5" :step="0.5" label-always thumb-label="always" thumb-size="25" class="mx-3 mb-5 pt-3"></q-range>
+                
                 <h4 class="title mb-4">Localisation</h4>
                 <q-input v-model="location" class="location_input mb-5" color="primary" hide-details outlined solo text>
                   <template v-slot:append>
                     <q-icon name="mdi-map-marker" />
                   </template>
                 </q-input>
-                <h4 class="title mb-4">Interêts</h4>
 
-                <!-- <q-select v-model="interests" :options="allTags" solo text outlined multiple hide-details class="tags_menu mb-5"></q-select> -->
-                <q-select v-model="allTags" hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined/>
-                <!-- <q-select v-model="allTags" multiple hide-dropdown-icon :options="allTags" label="Select tag" style="width: 250px" outlined @filter="filterTags"/> -->
+                <h4 class="title mb-4">Interêts</h4>
+                <q-select v-model="interests" :options="allTags" multiple hide-dropdown-icon label="Select tag" style="width: 250px" outlined/>
   
                 <div class="row justify-between mb-4">
                   <h4 class="title">Sort by</h4>
@@ -39,6 +39,7 @@
                   <h4 class="title mb-4">Reset all</h4>
                   <q-btn @click="reset" flat round style="width: 10px" class="clear_btn" color="primary" icon="mdi-refresh"/>
                 </div>
+
               </q-layout>
             </q-page-container>
           </div>
@@ -88,12 +89,13 @@ import { matMenu } from '@quasar/extras/material-icons'
 import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 
 const store = useStore()
-const { user, status, online, blocked, blockedBy } = store.getters
-const allTags = store.getters.allTags
+const { user, allTags, status, online, blocked, blockedBy } = store.getters
+
 const userLocation = store.state.location
 
-console.log("======= userrLocation ===> ", userLocation)
-console.log("======= store.getters ===> ", store.getters)
+
+// console.log("======= userrLocation ===> ", userLocation)
+// console.log("======= store.getters ===> ", store.getters)
 
 const model = ref(null)
 const max = ref(0)
@@ -178,21 +180,46 @@ const sorted = computed(() => {
   return [...filtered.value].sort(sortFunc)
 })
 
-const maxDis = computed(() => {
+
+
+const calculateMaxDis = () => {
   if (sort.value === null && sortDir.value === 1 && users.value.length) {
-    const { lat, lng } = users.value[users.value.length - 1]
+    const { lat, lng } = users.value[users.value.length - 1];
     const to = {
       lat: Number(lat),
       lng: Number(lng)
-    }
-    console.log('maxDis ===> ', Math.ceil(utility.calculateDistance(userLocation, to)))
-    return Math.ceil(utility.calculateDistance(userLocation, to))
-  }
-  // return 77
-})
+    };
+    const distance = Math.ceil(utility.calculateDistance(userLocation, to));
 
-console.log('maxDis toto===> ',  distance.value)
-distance.value.max =  maxDis.value
+    console.log('maxDis ===> ', distance);
+
+    if (distance > 0) {
+      return distance;
+    } else {
+      return calculateMaxDis(); // récursion
+    }
+  }
+  return undefined; // ou retournez une autre valeur par défaut si nécessaire
+}
+
+const maxDis = computed(calculateMaxDis);
+
+
+// const maxDis = computed(() => {
+//   if (sort.value === null && sortDir.value === 1 && users.value.length) {
+//     const { lat, lng } = users.value[users.value.length - 1]
+//     const to = {
+//       lat: Number(lat),
+//       lng: Number(lng)
+//     }
+//     console.log('maxDis ===> ', Math.ceil(utility.calculateDistance(userLocation, to)))
+//     return Math.ceil(utility.calculateDistance(userLocation, to))
+//   }
+//   // return 77
+// })
+
+// console.log('maxDis toto===> ',  distance.value)
+// distance.value.max =  maxDis.value
 
 // watch(maxDis, (newMaxDis) => {
 //   const distanceVal = newMaxDis
@@ -274,13 +301,17 @@ async function created() {
   const headers = { 'x-auth-token': token }
   const res = await axios.post(url, { filter: true }, { headers })
   if (!res.data.msg) {
-      distance.value.max = maxDis.value
-      users.value = res.data.slice(0, 100).map(cur => ({
+      // distance.value.max = maxDis.value
+      // distance.value.max = 100
+
+      users.value = res.data.slice(0, 1000).map(cur => ({
       ...cur,
       rating: Number(cur.rating)
     }));
     whoIsUp()
-    loaded.value = true
+    // if (maxDis > 0) {
+      loaded.value = true
+      // }
   } else {
     console.log('res.data.msg => ', res.data.msg)
     router.push('/login')
@@ -293,8 +324,7 @@ onMounted(async () => {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
     const headers = { 'x-auth-token': token }
     const res = await axios.get(url, { headers })
-    if (!res.data.msg) {
-      distance.value.max = maxDis.value
+    if (!res.data.msg && maxDis.value > 0) {
       const user = res.data
       if (user.birthdate) {
         user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)

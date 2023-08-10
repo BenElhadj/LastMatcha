@@ -53,9 +53,24 @@ const syncLocation = async location => {
   }
 }
 
+const getAllTags = async () => {
+  try {
+      const url = `${import.meta.env.VITE_APP_API_URL}/allTags`
+      const response = await axios.get(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      const res = response.data
+      return response.data
+  } catch (error) {
+      console.error("Error fetching tags:", error)
+      throw error
+  }
+}
+
 export default {
   getDate,
   isBlocked,
+  getAllTags,
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line

@@ -196,7 +196,7 @@ export default {
       const res = await axios.post(url, { filter: true }, { headers });
 
       if (!res.data.msg) {
-        users.value = res.data.slice(0, 100).map(cur => ({
+        users.value = res.data.slice(0, 1000).map(cur => ({
           ...cur,
           rating: Number(cur.rating)
         }));

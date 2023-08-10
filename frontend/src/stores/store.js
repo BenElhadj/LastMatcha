@@ -12,6 +12,7 @@ export const store = createStore({
     chat: chat.state,
     socket: socket.state,
     tags: [],
+    allTags: [],
     notif: [],
     convos: [],
     online: [],

@@ -17,6 +17,10 @@ export const getters = {
   newMessage: (state) => state.newMessage,
   selectedConvo: (state) => state.selectedConvo,
   following: (state) => state.following,
+  // allTags: (state) => {
+  //   return state.user.allTags
+  // },
+  allTags: (state) => state.allTags,
   history: (state) => {
     return [
       ...state.history.map((cur) => ({ ...cur, type: 'history' })),

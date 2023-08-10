@@ -53,6 +53,7 @@ export const auth = {
         commit('locate', { lat, lng })
         dispatch('locate')
         dispatch('getTags')
+        dispatch('getAllTags')
         dispatch('getNotif')
         dispatch('syncHistory')
         dispatch('syncMatches')

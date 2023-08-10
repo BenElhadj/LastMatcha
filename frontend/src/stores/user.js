@@ -11,6 +11,7 @@ export const user = {
     visited: [],
     notif: [],
     tags: [],
+    allTags: [],
     followers: [],
     following: [],
     blocked: [],
@@ -25,6 +26,8 @@ export const user = {
       state.user.email = email
     },
     updateTags: (state, tags) => (state.user.tags = tags.map(cur => cur.text.toLowerCase()).join(',')),
+    updateAllTags: (state, allTags) => (state.user.allTags = allTags),
+
     updateUser: (state, user) => (state.user = user),
     updateProfileImage: (state, data) => {
       state.user.images.forEach(cur => (cur.profile = 0))
@@ -59,6 +62,9 @@ export const user = {
     },
     getTags: (state, tags) => {
       state.tags = tags
+    },
+    setAllTags: (state, allTags) => {
+      state.allTags = allTags
     },
     seenNotif: state => {
       state.notif = state.notif.map(cur => {
@@ -181,6 +187,14 @@ export const user = {
         commit('getTags', tags.body)
       } catch (err) {
         console.log('Got error here --> ', err)
+      }
+    },
+    getAllTags: async ({ commit }) => {
+      try {
+        const allTags = await utility.getAllTags()
+        commit('setAllTags', allTags)
+      } catch (err) {
+        console.log("Error in fetchAllTags action:", err)
       }
     },
     getNotif: async ({ commit }) => {
