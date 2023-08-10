@@ -88,7 +88,7 @@ export const user = {
       if (Array.isArray(list)) {
         state.blacklist = list
       } else {
-        console.error('list is not an array')
+        console.error('err syncBlacklist in frontend/user.js ===> ', err)
       }
     }
   },
@@ -139,7 +139,7 @@ export const user = {
         }
         commit('syncMatches', { following, followers })
       } catch (err) {
-        console.log('Got error here --> ', err)
+        console.error('err syncMatches in frontend/user.js ===> ', err)
       }
     },
     syncBlocked: async ({ commit, dispatch }, id) => {
@@ -154,7 +154,7 @@ export const user = {
         commit('syncBlocked', { blocked, blockedBy })
         if (blocked.length) dispatch('syncBlacklist', blocked)
       } catch (err) {
-        console.log('Got error here --> ', err)
+        console.error('err syncBlocked in frontend/user.js ===> ', err)
       }
     },
     syncHistory: async ({ commit }) => {
@@ -177,8 +177,7 @@ export const user = {
         const visited = responseBody.filter(cur => cur.visited_id).map(merge)
         commit('syncHistory', { history, visitor, visited })
       } catch (err) {
-        console.error('Failed to sync history:', err.message)
-        console.log('Got error here --> ', err)
+        console.error('err syncHistory in frontend/user.js ===> ', err)
       }
     },
     getTags: async ({ commit }) => {
@@ -186,7 +185,7 @@ export const user = {
         const tags = await utility.sync('browse/tags')
         commit('getTags', tags.body)
       } catch (err) {
-        console.log('Got error here --> ', err)
+        console.error('err getTags in frontend/user.js ===> ', err)
       }
     },
     getAllTags: async ({ commit }) => {
@@ -194,7 +193,7 @@ export const user = {
         const allTags = await utility.getAllTags()
         commit('setAllTags', allTags)
       } catch (err) {
-        console.log("Error in fetchAllTags action:", err)
+        console.error('err getAllTags in frontend/user.js ===> ', err)
       }
     },
     getNotif: async ({ commit }) => {
@@ -202,7 +201,7 @@ export const user = {
         const notif = await utility.syncNotif()
         commit('getNotif', notif)
       } catch (err) {
-        console.log('Got error here --> ', err)
+        console.error('err getNotif in frontend/user.js ===> ', err)
       }
     },
     seenNotif: ({ commit }) => {
@@ -222,10 +221,10 @@ export const user = {
         if (res.data.ok && Array.isArray(res.data.list)) {
           commit('syncBlacklist', res.data.list)
         } else {
-          console.error('res.data.list is not an array')
+          console.error('err syncBlacklist in frontend/user.js ===> res.data.list is not an array')
         }
       } catch (err) {
-        console.log('Got error here --> ', err)
+        console.error('err syncBlacklist in frontend/user.js ===> ', err)
       }
     }
   }

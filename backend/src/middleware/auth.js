@@ -13,7 +13,7 @@ const auth = async (req, res, next) => {
 			try {
 				user = await userModel.getUserByIdD(decoded.id)
 			} catch (err) {
-				console.log('Got error here -->', err)
+				console.error('err auth in backend/auth.js ===> ', err)
 			}
 			req.user = user[0]
 		}

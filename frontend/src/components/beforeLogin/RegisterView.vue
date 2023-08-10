@@ -89,7 +89,7 @@ export default {
           this.showAlert('red', res.data.msg, this)
         }
       } catch (err) {
-        console.error(err)
+        console.error('err registerUser in frontend/RegisterView.vue ===> ', err)
       }
     },
     passwordMatch () {

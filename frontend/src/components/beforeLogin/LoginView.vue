@@ -97,8 +97,7 @@ export default {
         }
 
       } catch (err) {
-        console.log('Got error here -->', err)
-        console.error(err)
+        console.error('err async log in frontend/LoginView.vue ===> ', err)
       }
     }
 
@@ -111,7 +110,7 @@ export default {
         const res = await axios.get(url, { headers })
         if (!res.data.msg) router.push('/')
       } catch (err) {
-        console.log('Got error here -->', err)
+        console.error('err checkLogin in frontend/LoginView.vue ===> ', err)
       }
     }
 

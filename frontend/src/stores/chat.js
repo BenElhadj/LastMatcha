@@ -78,7 +78,7 @@ export const chat = {
         const result = await axios.get(url, { headers })
         if (!result.data.msg) commit('syncConvoAll', result.data)
       } catch (err) {
-        console.log('Error in syncConvoAll:', err)
+        console.error('err syncConvoAll in frontend/chat.js ===> ', err)
       }
     }
   }

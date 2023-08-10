@@ -72,7 +72,7 @@ export default {
             return
           }
         } catch (err) {
-          console.log('Got error here --> ', err)
+          console.error('err watch user in frontend/MessengerView.vue ===> ', err)
         }
       }
       store.dispatch('logout', newUser.id)

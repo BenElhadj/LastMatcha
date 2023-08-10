@@ -80,13 +80,13 @@ export default {
         this.loading = false
         if (res.ok) {
           router.replace('/recover').catch(err => {
-            console.log('Got error with --> ', err)
+            console.error('err onMounted router.replace in frontend/RecoverView.vue ===> ', err)
           })
         } else {
           this.$router.push('/404')
         }
       } catch (err) {
-        console.log('Got error with --> ', err)
+        console.error('err onMounted in frontend/RecoverView.vue ===> ', err)
       }
     })
 
@@ -111,7 +111,7 @@ export default {
           this.showAlert('red', 'Oups, une erreur s\'est produite. Merci de réessayer.', this)
         }
       } catch (err) {
-        console.log('Got error with --> ', err)
+        console.error('err submit in frontend/RecoverView.vue ===> ', err)
       }
     }
 

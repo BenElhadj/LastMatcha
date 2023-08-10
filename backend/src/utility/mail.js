@@ -31,7 +31,7 @@ const sendMail = async (to, key, type) => {
 			to
 		})
 	} catch (err) {
-		console.log('Got error here -->', err)
+		console.error('err sendMail in backend/mail.js ===> ', err)
 	}
 }
 

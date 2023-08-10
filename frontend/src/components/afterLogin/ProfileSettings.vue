@@ -194,8 +194,8 @@ export default {
       try {
         const response = await axios.post(url, data, { headers })
         return response.data
-      } catch (error) {
-        console.error(error)
+      } catch (err) {
+        console.error('err async httpPost in frontend/ProfileSettings.vue ===> ', err)
       }
     }
 
@@ -225,7 +225,7 @@ export default {
           showAlert('red', res.msg)
         }
       } catch (err) {
-        console.error('Got error with -> ', err)
+        console.error('err saveEmail in frontend/ProfileSettings.vue ===> ', err)
       }
     }
 
@@ -251,7 +251,7 @@ export default {
           showAlert('red', res.msg)
         }
       } catch (err) {
-        console.error('Got error with -> ', err)
+        console.error('err savePass in frontend/ProfileSettings.vue ===> ', err)
       }
     }
 

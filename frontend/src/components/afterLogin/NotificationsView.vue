@@ -103,10 +103,10 @@ export default {
         if (res.data.ok) {
           store.dispatch('logout')
         } else {
-          console.log('Logout failed:', res.data.message)
+          console.log('Logout failed : ', res.data.message)
         }
-      } catch (error) {
-        console.log('Got error while logging out:', error)
+      } catch (err) {
+        console.error('err logout in frontend/NotificationsView.vue ===> ', err)
       }
     }
 
@@ -119,7 +119,7 @@ export default {
           const res = await axios.get(url, { headers })
           if (!res.data.msg) return
         } catch (err) {
-          console.log('Got error here --> ', err)
+          console.error('err watch user in frontend/NotificationsView.vue ===> ', err)
         }
       }
       await logout(newUser.id)

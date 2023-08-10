@@ -173,7 +173,6 @@ import parametreImage from '@/assets/Navbar/parametre.png'
 export default {
   name: 'NavbarView',
   setup (_, { app }) {
-    // console.log('*** Setting up NavbarView ***')
     const store = useStore()
     const router = useRouter()
     const timer = {}
@@ -227,7 +226,6 @@ export default {
     const user = computed(() => store.getters.user)
     const notif = computed(() => store.getters.notif)
     const notifs = computed(() => store.getters.notifs)
-    // const status = computed(() => store.getters.status)
     const status = computed(() => store.getters.status || localStorage.getItem('token'))
     const convos = computed(() => store.getters.convos)
     const typingSec = computed(() => store.getters.typingSec)
@@ -236,17 +234,14 @@ export default {
 
     const getFullPath = utility.getFullPath
 
-    // console.log('Store:', store);
-    // console.log('Getters:', store.getters);
     const seenNotif = async () => {
-      // console.log('*** Seen notification called ***')
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/update`
         const headers = { 'x-auth-token': user.value.token }
         await axios.post(url, {}, { headers })
         store.dispatch('seenNotif')
-      } catch (error) {
-        console.log('Got error here -->', error)
+      } catch (err) {
+        console.error('err seenNotif in frontend/NavbarView.view ===> ', err)
       }
     }
 
@@ -255,11 +250,10 @@ export default {
     }
 
     const toUserProfile = (id) => {
-      // console.log('*** Navigating to user profile ***')
       try {
         router.push(`/user/${id}`)
-      } catch (error) {
-        console.log('Error navigating to user profile:', error)
+      } catch (err) {
+        console.error('err toUserProfile in frontend/NavbarView.view ===> ', err)
       }
     }
 
@@ -279,7 +273,6 @@ export default {
     })
 
     onMounted(async () => {
-      // console.log('*** NavbarView mounted ***')
       try {
         const token = localStorage.getItem('token')
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
@@ -293,32 +286,30 @@ export default {
           store.dispatch('login', user)
         }
       } catch (err) {
-        console.log('Got error here -->', err)
+        console.error('err async onMounted in frontend/NavbarView.view ===> ', err)
       }
     })
 
     const toUserChat = (convo) => {
       try {
         syncConvo(convo)
-      } catch (error) {
-        console.log('Error navigating to user chat:', error)
+      } catch (err) {
+        console.error('err toUserChat in frontend/NavbarView.view ===> ', err)
       }
     }
 
     const syncConvo = async (convo) => {
-      // console.log('*** Syncing conversation ***')
       try {
         store.dispatch('syncConvo', convo)
         router.push('/chat').catch(err => {
-          console.log('Error navigating to user chat:', err)
+          console.error('err syncConvo router.push in frontend/NavbarView.view ===> ', err)
         })
-      } catch (error) {
-        console.log('Error synchronizing conversation:', error)
+      } catch (err) {
+        console.error('err syncConvo in frontend/NavbarView.view ===> ', err)
       }
     }
 
     const logout = async (userId) => {
-      // console.log('*** Logging out ***')
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
         const headers = { 'x-auth-token': user.value.token }
@@ -327,10 +318,10 @@ export default {
           store.dispatch('logout', user.value.id)
         }
         router.push('/').catch(err => {
-          console.log('Error navigating to home:', err)
+          console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
         })
       } catch (err) {
-        console.log('Error logging out:', err)
+        console.error('err logout in frontend/NavbarView.view ===> ', err)
       }
     }
 

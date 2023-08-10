@@ -104,7 +104,6 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
       text: ''
     })
 
-    console.log('ProfileImage ==========> ', user)
     const filteredImages = computed(() => {
       if (!user.images) return []
       return user.images.filter(cur => !cur.cover)
@@ -117,13 +116,12 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
           const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
           const headers = { 'x-auth-token': token }
           const res = await axios.get(url, { headers })
-          console.log('res ===========> ', res)
           if (!res.data.msg) {
             loaded.value = true
             return
           }
         } catch (err) {
-          console.error('Setting.js watch.user error ===> ', err)
+          console.error('err watch user in frontend/SettingsView.vue ===> ', err)
         }
       }
       store.dispatch('logout', newValue.id)
@@ -138,22 +136,22 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
     })
     
     onMounted(async () => {
-    try {
-      const token = localStorage.getItem('token')
-      const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-      const headers = { 'x-auth-token': token }
-      const res = await axios.get(url, { headers })
-      if (!res.data.msg) {
-        const user = res.data
-        if (user.birthdate) {
-          user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+      try {
+        const token = localStorage.getItem('token')
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
+        const headers = { 'x-auth-token': token }
+        const res = await axios.get(url, { headers })
+        if (!res.data.msg) {
+          const user = res.data
+          if (user.birthdate) {
+            user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+          }
+          store.dispatch('login', user)
         }
-        store.dispatch('login', user)
+      } catch (err) {
+        console.error('err onMounted async in frontend/SettingsView.vue ===> ', err)
       }
-    } catch (err) {
-      console.log('Got error here -->', err)
-    }
-  })
+    })
 
     const updateUser = async () => {
       try {
@@ -171,7 +169,7 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
           utility.showAlert('red', msg, this)
         }
       } catch (err) {
-        console.error('Setting.js updateUser error ===> ', err)
+        console.error('err updateUser in frontend/SettingsView.vue ===> ', err)
       }
     }
 
@@ -196,7 +194,7 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
             text: msg
           }
         } catch (err) {
-          console.error('Setting.js updateImage error ===> ', err)
+          console.error('err updateImage in frontend/SettingsView.vue ===> ', err)
         }
       }
     }
@@ -254,7 +252,7 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
               }
             }
           } catch (err) {
-            console.error('Setting.js onFilePicked error ===> ', err)
+            console.error('err onFilePicked in frontend/SettingsView.vue ===> ', err)
           }
         }
       }

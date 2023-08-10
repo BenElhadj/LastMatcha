@@ -38,7 +38,7 @@ const getLocationFromIp = async f => {
       f({ lat: Number(splitted[0]), lng: Number(splitted[1]) })
     }
   } catch (err) {
-    console.log('Got error here -->', err)
+    console.error('err getLocationFromIp in frontend/utility.js ===> ', err)
   }
 }
 
@@ -49,7 +49,7 @@ const syncLocation = async location => {
     const headers = { 'x-auth-token': token }
     await axios.post(url, location, { headers })
   } catch (err) {
-    console.log('Got error here -->', err)
+    console.error('err syncLocation in frontend/utility.js ===> ', err)
   }
 }
 
@@ -62,7 +62,7 @@ const getAllTags = async () => {
       const res = response.data
       return response.data
   } catch (error) {
-      console.error("Error fetching tags:", error)
+    console.error('err getAllTags in frontend/utility.js ===> ', err)
       throw error
   }
 }
@@ -95,7 +95,7 @@ export default {
       const res = await axios.get(url, { headers })
       return res.data.msg ? [] : res.data
     } catch (err) {
-      console.log('Got error here -->', err)
+    console.error('err sync in frontend/utility.js ===> ', err)
     }
   },
   syncNotif: async () => {
@@ -106,7 +106,7 @@ export default {
       const result = await axios.get(url, { headers })
       return result.data.msg ? [] : result.data
     } catch (err) {
-      console.log('Got error here -->', err)
+    console.error('err syncNotif in frontend/utility.js ===> ', err)
     }
   },
   calculateDistance: (from, to, mile) => {

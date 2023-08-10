@@ -68,7 +68,7 @@ export default {
               socket.emit('chat', data)
             }
           } catch (err) {
-            console.error(err)
+            console.error('err sendMsg in frontend/MessengerForm.vue ===> ', err)
           }
         }
       } else {

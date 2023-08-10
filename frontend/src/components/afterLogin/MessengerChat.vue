@@ -107,7 +107,7 @@ export default {
         const result = await axios.post(url, data, { headers })
         return result
       } catch (err) {
-        console.log('Got error here --> ', err)
+        console.error('err getChat in frontend/MessengerChat.vue ===> ', err)
       }
     }
 
@@ -215,7 +215,7 @@ export default {
             convo: selectedConvo.value
           });
         } catch (err) {
-          console.log('Got error here --> ', err);
+          console.error('err watch selectedConvo in frontend/MessengerChat.vue ===> ', err)
         }
       }
     }, { immediate: true });

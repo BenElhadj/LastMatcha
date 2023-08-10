@@ -11,7 +11,7 @@
                 <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/>
                 
                 <h4 class="title mb-3">Distance</h4>
-                <q-range v-model="distance" :min="0" :max="maxDis.value" :step="step" label-always thumb-label="always" thumb-size="30" class="custom-slider mx-3 mb-5 pt-3"></q-range>
+                <q-range v-model="distance" :min="0" :max="maxDis" :step="step" label-always thumb-label="always" thumb-size="30" class="custom-slider mx-3 mb-5 pt-3"></q-range>
                 
                 <h4 class="title mb-3">Age</h4>
                 <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
@@ -93,10 +93,6 @@ const { user, allTags, status, online, blocked, blockedBy } = store.getters
 
 const userLocation = store.state.location
 
-
-// console.log("======= userrLocation ===> ", userLocation)
-// console.log("======= store.getters ===> ", store.getters)
-
 const model = ref(null)
 const max = ref(0)
 const step = ref(0)
@@ -111,6 +107,7 @@ const loaded = ref(false)
 const age = ref({min: 18, max: 85})
 const rating = ref({min: 0, max: 5})
 const distance = ref({min: 0, max: 0})
+const maxDis = ref(null)
 const alltags = ref([])
 const sortTypes = ['age', 'distance', 'rating', 'interests']
 const nats = ref(countries)
@@ -123,7 +120,6 @@ const filters = {
   gender: val => !gender.value || val.gender === gender.value,
   location: val => !location.value || [val.country, val.address, val.city].some(cur => cur.includes(location.value)),
   distance: val => {
-    // if (distance.value.min === distance.value.max) return true
     if (val.lat && val.lng) {
       const { lat, lng } = val
       const distanceCalc = utility.calculateDistance(userLocation, { lat, lng })
@@ -180,59 +176,23 @@ const sorted = computed(() => {
   return [...filtered.value].sort(sortFunc)
 })
 
-
-
-const calculateMaxDis = () => {
-  if (sort.value === null && sortDir.value === 1 && users.value.length) {
-    const { lat, lng } = users.value[users.value.length - 1];
+const calculateMaxDistance = () => {
+  if (users.value.length) {
+    const { lat, lng } = users.value[users.value.length - 1]
     const to = {
       lat: Number(lat),
       lng: Number(lng)
-    };
-    const distance = Math.ceil(utility.calculateDistance(userLocation, to));
-
-    console.log('maxDis ===> ', distance);
-
-    if (distance > 0) {
-      return distance;
-    } else {
-      return calculateMaxDis(); // récursion
     }
+    maxDis.value = Math.ceil(utility.calculateDistance(userLocation, to))
+  } else {
+    setTimeout(calculateMaxDistance, 1000)
   }
-  return undefined; // ou retournez une autre valeur par défaut si nécessaire
 }
 
-const maxDis = computed(calculateMaxDis);
+watch(users, () => {
+  calculateMaxDistance()
+}, { immediate: true })
 
-
-// const maxDis = computed(() => {
-//   if (sort.value === null && sortDir.value === 1 && users.value.length) {
-//     const { lat, lng } = users.value[users.value.length - 1]
-//     const to = {
-//       lat: Number(lat),
-//       lng: Number(lng)
-//     }
-//     console.log('maxDis ===> ', Math.ceil(utility.calculateDistance(userLocation, to)))
-//     return Math.ceil(utility.calculateDistance(userLocation, to))
-//   }
-//   // return 77
-// })
-
-// console.log('maxDis toto===> ',  distance.value)
-// distance.value.max =  maxDis.value
-
-// watch(maxDis, (newMaxDis) => {
-//   const distanceVal = newMaxDis
-//   if (distanceVal) {
-//     distance.value[1] = distanceVal
-//     max.value = distanceVal
-//     step.value = Math.ceil(distanceVal / 30)
-//     if (shouldReset.value) {
-//       distance.value = [0, maxDis.value]
-//       shouldReset.value = false
-//     }
-//   }
-// })
 
 watch(user, (newUser, oldUser) => {
   if (newUser.looking && newUser.looking === 'both') {
@@ -301,19 +261,17 @@ async function created() {
   const headers = { 'x-auth-token': token }
   const res = await axios.post(url, { filter: true }, { headers })
   if (!res.data.msg) {
-      // distance.value.max = maxDis.value
-      // distance.value.max = 100
-
       users.value = res.data.slice(0, 1000).map(cur => ({
       ...cur,
       rating: Number(cur.rating)
-    }));
+    }))
+    
+    await calculateMaxDistance()
+    distance.value.max = maxDis.value
     whoIsUp()
-    // if (maxDis > 0) {
-      loaded.value = true
-      // }
+    loaded.value = true
   } else {
-    console.log('res.data.msg => ', res.data.msg)
+    console.log('res.data.msg ===> ', res.data.msg)
     router.push('/login')
   }
 }
@@ -332,7 +290,7 @@ onMounted(async () => {
       store.dispatch('login', user)
     }
   } catch (err) {
-    console.log('Got error here -->', err)
+    console.error('err onMounted in frontend/DiscoverView.vue ===> ', err)
   }
 })
 

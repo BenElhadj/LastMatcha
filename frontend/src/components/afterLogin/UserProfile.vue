@@ -436,7 +436,7 @@ export default {
             this.$socket.emit('visit', data)
             this.f = false
           } catch (err) {
-            console.error(err)
+            console.error('err fetchUser in frontend/UserProfile.vue ===> ', err)
           }
         }
       }

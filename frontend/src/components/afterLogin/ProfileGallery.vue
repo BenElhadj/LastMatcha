@@ -58,7 +58,7 @@ export default {
           showAlert('red', 'Oups.. something went wrong', this)
         }
       } catch (err) {
-        console.log('Got error with --> ', err)
+        console.error('err deleteImg in frontend/ProfileGallery.vue ===> ', err)
       }
     }
 

@@ -17,9 +17,6 @@ export const getters = {
   newMessage: (state) => state.newMessage,
   selectedConvo: (state) => state.selectedConvo,
   following: (state) => state.following,
-  // allTags: (state) => {
-  //   return state.user.allTags
-  // },
   allTags: (state) => state.allTags,
   history: (state) => {
     return [
@@ -38,13 +35,13 @@ export const getters = {
       return false
     }),
   profileImage: (state) => {
-    const imageProfil = '/src/assets/logo.png'
+    const imageProfil = '/src/assets/default/defaut_profile.png'
     if (!state.user.images) return imageProfil
     const image = state.user.images.find((cur) => cur.profile)
     return utility.getFullPath(image ? image.name : imageProfil)
   },
   coverPhoto: (state) => {
-    const cover = '/src/assets/defaut_couverture.jpg'
+    const cover = '/src/assets/default/defaut_couverture.jpg'
     if (!state.user.images) return cover
     const image = state.user.images.find((cur) => cur.cover)
     return utility.getFullPath(image ? image.name : cover)

@@ -65,7 +65,7 @@ export const socket = {
           await axios.post(url, body, { headers }) // replaced Vue.http.post with axios.post
         }
       } catch (err) {
-        console.log('error here -->', err)
+        console.error('err SOCKET_chat in frontend/socket.js ===> ', err)
       }
     },
     SOCKET_typing: (state, data) => {
