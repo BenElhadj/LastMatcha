@@ -1,8 +1,7 @@
 <template>
   <q-layout>
     <div>
-      <Loader v-if="f" />
-      <v-layout v-else column class="user_profile">
+      <v-layout  column class="user_profile">
         <div class="parallax" :style="`background-image: url(${coverPhoto});`"></div>
         <v-layout class="py-0 strap grey lighten-3">
           <v-container py-0>
@@ -420,7 +419,7 @@ export default {
             if (res.data.msg) {
               this.$router.push('/404')
             }
-            this.user = { ...res.body, rating: Number(res.data.rating) }
+            this.user = { ...res.data, rating: Number(res.data.rating) }
             const profileImg = this.loggedIn.images.find(cur => cur.profile === 1)
             if (this.online.includes(this.user.id)) {
               this.user.status = true

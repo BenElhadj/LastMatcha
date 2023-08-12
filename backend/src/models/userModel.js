@@ -155,7 +155,6 @@ const updateProfile = (user, callback) => {
 		birthdate = ?,
 		biography = ?, 
 		tags = ?,
-		allTags = ?,
 		\`address\` = ?,
 		city = ?,
 		country = ?,

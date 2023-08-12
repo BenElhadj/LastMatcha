@@ -54,7 +54,7 @@
           <!-- This may require some extra work to integrate -->
         </q-col>
         <q-col cols="12">
-          <q-input v-model="user.biography" :disable="!isEditing" :counter="500" color="primary" label="Bio" type="textarea"/>
+          <q-input v-model="user.biography" :disable="!isEditing" :maxlength="500" color="primary" label="Bio" type="textarea"/>
         </q-col>
         <q-col cols="12" text-xs-right>
           <q-btn :disable="!isEditing" class="mx-0 font-weight-light" color="primary" large label="Enregistrer" @click.prevent="updateUser"/>
@@ -65,60 +65,64 @@
 </template>
 
 <script>
-import { ref, watch, reactive } from 'vue'
+import { mapGetters } from 'vuex'
+import utility from '@/utility.js'
+import { VueTagsInput, createTags } from '@johmun/vue-tags-input'
 
 export default {
   name: 'ProfileForm',
+  components: { VueTagsInput },
+  data () {
+    return {
+      isEditing: false,
+      menu: false,
+      tag: '',
+      tags: [],
+      genders: ['male', 'female'],
+      looking: ['male', 'female', 'both'],
+      tagEsc: [13, ':', ',', ';']
+    }
+  },
+  computed: {
+    ...mapGetters({ tags: 'tags' }),
+    formatedTags (val) {
+      return createTags(this.tags).filter(cur => {
+        const txt = cur.text.toLowerCase()
+        const tag = this.tag.toLowerCase()
+        return txt.length && txt.indexOf(tag) !== -1
+      })
+    }
+  },
   props: {
-    userProp: {
+    user: {
       type: Object,
       default: function () { return {} }
     }
   },
-  emits: ['sync-user', 'update-user'],
-  setup (props, { emit }) {
-    const isEditing = ref(false)
-    const menu = ref(false)
-    const tag = ref('')
-    const tags = ref([])
-    const genders = ref(['male', 'female'])
-    const looking = ref(['male', 'female', 'both'])
-    const tagEsc = ref([13, ':', ',', ';'])
-
-    const user = reactive({ ...props.userProp })
-
-    const syncUser = () => {
-      const list = user.tags ? user.tags.split(',') : []
-      tags.value = list.length ? list : [] // replace with appropriate Quasar function
-      emit('sync-user', user)
-    }
-
-    const updateUser = () => {
-      emit('update-user', user)
-    }
-
-    watch(() => props.userProp, val => {
-      Object.assign(user, val)
-      syncUser()
-    }, { immediate: true })
-
-    watch(tags, (newTags) => {
-      user.tags = newTags
+  watch: {
+    user: {
+      handler: 'syncUser',
+      immediate: true
+    },
+    tags () {
+      this.user.tags = this.tags
         .map(cur => cur.text.toLowerCase())
         .join(',')
-    })
-
-    return {
-      isEditing,
-      menu,
-      tag,
-      tags,
-      genders,
-      looking,
-      tagEsc,
-      user,
-      syncUser,
-      updateUser
+    }
+  },
+  methods: {
+    ...utility,
+    syncUser () {
+      const tags = this.user.tags
+      const list = tags ? tags.split(',') : []
+      this.tags = list ? createTags(list) : []
+      this.$emit('sync-user', this.user)
+    },
+    updateUser () {
+      this.$emit('update-user', this.user)
+    },
+    toggleEdit () {
+      this.isEditing = !this.isEditing
     }
   }
 }
@@ -148,7 +152,6 @@ export default {
   bottom: 0;
   left: 50%;
   transform: translate(-50%, 25%);
-  width: 0;
   height: 1.2px;
   /* background: var(--color-primary); */
   transition: width .2s ease-in-out;

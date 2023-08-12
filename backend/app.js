@@ -19,7 +19,7 @@ app.use(cors())
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 app.use(bodyParser.json({ limit: '50mb', extended: true }))
 
-app.set('views', path.join(__dirname, '/views'));
+app.set('views', path.join(__dirname, '/src/views'));
 app.set('view engine', 'ejs')
 
 app.use(express.static('public'));
@@ -34,8 +34,9 @@ app.use('/api/browse/', require('./src/routes/browsingRoutes'))
 app.use('/api/chat/', require('./src/routes/chatRoutes'))
 app.use('/api/notif/', require('./src/routes/notifRoutes'))
 app.use('/api/matching/', require('./src/routes/matchingRoutes'))
-
-
+app.get('/verified', (req, res) => {
+    res.render('verified');
+});
 app.get('/get_last_user_id', (req, res) => {
     const connection = mysql.createConnection({
         host: process.env.DB_HOST,
@@ -85,9 +86,9 @@ app.get('/allTags', (req, res) => {
 app.get('/api/', (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
 
 
-app.use((req, res, next) => {
-    res.status(404).sendFile(path.resolve(__dirname, '404.html'));
-});
+// app.use((req, res, next) => {
+//     res.status(404).sendFile(path.resolve(__dirname, '404.html'));
+// });
 
 
 const io = socketIo(server, {

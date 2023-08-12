@@ -2,7 +2,7 @@
   <q-layout v-if="loaded" view="hHh LpR lff" class="settings">
     <div class="parallax" :style="`background-image: url(${coverPhoto});`">
     </div>
-  <q-btn class="cover__btn" color="blue" round dense icon="mdi-image" flat @click.stop="pickFile" >
+    <q-btn class="cover__btn" color="blue" round dense icon="mdi-image" flat @click.stop="pickFile" >
       <q-tooltip anchor="bottom middle" self="top middle">
         Change cover photo
       </q-tooltip>
@@ -59,9 +59,9 @@
 
 <script>
 import { ref, computed, watch, onMounted } from 'vue'
+import axios from 'axios'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
 import Alert from '@/views/AlertView.vue'
 import LoaderView from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
@@ -86,13 +86,15 @@ export default {
     ProfileGallery,
     ProfileSettings
   },
-  setup () {
-const store = useStore()
-const { user, allTags, status, online, blocked, userLocation, blockedBy } = store.getters
+  setup (props, { emit }) {
+    const store = useStore()
+    const { user, status, online, blocked, userLocation, blockedBy } = store.getters
     const router = useRouter()
     const profileEditor = ref(null)
-    const coverPhoto = computed(() => store.state.cover)
-    const profileImage = computed(() => store.state.profile)
+    const coverPhoto = computed(() => store.getters.coverPhoto)
+    console.log('coverPhoto ===> ', store.getters.coverPhoto)
+    const profileImage = computed(() => store.getters.profileImage)
+    console.log('profileImage ===> ', store.getters)
     const error = ref(null)
     const formRef = ref(null)
     const loaded = ref(false)
@@ -153,23 +155,51 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
       }
     })
 
-    const updateUser = async () => {
+    // const updateUser = async () => {
+    //   try {
+    //     let msg
+
+    //     const token = localStorage.getItem('token')
+    //     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
+    //     const headers = { 'x-auth-token': token }
+    //     const res = await axios.post(url, user, { headers })
+        
+    //     if (res && res.data && !res.data.msg) {
+    //       msg = 'Your account has been updated successfuly'
+    //       utility.showAlert('green', msg, this)
+    //       store.dispatch('updateUser', user)
+    //       formRef.value.toggleEdit()
+    //     } else {
+    //       msg = res.data.msg ? res.data.msg : 'Ouups something went wrong!'
+    //       utility.showAlert('red', msg, this)
+    //     }
+    //   } catch (err) {
+    //     console.error('err updateUser in frontend/SettingsView.vue ===> ', err)
+    //   }
+    // }
+     const updateUser = async () => {
       try {
-        let msg
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
-        const headers = { 'x-auth-token': user.token }
-        const res = await axios.post(url, user, { headers })
-        if (res && res.data && !res.data.msg) {
-          msg = 'Your account has been updated successfuly'
-          utility.showAlert('green', msg, this)
-          store.dispatch('updateUser', user)
-          formRef.value.toggleEdit()
+        const token = localStorage.getItem('token')
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`;
+        const headers = { 'x-auth-token': token };
+        const response = await axios.post(url, user, { headers });
+
+        if (response.data && !response.data.msg) {
+          const msg = 'Your account has been updated successfully';
+          showAlert('green', msg);
+          store.commit('updateUser', user); // assuming you have an updateUser mutation
+          formRef.value.toggleEdit();
         } else {
-          msg = res.data.msg ? res.data.msg : 'Ouups something went wrong!'
-          utility.showAlert('red', msg, this)
+          const msg = response.data.msg ? response.data.msg : 'Oops, something went wrong!';
+          utility.showAlert('red', msg);
+          alert = {
+            state: true,
+            color: 'error',
+            text: msg
+          }
         }
       } catch (err) {
-        console.error('err updateUser in frontend/SettingsView.vue ===> ', err)
+        console.error('Error updating user:', err);
       }
     }
 
@@ -235,16 +265,16 @@ const { user, allTags, status, online, blocked, userLocation, blockedBy } = stor
             const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
             const headers = { 'x-auth-token': user.token }
             const res = await axios.post(url, fd, { headers })
-            if (res && res.body && !res.body.msg) {
+            if (res && res.data && !res.data.msg) {
               msg = 'You cover image has been updated successfully'
               alert.value = {
                 state: true,
                 color: 'success',
                 text: msg
               }
-              store.commit('updateCoverImage', res.body)
+              store.commit('updateCoverImage', res.data)
             } else {
-              msg = res.body.msg ? res.body.msg : 'Oops something went wrong!'
+              msg = res.data.msg ? res.data.msg : 'Oops something went wrong!'
               alert.value = {
                 state: true,
                 color: 'red',

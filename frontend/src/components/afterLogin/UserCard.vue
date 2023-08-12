@@ -1,21 +1,27 @@
 <template>
   <q-card :to="`/user/${user.user_id}`">
-    <div column justify-center align-center class="pt-1">
-      <div class="row top pa-2" justify-space-between>
+    <div  class="pt-1 column justify-center align-center">
+
+      <div class="row justify-between q-ma-sm">
         <q-chip outline small text-color="grey-7">{{ distance }}</q-chip>
-        <q-tooltip bottom class="status_container">
-          <template v-slot:activator="{ on }">
-            <q-icon :color="`${user.status ? 'green' : 'grey'} lighten-2`" class="status_icon mr-3" small v-on="on">mdi-circle</q-icon>
-          </template>
-          <span>{{ lastSeen }}</span>
-        </q-tooltip>
+        <q-item-section side>
+          <q-tooltip bottom class="status_container">
+            <span>{{ lastSeen }}</span>
+          </q-tooltip>
+          <q-badge small rounded :color="user.status ? 'green' : 'grey'" />
+        </q-item-section>
       </div>
 
-      <q-avatar size="120">
+
+
+
+      <q-avatar lass="justify-center" size="120px">
         <img :src="profileImage(user.name)" aspect-ratio="1"/>
       </q-avatar>
+      {{props.user.status }}
 
-      <h5 class="name headline text-capitalize mt-2 mb-4">{{ user.first_name }}</h5>
+      <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
+      <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
       <div align-start justify-center>
         <p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
           <!-- <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :value="user.rating" half-increments class="rating"/> -->
@@ -36,6 +42,56 @@
   </q-card>
 </template>
 
+<script setup>
+import { ref, computed } from 'vue'
+import { useStore } from 'vuex'
+import moment from 'moment'
+import utility from '@/utility'
+
+// export default defineComponent({
+//   name: 'UserCard',
+// })
+
+// Props
+const props = defineProps({
+  user: {
+    type: Object,
+    default: () => ({})
+  }
+})
+
+
+// Store
+const store = useStore()
+
+// Computed
+const location = computed(() => store.getters.location)
+
+
+const age = computed(() => {
+  return new Date().getFullYear() - new Date(props.user.birthdate).getFullYear()
+})
+
+const distance = computed(() => {
+  const to = {
+    lat: props.user.lat,
+    lng: props.user.lng
+  }
+  return `${Math.round(utility.calculateDistance(location.value, to))} kms away`
+})
+
+const lastSeen = computed(() => {
+  if (props.user.status) return 'online'
+  if (props.user.lastSeen) return moment(props.user.lastSeen).utc().fromNow()
+  return moment(props.user.created_at).utc().fromNow()
+})
+
+// Methods
+const profileImage = (image) => {
+  return utility.getFullPath(image)
+}
+</script>
+<!-- 
 <script>
 import moment from 'moment'
 import { mapGetters } from 'vuex'
@@ -86,7 +142,7 @@ export default {
   //   }
   // }
 }
-</script>
+</script> -->
 
 <style>
 .name {

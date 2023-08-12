@@ -11,7 +11,6 @@ export const user = {
     visited: [],
     notif: [],
     tags: [],
-    allTags: [],
     followers: [],
     following: [],
     blocked: [],
@@ -26,7 +25,6 @@ export const user = {
       state.user.email = email
     },
     updateTags: (state, tags) => (state.user.tags = tags.map(cur => cur.text.toLowerCase()).join(',')),
-    updateAllTags: (state, allTags) => (state.user.allTags = allTags),
 
     updateUser: (state, user) => (state.user = user),
     updateProfileImage: (state, data) => {
@@ -62,9 +60,6 @@ export const user = {
     },
     getTags: (state, tags) => {
       state.tags = tags
-    },
-    setAllTags: (state, allTags) => {
-      state.allTags = allTags
     },
     seenNotif: state => {
       state.notif = state.notif.map(cur => {
@@ -133,7 +128,7 @@ export const user = {
           profile_image: cur.profile_image
         })
         const res = await utility.sync('matching/getmatches')
-        if (Array.isArray(res.body)) {
+        if (Array.isArray(res.data)) {
           following = res.data.filter(cur => cur.matched_id).map(merge)
           followers = res.data.filter(cur => cur.matcher_id).map(merge)
         }
@@ -147,9 +142,9 @@ export const user = {
         let blocked = []
         let blockedBy = []
         const res = await utility.sync('users/getblocked')
-        if (Array.isArray(res.body)) {
-          blocked = res.body.filter(cur => cur.blocker === id).map(cur => cur.blocked)
-          blockedBy = res.body.filter(cur => cur.blocked === id).map(cur => cur.blocker)
+        if (Array.isArray(res.data)) {
+          blocked = res.data.filter(cur => cur.blocker === id).map(cur => cur.blocked)
+          blockedBy = res.data.filter(cur => cur.blocked === id).map(cur => cur.blocker)
         }
         commit('syncBlocked', { blocked, blockedBy })
         if (blocked.length) dispatch('syncBlacklist', blocked)
@@ -166,7 +161,7 @@ export const user = {
       })
       try {
         const res = await utility.sync('browse/history')
-        let responseBody = res.body
+        let responseBody = res.data
         if (!responseBody) {
           responseBody = []
         } else if (!Array.isArray(responseBody)) {
@@ -186,14 +181,6 @@ export const user = {
         commit('getTags', tags.body)
       } catch (err) {
         console.error('err getTags in frontend/user.js ===> ', err)
-      }
-    },
-    getAllTags: async ({ commit }) => {
-      try {
-        const allTags = await utility.getAllTags()
-        commit('setAllTags', allTags)
-      } catch (err) {
-        console.error('err getAllTags in frontend/user.js ===> ', err)
       }
     },
     getNotif: async ({ commit }) => {

@@ -1,35 +1,71 @@
 <template>
-  <q-layout :align="center" class="q-py-sm">
-    <q-col cols="12" sm="11" md="9" offset-lg="3" offset-xl="4" offset-md="2" offset-sm="1" class="badge text-capitalize">
-      <h2 class="font-weight-thin mb-2">
-        <div class="text-truncate full_name pr-3 d-inline">
-          {{ `${user.first_name} ${user.last_name}` }}
-        </div>
-        <q-tooltip v-if="!settings && like" anchor="bottom middle">
-          <template #activator>
-            <span viewBox="0 0 407.585 407.585" class="match_icon">
-              <q-icon color="red" :name="!match ? 'favorite_border' : 'favorite'"></q-icon>
+  <q-layout class="justify-center q-py-none">
+    <div class="col-xs-12 col-sm-11 col-md-9 offset-lg-3 offset-xl-4 offset-md-2 offset-sm-1 badge text-capitalize">
+      <h2 class="q-mb-md">
+        <div class="text-truncate full_name q-pr-md inline-block">{{ `${user.first_name} ${user.last_name}` }}</div>
+        <q-tooltip v-if="!settings && like" anchor="bottom middle" self="top middle">
+          <template v-slot:activator="{on}">
+            <span x="0px" y="0px" viewBox="0 0 407.585 407.585" v-on="on" class="match_icon">
+              <q-icon :name="match ? 'mdi-heart-multiple' : 'mdi-heart-multiple-outline'" color="red"></q-icon>
             </span>
           </template>
-          <span>{{ match ? 'You have a match' : 'This user likes you' }}</span>
+          <span>{{ match ? 'Avez-vous un match' : 'Cet utilisateur vous aime' }}</span>
         </q-tooltip>
       </h2>
-      <h4 class="font-weight-thin mb-3">
-        {{ `@${user.username}` }}
-      </h4>
-      <div v-for="field in fields" :key="field.icon" class="font-weight-light text-truncate">
-        <p v-if="field.exist" class="my-2">
-        <div>
-    <q-icon v-if="field.icon" :name="field.icon" small />
-    <span class="ml-2">{{ field.text }}</span>
-  </div>
+      <h4 class="q-mb-md">{{ `@${user.username}` }}</h4>
+      <div class="font-weight-light text-truncate" v-for="field in fields" :key="field.icon">
+        <p class="my-2" v-if="field.exist">
+          <q-icon :name="field.icon" size="sm"></q-icon>
+          <span class="q-ml-md">{{ field.text }}</span>
         </p>
       </div>
-    </q-col>
+    </div>
   </q-layout>
 </template>
 
-<script>
+<script setup>
+import moment from 'moment'
+import utility from '@/utility.js'
+import { ref, computed, toRefs } from 'vue'
+
+// Props
+const props = defineProps({
+  match: { type: Boolean, default: false },
+  like: { type: Boolean, default: false },
+  settings: { type: Boolean, default: false },
+  user: { type: Object, default: () => ({ }) }
+})
+
+// Destructure les propriétés pour un accès plus facile
+const { user } = toRefs(props)
+
+// Calculé
+const fields = computed(() => {
+  return [
+    {
+      exist: true,
+      icon: 'mdi-calendar',
+      text: `Joined ${moment(user.value.created_at).format('MMMM YYYY')}`
+    }, {
+      exist: !!user.value.birthdate,
+      icon: 'mdi-cake-variant',
+      text: `Born ${moment(user.value.birthdate).format('MMMM D, YYYY')}`
+    }, {
+      exist: !!user.value.city && !!user.value.country,
+      icon: 'mdi-map-marker',
+      text: `${user.value.city}, ${user.value.country}`
+    }
+  ]
+})
+
+// Méthodes
+const { someMethod, anotherMethod } = utility
+
+</script>
+
+
+
+<!-- <script>
 import moment from 'moment'
 import utility from '@/utility.js'
 import { toRefs, reactive } from 'vue'
@@ -67,7 +103,7 @@ export default {
     }
   }
 }
-</script>
+</script> -->
 
 <style scoped>
 

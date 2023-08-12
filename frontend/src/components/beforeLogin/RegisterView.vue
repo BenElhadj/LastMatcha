@@ -10,7 +10,7 @@
           <q-input v-model="email" color="primary" class="my-3" :rules="rules.email" label="E-mail" required></q-input>
           <q-input v-model="password" color="primary" class="my-3" :rules="rules.password" label="Password" :type="showPass ? 'text' : 'password'" @keyup.enter="registerUser"></q-input>
           <q-input v-model="passwordConfirm" color="primary" class="my-3" label="Confirm Password" :type="showConfPass ? 'text' : 'password'" @keyup.enter="registerUser" :error-messages="passwordMatch"></q-input>
-          <q-btn block large color="primary" @click="registerUser" :disabled="!valid" class="my-5">Submit</q-btn>
+          <q-btn block large color="primary" @click="registerUser"  class="my-5">Submit</q-btn>
           <div class="row justify-end">
             <q-btn flat label="Have an account? Login" color="primary" to="/login"></q-btn>
           </div>
@@ -51,7 +51,7 @@ export default {
       name: [
         v => !!v || 'This field is required',
         // eslint-disable-next-line
-        v => !(/[^a-zA-Z\-]+/.test(v)) || 'Le nom doit contenir des lettres uniquement',
+        v => !(/[^a-zA-Z\- ]+/.test(v)) || 'Le nom doit contenir des lettres uniquement',
         v => (v.length >= 3 && v.length <= 255) || 'Le nom doit contenir entre 3 et 255 caractères'
       ],
       username: [
@@ -83,6 +83,7 @@ export default {
           password: this.password
         }
         const res = await axios.post(url, data)
+        console.log(res)
         if (res.data.ok) {
           this.showAlert('green', res.data.status, this)
         } else {

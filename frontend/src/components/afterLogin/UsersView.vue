@@ -160,7 +160,7 @@ export default {
 }
 
 .complete::-webkit-scrollbar {
-  width: .45em;
+  width: 45em;
 }
 
 .home_clear_btn {

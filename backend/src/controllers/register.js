@@ -49,7 +49,9 @@ const register = async (req, res) => {
 				userModel.addUser(user, (result) => {
 					if (result.affectedRows) {
 						mailer.sendMail(user.email, user.vkey, 'users/verify')
+						
 						return res.json({ ok: true, status: 'You have been successfully registered, please verify your email' })
+
 					}
 				})
 			}

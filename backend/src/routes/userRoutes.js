@@ -37,4 +37,5 @@ routes.post('/image', [authCheck, upload.single('image')], userProfile.uploadIma
 routes.post('/image/cover', [authCheck, upload.single('image')], userProfile.uploadCover)
 routes.post('/image/del', authCheck, userProfile.deleteImage)
 
+
 module.exports = routes

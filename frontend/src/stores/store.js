@@ -4,15 +4,16 @@ import { user } from './user'
 import { chat } from './chat'
 import { socket } from './socket'
 import { getters } from './getter'
+import { allTags } from './allTags';
 
 export const store = createStore({
   state: {
+    allTags: allTags.state,
     user: user.state,
     auth: auth.state,
     chat: chat.state,
     socket: socket.state,
     tags: [],
-    allTags: [],
     notif: [],
     convos: [],
     online: [],
@@ -37,12 +38,14 @@ export const store = createStore({
   actions: {
     ...auth.actions,
     ...user.actions,
-    ...chat.actions
+    ...chat.actions,
+    ...allTags.actions,
   },
   mutations: {
     ...auth.mutations,
     ...user.mutations,
     ...chat.mutations,
-    ...socket.mutations
+    ...socket.mutations,
+    ...allTags.mutations,
   }
 })

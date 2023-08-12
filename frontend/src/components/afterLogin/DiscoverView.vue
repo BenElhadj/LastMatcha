@@ -3,6 +3,7 @@
     <div v-if="isComplete" class="discover">
       <q-page-container v-if="loaded" class="pt-5 px-0">
         <q-layout class="row wrap justify-center">
+        
           
           <div class="col-2">
             <q-page-container class="px-5">
@@ -90,8 +91,15 @@ import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 
 const store = useStore()
 const { user, allTags, status, online, blocked, blockedBy } = store.getters
-
 const userLocation = store.state.location
+
+console.log('=== store.state ===> ', store.state)
+console.log('=== store.getters ===> ', store.getters)
+console.log('=== store.allTags ===> ', store.allTags)
+console.log('=== allTags ===> ', allTags)
+console.log('=== store ===> ', store)
+// console.log('=== user === ', user )
+
 
 const model = ref(null)
 const max = ref(0)
@@ -108,7 +116,8 @@ const age = ref({min: 18, max: 85})
 const rating = ref({min: 0, max: 5})
 const distance = ref({min: 0, max: 0})
 const maxDis = ref(null)
-const alltags = ref([])
+// const allTags = computed(() => store.allTags)
+// const allTags = ref(() => store.allTags)
 const sortTypes = ['age', 'distance', 'rating', 'interests']
 const nats = ref(countries)
 
@@ -192,7 +201,6 @@ const calculateMaxDistance = () => {
 watch(users, () => {
   calculateMaxDistance()
 }, { immediate: true })
-
 
 watch(user, (newUser, oldUser) => {
   if (newUser.looking && newUser.looking === 'both') {

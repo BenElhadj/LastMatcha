@@ -54,11 +54,9 @@
 </template>
 
 <script>
-
-import { ref, watch, computed, onMounted, reactive } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
-import utility from '@/utility'
 import countries from '@/nats.json'
 import LoaderView from '@/views/LoaderView.vue'
 import UserCard from '@/components/afterLogin/UserCard.vue'
@@ -71,15 +69,9 @@ export default {
     UserCard,
     LoaderView
   },
-  props: {
-    data: {
-      type: Object,
-      default: () => ({ })
-    }
-  },
-  setup(props) {
-
+  setup() {
     const store = useStore()
+
     const online = ref(false)
     const max = ref(0)
     const step = ref(0)

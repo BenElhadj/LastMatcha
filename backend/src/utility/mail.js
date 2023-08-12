@@ -12,9 +12,9 @@ const sendMail = async (to, key, type) => {
 		const raw = await readFileAsync(path, 'utf8')
 		const data = {
 			title: type == 'users/verify' ? 'Vérifier email' : 'Réinitialiser mot de passe',
-			body: `Veuillez cliquer sur ce lien pour ${type == 'users/verify' ? 'Vérifier votre compte' : 'Réinitialiser votre mot de passe'}`,
+			body: `Merci pour votre inscription.<br>Il vous reste une dernière étape avent de trouver l'amour de votre vie ! <br>Veuillez cliquer sur ce lien pour ${type == 'users/verify' ? 'Vérifier votre compte' : 'Réinitialiser votre mot de passe'}`,
 			action: type == 'users/verify' ? 'Vérifier' : 'Réinitialiser',
-			url: `${process.env.API_URL}api/${type}/${key}`
+			url: `${process.env.API_URL}/api/${type}/${key}`
 		}
 		const html = ejs.render(raw, data)
 		let transporter = nodemailer.createTransport({

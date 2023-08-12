@@ -24,6 +24,7 @@ export const auth = {
     login (state, user) {
       state.status = true
       state.user = user
+     
     },
     logout (state) {
       state.status = false

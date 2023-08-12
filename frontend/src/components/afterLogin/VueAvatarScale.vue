@@ -385,8 +385,9 @@ export default {
 </script>
 
 <style>
+@use 'sass:math';
 .editor {
-  border-radius: 50%;
+  border-radius: math.div($borderRadius, 2);
   overflow: hidden;
   display: flex;
   align-items: center;

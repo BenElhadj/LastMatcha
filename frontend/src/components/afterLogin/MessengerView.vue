@@ -114,7 +114,7 @@ export default {
 }
 
 .top_chat::-webkit-scrollbar {
-  width: .45em;
+  width: 45em;
 }
 
 .top_chat::-webkit-scrollbar-track {
