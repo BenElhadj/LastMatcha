@@ -340,17 +340,17 @@ a{
   margin: 0;
 }
 
-.v-input__icon.v-input__icon--append > .v-icon {
+.v-input__icon.v-input__icon--append > .q-icon {
   color: var(--color-primary);
 }
 
 .v-select-list.v-card.theme--light > .v-list,
-.theme--light.v-btn-toggle,
+.theme--light.q-btn-toggle,
 .v-menu__content.menuable__content__active.v-autocomplete__content > .v-select-list > .v-list {
   /* background-color: #FAFAFA; */
 }
 
-.v-btn-toggle {
+.q-btn-toggle {
   display: flex;
 }
 
@@ -364,7 +364,7 @@ a{
   align-self: flex-end;
 }
 
-.v-btn-toggle--selected {
+.q-btn-toggle--selected {
   box-shadow: none;
 }
 

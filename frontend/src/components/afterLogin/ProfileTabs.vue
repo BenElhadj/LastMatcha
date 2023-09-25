@@ -79,7 +79,7 @@ const isDesktop = computed(() => !store.state.mobile)
 }
 
 .q-tabs__item--active,
-.q-tabs__item--active > .v-icon {
+.q-tabs__item--active > .q-icon {
   color: grey !important;
 }
 </style>

@@ -1,121 +1,121 @@
 <template>
   <q-layout>
     <div>
-      <v-layout  column class="user_profile">
+      <q-layout  column class="user_profile">
         <div class="parallax" :style="`background-image: url(${coverPhoto});`"></div>
-        <v-layout class="py-0 strap grey lighten-3">
-          <v-container py-0>
-            <v-layout>
-              <v-flex xs12 sm8 md4 class="avatar">
-                <v-avatar class="mx-auto d-block" size="200">
+        <q-layout class="py-0 strap grey lighten-3">
+          <q-page-container py-0>
+            <q-layout>
+              <q-flex xs12 sm8 md4 class="avatar">
+                <q-avatar class="mx-auto d-block" size="200">
                   <template #offset>
                     <img :src="profileImage" class="avatar__img">
                   </template>
-                </v-avatar>
-              </v-flex>
+                </q-avatar>
+              </q-flex>
               <profile-tabs :active="activeTab" @change-tab="changeTab"></profile-tabs>
-              <v-tooltip bottom>
+              <q-tooltip bottom>
                 <template #activator="{ on }">
-                  <v-icon :color="`${isOnline ? 'green' : 'grey'} lighten-2`" class="profile-status_icon mx-3 hidden-xs-only" medium v-on="on">
+                  <q-icon :color="`${isOnline ? 'green' : 'grey'} lighten-2`" class="profile-status_icon mx-3 hidden-xs-only" medium v-on="on">
                     mdi-circle
-                  </v-icon>
+                  </q-icon>
                 </template>
                 <span>{{ lastSeen }}</span>
-              </v-tooltip>
-              <v-chip disabled outlined small color="grey lighten-1" class="mt-3 ml-2 hidden-xs-only">
+              </q-tooltip>
+              <q-chip disabled outlined small color="grey lighten-1" class="mt-3 ml-2 hidden-xs-only">
                 {{ distance }}
-              </v-chip>
-              <v-btn icon text large color="primary" :disabled="userCantLike" class="hidden-xs-only" @click="match">
-                <v-icon>{{ liked ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
-              </v-btn>
-              <v-btn icon text large color="primary" :disabled="!userCanChat" class="hidden-xs-only mx-0" @click="goToChat">
-                <v-icon>{{ userCanChat ? 'mdi-chat' : 'mdi-chat-outline' }}</v-icon>
-              </v-btn>
+              </q-chip>
+              <q-btn icon text large color="primary" :disabled="userCantLike" class="hidden-xs-only" @click="match">
+                <q-icon>{{ liked ? 'mdi-heart' : 'mdi-heart-outline' }}</q-icon>
+              </q-btn>
+              <q-btn icon text large color="primary" :disabled="!userCanChat" class="hidden-xs-only mx-0" @click="goToChat">
+                <q-icon>{{ userCanChat ? 'mdi-chat' : 'mdi-chat-outline' }}</q-icon>
+              </q-btn>
               <v-speed-dial v-model="fab" direction="bottom" transition="slide-y-reverse-transition" class="speed_list">
                 <template #activator>
-                  <v-btn v-model="fab" icon text small large color="primary">
-                    <v-icon>mdi-dots-vertical</v-icon>
-                  </v-btn>
+                  <q-btn v-model="fab" icon text small large color="primary">
+                    <q-icon>mdi-dots-vertical</q-icon>
+                  </q-btn>
                 </template>
-                <v-tooltip left>
+                <q-tooltip left>
                   <template #activator="{ on }">
-                    <v-btn fab dark small color="primary darken-2" @click="reportDialog = true" v-on="on">
-                      <v-icon>mdi-alert-octagon</v-icon>
-                    </v-btn>
+                    <q-btn fab dark small color="primary darken-2" @click="reportDialog = true" v-on="on">
+                      <q-icon>mdi-alert-octagon</q-icon>
+                    </q-btn>
                   </template>
                   <span>Report</span>
-                </v-tooltip>
-                <v-tooltip left>
+                </q-tooltip>
+                <q-tooltip left>
                   <template #activator="{ on }">
-                    <v-btn fab dark small color="primary darken-2" @click="blockDialog = true" v-on="on">
-                      <v-icon>mdi-cancel</v-icon>
-                    </v-btn>
+                    <q-btn fab dark small color="primary darken-2" @click="blockDialog = true" v-on="on">
+                      <q-icon>mdi-cancel</q-icon>
+                    </q-btn>
                   </template>
                   <span>Block</span>
-                </v-tooltip>
+                </q-tooltip>
               </v-speed-dial>
-            </v-layout>
-          </v-container>
-        </v-layout>
-        <v-container fill-height grid-list-xl class="profile">
-          <v-layout justify-center wrap>
-            <v-flex xs12 sm8 md4>
+            </q-layout>
+          </q-page-container>
+        </q-layout>
+        <q-page-container fill-height grid-list-xl class="profile">
+          <q-layout justify-center wrap>
+            <q-flex xs12 sm8 md4>
               <profile-badge :user="user" :like="likedBy" :match="userCanChat"></profile-badge>
-            </v-flex>
-            <v-flex xs12 sm10 md8 class="pa-0 grey--text main">
-              <v-tabs-items v-model="activeTab">
-                <v-tab-item value="tab-profile">
-                  <v-container>
+            </q-flex>
+            <q-flex xs12 sm10 md8 class="pa-0 grey--text main">
+              <q-tab v-model="activeTab">
+                <q-tab value="tab-profile">
+                  <q-page-container>
                     <div v-if="user.biography">
                       <h1 class="py-3 mb-4">
                         A propos
                       </h1>
-                      <v-container class="infos subheading py-2">
+                      <q-page-container class="infos subheading py-2">
                         {{ user.biography }}
-                      </v-container>
+                      </q-page-container>
                     </div>
                     <h1 class="py-3 mb-4">
                       Informations
                     </h1>
-                    <v-layout column class="title text-capitalize infos">
+                    <q-layout column class="title text-capitalize infos">
                       <div v-for="item in informations" :key="item.label">
-                        <v-container v-if="item.content" py-3>
-                          <v-layout>
-                            <v-flex xs6>
+                        <q-page-container v-if="item.content" py-3>
+                          <q-layout>
+                            <q-flex xs6>
                               {{ `${item.label}:` }}
-                            </v-flex>
-                            <v-flex xs6 class="infos">
+                            </q-flex>
+                            <q-flex xs6 class="infos">
                               {{ item.content }}
-                            </v-flex>
-                          </v-layout>
-                        </v-container>
+                            </q-flex>
+                          </q-layout>
+                        </q-page-container>
                       </div>
-                      <v-container v-if="!!userTags.length" py-3 px-2>
+                      <q-page-container v-if="!!userTags.length" py-3 px-2>
                         <h1 class="py-3 mb-4">
                           Interêts
                         </h1>
-                        <v-chip v-for="(tag, i) in userTags" :key="i" color="primary" class="user_tags" dark label>
+                        <q-chip v-for="(tag, i) in userTags" :key="i" color="primary" class="user_tags" dark label>
                           {{ tag }}
-                        </v-chip>
-                      </v-container>
-                    </v-layout>
-                  </v-container>
-                </v-tab-item>
-                <v-tab-item value="tab-photo">
+                        </q-chip>
+                      </q-page-container>
+                    </q-layout>
+                  </q-page-container>
+                </q-tab>
+                <q-tab value="tab-photo">
                   <profile-gallery :images="filteredImages"></profile-gallery>
-                </v-tab-item>
-              </v-tabs-items>
-            </v-flex>
-          </v-layout>
-        </v-container>
-      </v-layout>
+                </q-tab>
+              </q-tab>
+            </q-flex>
+          </q-layout>
+        </q-page-container>
+      </q-layout>
       <v-dialog v-model="reportDialog" max-width="600px">
         <v-card class="pa-2">
           <v-card-title>
             <span class="headline">Signaler comme faux</span>
           </v-card-title>
           <v-card-text>
-            <v-container>
+            <q-page-container>
               <p class="subheading d-inline">
                 Êtes-vous sûr de vouloir signaler
               </p>
@@ -125,16 +125,16 @@
               <p class="subheading d-inline">
                 comme faux ?
               </p>
-            </v-container>
+            </q-page-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="reportDialog = false">
+            <q-btn color="primary" text @click="reportDialog = false">
               Fermer
-            </v-btn>
-            <v-btn color="primary" text @click="reportUser">
+            </q-btn>
+            <q-btn color="primary" text @click="reportUser">
               Signaler
-            </v-btn>
+            </q-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -144,7 +144,7 @@
             <span class="headline">Bloquer</span>
           </v-card-title>
           <v-card-text>
-            <v-container>
+            <q-page-container>
               <p class="subheading d-inline">
                 Êtes-vous sûr de vouloir bloquer
               </p>
@@ -154,16 +154,16 @@
               <p class="subheading d-inline">
                 ?
               </p>
-            </v-container>
+            </q-page-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="blockDialog = false">
+            <q-btn color="primary" text @click="blockDialog = false">
               Fermer
-            </v-btn>
-            <v-btn color="primary" text @click="block">
+            </q-btn>
+            <q-btn color="primary" text @click="block">
               Bloquer
-            </v-btn>
+            </q-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

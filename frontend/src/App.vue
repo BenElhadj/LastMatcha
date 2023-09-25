@@ -164,8 +164,8 @@ footer {
   left: 85%;
 }
 
-.v-btn--floating:not(.v-btn--depressed):not(.v-btn--flat),
-.v-btn--floating:not(.v-btn--depressed):not(.v-btn--flat):focus {
+.q-btn--floating:not(.q-btn--depressed):not(.q-btn--flat),
+.q-btn--floating:not(.q-btn--depressed):not(.q-btn--flat):focus {
   box-shadow: 0 0 3px rgba(0, 0, 0, .2) inset;
 }
 
@@ -232,7 +232,7 @@ footer {
   .title {
     font-size: 16px !important;
   }
-  .v-chip__content {
+  .q-chip__content {
     transform: scale(.9);
   }
   .chat_container {
@@ -287,7 +287,7 @@ footer {
   .title {
     font-size: 12px !important;
   }
-  .v-chip__content {
+  .q-chip__content {
     transform: scale(.8);
   }
   .chat_container {

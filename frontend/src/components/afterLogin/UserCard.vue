@@ -8,17 +8,19 @@
           <q-tooltip bottom class="status_container">
             <span>{{ lastSeen }}</span>
           </q-tooltip>
-          <q-badge small rounded :color="user.status ? 'green' : 'grey'" />
+          <q-badge small rounded :color="lastSeen == 'online' ? 'green' : 'grey'" />
         </q-item-section>
       </div>
 
 
 
 
-      <q-avatar lass="justify-center" size="120px">
+      <q-avatar class="justify-center" size="120px">
         <img :src="profileImage(user.name)" aspect-ratio="1"/>
       </q-avatar>
-      {{props.user.status }}
+      
+      {{ props.user.status }}
+      {{ online }}
 
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
