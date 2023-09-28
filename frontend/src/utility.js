@@ -184,8 +184,8 @@ export default {
   filterBlocked: (state, type) => {
     return state[type].filter(cur => !isBlocked(state, cur[getId(type)]))
   },
+  
   showAlert (color, text) {
-
     alert.value = {
       state: true,
       color,

@@ -6,7 +6,7 @@ import { io } from 'socket.io-client'
 export const socket = {
   state: {
     isConnected: false,
-    typingSec: { status: false, convos: [] },
+    typingSec: { status: [], convos: [] },
     seenConvo: false,
     convos: [],
     notif: [],
@@ -71,7 +71,7 @@ export const socket = {
     SOCKET_typing: (state, data) => {
       if (!state.typingSec.convos.some(cur => cur.id_conversation === data.id_conversation)) {
         state.typingSec.convos.push(data)
-        state.typingSec.status = !!state.typingSec.convos.length
+        state.typingSec.status = !state.typingSec.convos.length
       }
     },
     SOCKET_seenConvo: (state, convo) => {
@@ -141,7 +141,7 @@ export const socket = {
     },
     SOCKET_out: (state, online) => {
       if (!online.find(cur => cur === state.user.id)) {
-        state.status = false
+        state.status = []
         state.user = {}
         state.isConnected = false
         state.typing = false

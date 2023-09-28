@@ -33,6 +33,7 @@ const login = async (req, res) => {
 				const decoded = await bcrypt.compare(password, user.password)
 				if (!decoded)
 					return res.json({ msg: 'Wrong password' })
+				await userModel.updateStatus(user.id, null);
 				delete user.password
 				delete user.verified
 				delete user.tokenExpiration
@@ -53,9 +54,13 @@ const login = async (req, res) => {
 
 // Logout 
 
-const logout = (req, res) => {
+const logout = async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
+	
+	const currentDateTime = new Date()
+	await userModel.updateStatus(req.user.id, currentDateTime)
+
 	res.json({ ok: true })
 }
 

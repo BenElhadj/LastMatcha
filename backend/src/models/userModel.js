@@ -324,6 +324,12 @@ const blacklist = (blacklist ,placehoder) => {
 	let request = `SELECT id, username, first_name, last_name FROM users WHERE id IN ${placehoder}`
 	return db.query(request, blacklist)
 }
+
+const updateStatus = (id, status) => {
+	let request = `UPDATE users SET status = ? WHERE id = ?`
+	return db.query(request, [status, id])
+}
+  
 module.exports = {
 	addUser,
 	getUser,
@@ -357,5 +363,6 @@ module.exports = {
 	unblockUser,
 	reportUser,
 	updateLocation,
+	updateStatus,
 	blacklist
 }

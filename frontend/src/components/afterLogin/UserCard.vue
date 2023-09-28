@@ -18,13 +18,9 @@
       <q-avatar class="justify-center" size="120px">
         <img :src="profileImage(user.name)" aspect-ratio="1"/>
       </q-avatar>
-      
-      {{ props.user.status }}
-      {{ online }}
-
-      <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
+         <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
-      <div align-start justify-center>
+      <div class="note">
         <p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
           <!-- <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :value="user.rating" half-increments class="rating"/> -->
           <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :modelValue="user.rating" half-increments class="rating"/>
@@ -37,7 +33,7 @@
         <span v-if="user.birthdate" class="pr-1">{{ age }}</span>
         <q-icon color="primary" size="xs" name="mdi-map-marker"></q-icon>
 
-        <span v-if="user.city && user.country" class="text-truncate">{{ `${user.city}, ${user.country}` }}</span>
+        <span v-if="user.city && user.country" class="text-truncate">{{ `${user.city},  ${user.country}` }}</span>
         <span v-else class="text-truncate">Earth</span>
       </div>
     </div>
@@ -50,11 +46,6 @@ import { useStore } from 'vuex'
 import moment from 'moment'
 import utility from '@/utility'
 
-// export default defineComponent({
-//   name: 'UserCard',
-// })
-
-// Props
 const props = defineProps({
   user: {
     type: Object,
@@ -62,13 +53,11 @@ const props = defineProps({
   }
 })
 
-
 // Store
 const store = useStore()
 
 // Computed
 const location = computed(() => store.getters.location)
-
 
 const age = computed(() => {
   return new Date().getFullYear() - new Date(props.user.birthdate).getFullYear()
@@ -83,7 +72,8 @@ const distance = computed(() => {
 })
 
 const lastSeen = computed(() => {
-  if (props.user.status) return 'online'
+  console.log(props.user)
+  if (props.user.status == null) return 'online'
   if (props.user.lastSeen) return moment(props.user.lastSeen).utc().fromNow()
   return moment(props.user.created_at).utc().fromNow()
 })
@@ -93,60 +83,14 @@ const profileImage = (image) => {
   return utility.getFullPath(image)
 }
 </script>
-<!-- 
-<script>
-import moment from 'moment'
-import { mapGetters } from 'vuex'
-import utility from '@/utility.js'
-
-export default {
-  name: 'UserCard',
-  props: {
-    user: {
-      type: Object,
-      default: () => { return {} }
-    }
-  },
-  computed: {
-    ...mapGetters(['location']),
-    age () {
-      return new Date().getFullYear() - new Date(this.user.birthdate).getFullYear()
-    },
-    distance () {
-      const from = this.location
-      const to = {
-        lat: this.user.lat,
-        lng: this.user.lng
-      }
-      return `${Math.round(this.calculateDistance(from, to))} kms away`
-    },
-    lastSeen () {
-      if (this.user.status) return 'online'
-      if (this.user.lastSeen) return moment(this.user.lastSeen).utc().fromNow()
-      return moment(this.user.created_at).utc().fromNow()
-    }
-  },
-  methods: {
-    ...utility,
-    profileImage (image) {
-      return this.getFullPath(image)
-    }
-  },
-  // setup () {
-  //   const model3 = ref(4.5)
-
-  //   return {
-  //     model3,
-
-  //     resetModels () {
-  //       model3.value = 4.5
-  //     }
-  //   }
-  // }
-}
-</script> -->
 
 <style>
+.note {
+  display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: center;
+}
 .name {
   color: #828282;
   position: relative;
@@ -170,6 +114,18 @@ export default {
   box-shadow: none;
   border: 1px solid rgba(0, 0, 0, .1) !important;
   transition: all .3s ease-out;
+  padding-bottom: 23px;
+}
+.q-avatar {
+  margin: 0 auto;
+  border: 1px solid rgba(0, 0, 0, .1);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .1);
+  transition: all .3s ease-out;
+}
+.align-center {
+  text-align: center;
+  gap: 10px;
+  
 }
 
 .q-card:hover {

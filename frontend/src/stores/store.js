@@ -25,7 +25,7 @@ export const store = createStore({
     blockedBy: [],
     blacklist: [],
     typingSec: {
-      status: false,
+      status: [],
       convos: []
     },
     seenConvo: false,

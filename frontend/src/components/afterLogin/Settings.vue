@@ -30,7 +30,7 @@
       </v-layout>
     </q-page-container>
   </v-layout>
-  <q-page-container fill-height grid-list-xl class="profile">
+  <q-page-container fill-height grid-list-xl class="profile"> 
     <v-layout justify-center wrap>
       <q-flex xs12 sm8 md4>
         <profile-badge :user="user" settings></profile-badge>

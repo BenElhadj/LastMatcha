@@ -1,7 +1,7 @@
 export const auth = {
   state () {
     return {
-      status: false,
+      status: [],
       user: {},
       isConnected: false,
       typing: false,
@@ -22,12 +22,10 @@ export const auth = {
   },
   mutations: {
     login (state, user) {
-      state.status = true
       state.user = user
      
     },
     logout (state) {
-      state.status = false
       state.user = {}
       state.isConnected = false
       state.typing = false
