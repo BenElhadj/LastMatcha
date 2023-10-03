@@ -12,6 +12,7 @@ const path = require('path')
 const pool = require('./src/utility/database')
 const cors = require('cors')
 
+const { connectedUsers } = require('./src/controllers/auth');
 const server = http.createServer(app)
 
 app.use(cors())
@@ -48,16 +49,16 @@ app.get('/get_last_user_id', (req, res) => {
     connection.connect();
 
     connection.query('SELECT user_id FROM images ORDER BY user_id DESC LIMIT 1;', (error, results) => {
-        if (error) throw error;
+        if (error) throw error
         if (results.length === 0) {
-          res.send(0);
+          res.send(0)
         } else {
-          res.send(results[0].user_id.toString());
+          res.send(results[0].user_id.toString())
         }
-    });
-    
-    connection.end();
-});
+    })
+    connection.end()
+    console.log('Connection closed')
+})
 
 app.get('/allTags', (req, res) => {
     if (req.headers['x-requested-with'] !== 'XMLHttpRequest') {
@@ -68,20 +69,19 @@ app.get('/allTags', (req, res) => {
         user: process.env.DB_USER,
         password: process.env.DB_PASS,
         database: process.env.DB_NAME
-    });
+    })
 
-    connection.connect();
+    connection.connect()
 
     connection.query('SELECT value FROM tags', (err, results) => {
       if (err) {
-        console.error(err);
+        console.error(err)
         res.status(500).send('Error retrieving data from database');
         return;
       }
       res.json(results.map(row => row.value));
-    });
-});
-
+    })
+})
 
 app.get('/api/', (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
 
@@ -100,6 +100,8 @@ const io = socketIo(server, {
   });
 
 let users = {}
+
+// let connectedUsers = {}
 
 io.on('connection', socket => {
     socket.on('chat', data => {
@@ -154,6 +156,8 @@ io.on('connection', socket => {
         try {
             users[id] = socket.id
             io.emit('online', Object.keys(users))
+            // connectedUsers[id] = id
+            // console.log(`User with ID ${id} authenticated and added to connectedUsers.`)
         } catch (err) {
             console.error('app.js auth error ===> ', err)
         }
@@ -163,6 +167,11 @@ io.on('connection', socket => {
             const sql = `UPDATE users SET status = NOW() WHERE id = ?`
             pool.query(sql, [id])
             delete users[id]
+
+            // delete connectedUsers[id]
+            io.emit('online', Object.keys(users))
+            // console.log(`User with ID ${id} logged out and removed from connectedUsers.`)
+
         } catch (err) {
             console.error('app.js logout error ===> ', err)
         }
@@ -174,7 +183,9 @@ io.on('connection', socket => {
                     const sql = `UPDATE users SET status = NOW() WHERE id = ?`
                     pool.query(sql, [key])
                     delete users[key]
+                    // delete connectedUsers[key]
                     io.emit('online', Object.keys(users))
+                    // console.log(`User with ID ${key} disconnected and removed from connectedUsers.`)
                     socket.disconnect()
                 } catch (err) {
                     console.error('app.js disconnect error ===> ', err)
@@ -184,8 +195,18 @@ io.on('connection', socket => {
     })
 })
 
+app.get('/connectedUsers', (req, res) => {
+    if (req.headers['x-requested-with'] !== 'XMLHttpRequest') {
+        return res.status(403).send('Forbidden')
+    }
+    
+    const onlineUserList = Object.keys(connectedUsers)
+    console.log('onlineUserList ===> ', onlineUserList)
+    res.json(onlineUserList)
+})
+
 server.listen(port, () => {
-	console.log(`\n\nServer Backend Matcha:`);
-	console.log(`\n-----> Operating locally at the port ${port}\n`);
-	console.log(`- Local:   \x1b[32mhttp://localhost:${port}\x1b[0m`);
+	console.log(`\n\nServer Backend Matcha:`)
+	console.log(`\n-----> Operating locally at the port ${port}\n`)
+	console.log(`- Local:   \x1b[32mhttp://localhost:${port}\x1b[0m`)
 });

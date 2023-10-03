@@ -1,8 +1,8 @@
 export const auth = {
   state () {
     return {
-      status: [],
       user: {},
+      status: {},
       isConnected: false,
       typing: false,
       blocked: [],
@@ -22,26 +22,30 @@ export const auth = {
   },
   mutations: {
     login (state, user) {
-      state.user = user
-     
+      state.status = true;
+      state.user = user;
+      if (!state.isConnected) {
+        state.isConnected = true;
+      }
     },
-    logout (state) {
-      state.user = {}
-      state.isConnected = false
-      state.typing = false
-      state.blocked = []
-      state.location = {}
-      state.seenConvo = false
-      state.convos = []
-      state.notif = []
-      state.blockedBy = []
-      state.followers = []
-      state.following = []
-      state.newMessage = null
-      state.selectedConvo = null
-      state.visited = []
-      state.visitor = []
-      state.imageConvo = null
+    logout(state) {
+      state.status = false;
+      state.user = {};
+      state.isConnected = false;
+      state.typing = false;
+      state.blocked = [];
+      state.location = {};
+      state.seenConvo = false;
+      state.convos = [];
+      state.notif = [];
+      state.blockedBy = [];
+      state.followers = [];
+      state.following = [];
+      state.newMessage = null;
+      state.selectedConvo = null;
+      state.visited = [];
+      state.visitor = [];
+      state.imageConvo = null;
     }
   },
   actions: {
@@ -53,6 +57,7 @@ export const auth = {
         dispatch('locate')
         dispatch('getTags')
         dispatch('getAllTags')
+        dispatch('getOnlineUserList')
         dispatch('getNotif')
         dispatch('syncHistory')
         dispatch('syncMatches')

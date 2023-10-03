@@ -23,6 +23,7 @@
         </q-item-section>
         <q-item-section side>
           <q-badge v-if="notTyping(convo)" small rounded :color="convo.status ? 'grey' : 'green'" />
+          <!-- <q-badge v-if="notTyping(convo)" small rounded :color="convo.status ? 'green' : 'grey'" /> -->
           <div v-else class="typing">
             <div class="typing_point"></div>
             <div class="typing_point"></div>

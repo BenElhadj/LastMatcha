@@ -14,7 +14,7 @@ const unlinkAsync = promisify(unlink)
 
 const randomHex = () => randomBytes(10).toString('hex')
 const isExternal = url => url && (url.indexOf(':') > -1 || url.indexOf('//') > -1 || url.indexOf('www.') > -1)
-const tokenExp = { expiresIn: 7200 }
+const tokenExp = { expiresIn: 7 * 24 * 60 * 60 }
 
 // Update user profile 
 

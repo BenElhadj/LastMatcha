@@ -3,7 +3,7 @@
     <div v-if="isComplete" class="discover">
       <q-page-container v-if="loaded" class="pt-5 px-0">
         <q-layout class="row wrap justify-center">
-          
+
           <div class="col-2">
             <q-page-container class="px-5">
               <q-layout class="column">
@@ -87,10 +87,12 @@ import countries from '@/nats.json'
 import utility from '@/utility'
 import { matMenu } from '@quasar/extras/material-icons'
 import { mdiAbTesting } from '@quasar/extras/mdi-v5'
+// import { router } from 'vue-router'
 
 const store = useStore()
 const { user, allTags, status, online, blocked, blockedBy } = store.getters
 const userLocation = store.state.location
+const onlineUserList = computed(() => store.state.onlineUserList)
 
 const model = ref(null)
 const max = ref(0)
@@ -197,7 +199,7 @@ watch(user, (newUser, oldUser) => {
   }
 })
 
-watch(online, () => {
+watch(onlineUserList, () => {
   whoIsUp()
 })
 
@@ -241,24 +243,20 @@ function changeSort() {
   sortDir.value = -sortDir.value
 }
 
-// function whoIsUp() {
-//   const currentDateTime = new Date()
-//   users.value.forEach((user, i) => {
-//     if (users.value[i].status !== null) {
-//       users.value[i].lastSeen = users.value[i].status
-//     } else {
-//       users.value[i].lastSeen = currentDateTime
-//     }
-//   });
-// }
-
 function whoIsUp() {
-  users.value.forEach((user, i) => {
-    users.value[i].lastSeen = users.value[i].status
-    // users.value[i].status = online.includes(user.user_id)
-  })
-}
+  const userList = onlineUserList.value 
 
+  users.value.forEach((user, i) => {
+    if (userList.includes(user.user_id.toString())) {
+      users.value[i].lastSeen = 'online'
+      users.value[i].isConnected = true
+    } else {
+      users.value[i].lastSeen = user.status
+      users.value[i].isConnected = false
+    }
+  })
+  return users.value
+}
 
 const isComplete = computed(() => {
   return user.gender && user.gender.length && user.looking && user.biography && user.tags && user.images.length && user.city && user.country && user.postal_code

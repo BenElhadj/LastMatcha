@@ -19,7 +19,7 @@ const htmlspecialchars = require('htmlspecialchars')
 
 const randomHex = () => randomBytes(10).toString('hex')
 
-const tokenExp = { expiresIn: 7200 }
+const tokenExp = { expiresIn: 7 * 24 * 60 * 60 }
 
 // Register a new user
 

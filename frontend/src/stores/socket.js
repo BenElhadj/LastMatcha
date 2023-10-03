@@ -6,7 +6,7 @@ import { io } from 'socket.io-client'
 export const socket = {
   state: {
     isConnected: false,
-    typingSec: { status: [], convos: [] },
+    typingSec: { status: false, convos: [] },
     seenConvo: false,
     convos: [],
     notif: [],
@@ -18,14 +18,30 @@ export const socket = {
   mutations: {
     SOCKET_connect (state) {
       if (!state.isConnected && state.user.id) {
-        const app = createApp({})
-        app.config.globalProperties.$socket = io(`${import.meta.env.VITE_APP_API_URL}`)
-        app.config.globalProperties.$socket.emit('auth', state.user.id)
-        state.isConnected = true
+        state.socket = io(`${import.meta.env.VITE_APP_API_URL}`);
+        state.socket.emit('auth', state.user.id);
+        state.isConnected = true;
+    
+        // Écoutez l'événement 'online' pour mettre à jour la liste des utilisateurs en ligne
+        state.socket.on('online', (onlineUsers) => {
+          state.online = onlineUsers.filter((userId) => userId !== state.user.id).map((userId) => Number(userId));
+        });
       }
+      // if (!state.isConnected && state.user.id) {
+      //   const app = createApp({})
+      //   app.config.globalProperties.$socket = io(`${import.meta.env.VITE_APP_API_URL}`)
+      //   app.config.globalProperties.$socket.emit('auth', state.user.id)
+      //   state.isConnected = true
+      // }
+      // console.log('connected')
     },
     SOCKET_disconnect (state) {
-      state.isConnected = false
+      if (state.socket) {
+        state.socket.disconnect();
+        state.isConnected = false;
+      }
+      // state.isConnected = false
+      // console.log('disconnected')
     },
     SOCKET_chat: async (state, data) => {
       try {
@@ -42,11 +58,13 @@ export const socket = {
                 })
                 state.convos[i].message = data.message
                 state.convos[i].message_from = data.id_from
+                console.log('SOCKET_chat')
               }
             })
             const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/update`
             const body = { id: state.selectedConvo }
             await axios.post(url, body, { headers })
+            console.log('SOCKET_chat')
           }
         } else {
           state.notif.push({ ...data, type: 'chat' })
@@ -56,6 +74,7 @@ export const socket = {
               cur.message = data.message
               cur.message_from = data.id_from
             }
+          console.log('SOCKET_chat')
           })
           // eslint-disable-next-line camelcase
           const { id_from, id_to, id_conversation } = data
@@ -63,7 +82,9 @@ export const socket = {
           const body = { id_to, id_from, type: 'chat', id_conversation }
           const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/add`
           await axios.post(url, body, { headers }) // replaced Vue.http.post with axios.post
+          console.log('SOCKET_chat')
         }
+        console.log('SOCKET_chat')
       } catch (err) {
         console.error('err SOCKET_chat in frontend/socket.js ===> ', err)
       }
@@ -71,13 +92,15 @@ export const socket = {
     SOCKET_typing: (state, data) => {
       if (!state.typingSec.convos.some(cur => cur.id_conversation === data.id_conversation)) {
         state.typingSec.convos.push(data)
-        state.typingSec.status = !state.typingSec.convos.length
+        state.typingSec.status = !!state.typingSec.convos.length
       }
+      console.log('SOCKET_typing')
     },
     SOCKET_seenConvo: (state, convo) => {
       if (state.selectedConvo === convo) {
         state.seenConvo = true
       }
+      console.log('SOCKET_seenConvo')
     },
     SOCKET_match: async (state, data) => {
       state.notif.push({
@@ -112,6 +135,7 @@ export const socket = {
           }
         })
       }
+      console.log('SOCKET_match')
     },
     SOCKET_visit: (state, data) => {
       state.notif.push({
@@ -128,6 +152,7 @@ export const socket = {
         username: data.username,
         visit_date: data.date
       })
+      console.log('SOCKET_visit')
     },
     SOCKET_block: (state, id) => {
       state.blockedBy.push(id)
@@ -135,13 +160,16 @@ export const socket = {
       const arr = ['visitor', 'visited', 'notif', 'convos', 'followers', 'following']
       arr.forEach(cur => (state[cur] = utility.filterBlocked(state, cur)))
       if (convo && state.selectedConvo === convo.id_conversation) state.selectedConvo = null
+      console.log('SOCKET_block')
     },
     SOCKET_online: (state, online) => {
       state.online = online.filter(cur => cur !== state.user.id).map(cur => Number(cur))
+      console.log('Utilisateurs en ligne :', state.online)
+      console.log('SOCKET_online')
     },
     SOCKET_out: (state, online) => {
       if (!online.find(cur => cur === state.user.id)) {
-        state.status = []
+        state.status = false
         state.user = {}
         state.isConnected = false
         state.typing = false
@@ -161,6 +189,7 @@ export const socket = {
       } else {
         state.online = online.filter(cur => cur !== state.user.id).map(cur => Number(cur))
       }
+      console.log('SOCKET_out')
     }
   }
 }

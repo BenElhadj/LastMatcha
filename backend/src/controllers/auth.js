@@ -10,8 +10,8 @@ const { randomBytes } = require('crypto')
 const { AsyncResource } = require('async_hooks')
 const randomHex = () => randomBytes(10).toString('hex')
 
-const tokenExp = { expiresIn: 7200 }
-
+const tokenExp = { expiresIn: 7 * 24 * 60 * 60 }
+const connectedUsers = {}
 // Login
 
 const login = async (req, res) => {
@@ -33,7 +33,7 @@ const login = async (req, res) => {
 				const decoded = await bcrypt.compare(password, user.password)
 				if (!decoded)
 					return res.json({ msg: 'Wrong password' })
-				await userModel.updateStatus(user.id, null);
+				// await userModel.updateStatus(user.id, null);
 				delete user.password
 				delete user.verified
 				delete user.tokenExpiration
@@ -43,6 +43,9 @@ const login = async (req, res) => {
 					user.token = await sign(payload, process.env.SECRET, tokenExp)
 					return res.json(user)
 				})
+				connectedUsers[user.id] = user.id
+				console.log(`User with ID ${user.id} connected`)
+				console.log(connectedUsers)
 			} catch (err) {
 				return res.json({ msg: 'Fatal error', err })
 			}
@@ -54,13 +57,14 @@ const login = async (req, res) => {
 
 // Logout 
 
+// const logout = (req, res) => {
 const logout = async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
-	
-	const currentDateTime = new Date()
-	await userModel.updateStatus(req.user.id, currentDateTime)
-
+	delete connectedUsers[req.user.id]
+	console.log(`User with ID ${req.user.id} disconnected`)
+	console.log(connectedUsers)
+	await userModel.updateStatus(req.user.id, new Date())
 	res.json({ ok: true })
 }
 
@@ -90,5 +94,6 @@ const isLoggedIn = async (req, res) => {
 module.exports = {
 	login,
 	logout,
+	connectedUsers,
 	isLoggedIn
 }

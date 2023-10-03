@@ -8,17 +8,15 @@
           <q-tooltip bottom class="status_container">
             <span>{{ lastSeen }}</span>
           </q-tooltip>
-          <q-badge small rounded :color="lastSeen == 'online' ? 'green' : 'grey'" />
+          <q-badge small rounded :color="`${user.isConnected ? 'green' : 'grey'}`"></q-badge>
         </q-item-section>
       </div>
-
-
 
 
       <q-avatar class="justify-center" size="120px">
         <img :src="profileImage(user.name)" aspect-ratio="1"/>
       </q-avatar>
-         <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
+      <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
       <div class="note">
         <p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
@@ -41,10 +39,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, createApp } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 import utility from '@/utility'
+
+const store = useStore()
+const app = createApp()
 
 const props = defineProps({
   user: {
@@ -53,10 +54,6 @@ const props = defineProps({
   }
 })
 
-// Store
-const store = useStore()
-
-// Computed
 const location = computed(() => store.getters.location)
 
 const age = computed(() => {
@@ -72,13 +69,14 @@ const distance = computed(() => {
 })
 
 const lastSeen = computed(() => {
-  console.log(props.user)
-  if (props.user.status == null) return 'online'
-  if (props.user.lastSeen) return moment(props.user.lastSeen).utc().fromNow()
-  return moment(props.user.created_at).utc().fromNow()
-})
+  if (props.user.lastSeen == 'online')
+  {
+    return 'online'
+  } else {
+    return props.user.lastSeen = moment(props.user.lastSeen).utc().fromNow()
+  }
+}) 
 
-// Methods
 const profileImage = (image) => {
   return utility.getFullPath(image)
 }

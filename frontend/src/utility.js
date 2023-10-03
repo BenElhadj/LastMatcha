@@ -59,10 +59,25 @@ const getAllTags = async () => {
       const response = await axios.get(url, {
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
-      const res = response.data
+      // const res = response.data
       return response.data
   } catch (error) {
     console.error('err getAllTags in frontend/utility.js ===> ', err)
+      throw error
+  }
+}
+
+const getOnlineUserList  = async () => {
+  try {
+      const url = `${import.meta.env.VITE_APP_API_URL}/connectedUsers`
+      const response = await axios.get(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      // console.log('---> response in getOnlineUserList ===> ', response.data)
+      // const res = response.data
+      return response.data
+  } catch (error) {
+    console.error('err getOnlineUserList in frontend/utility.js ===> ', err)
       throw error
   }
 }
@@ -71,6 +86,7 @@ export default {
   getDate,
   isBlocked,
   getAllTags,
+  getOnlineUserList,
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line
@@ -184,7 +200,6 @@ export default {
   filterBlocked: (state, type) => {
     return state[type].filter(cur => !isBlocked(state, cur[getId(type)]))
   },
-  
   showAlert (color, text) {
     alert.value = {
       state: true,

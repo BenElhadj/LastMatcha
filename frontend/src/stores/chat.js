@@ -5,7 +5,7 @@ export const chat = {
     newMessage: null,
     selectedConvo: null,
     convos: [],
-    typingSec: { status: [], convos: [] },
+    typingSec: { status: false, convos: [] },
     seenConvo: false
   },
   mutations: {
