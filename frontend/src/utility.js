@@ -37,8 +37,8 @@ const getLocationFromIp = async f => {
       const splitted = res.data.loc.split(',')
       f({ lat: Number(splitted[0]), lng: Number(splitted[1]) })
     }
-  } catch (err) {
-    console.error('err getLocationFromIp in frontend/utility.js ===> ', err)
+  } catch (error) {
+    console.error('err getLocationFromIp in frontend/utility.js ===> ', error)
   }
 }
 
@@ -48,8 +48,8 @@ const syncLocation = async location => {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/location`
     const headers = { 'x-auth-token': token }
     await axios.post(url, location, { headers })
-  } catch (err) {
-    console.error('err syncLocation in frontend/utility.js ===> ', err)
+  } catch (error) {
+    console.error('err syncLocation in frontend/utility.js ===> ', error)
   }
 }
 
@@ -59,25 +59,23 @@ const getAllTags = async () => {
       const response = await axios.get(url, {
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
-      // const res = response.data
       return response.data
   } catch (error) {
-    console.error('err getAllTags in frontend/utility.js ===> ', err)
+    console.error('err getAllTags in frontend/utility.js ===> ', error)
       throw error
   }
 }
 
-const getOnlineUserList  = async () => {
+const getConnectedUsers = async () => {
   try {
       const url = `${import.meta.env.VITE_APP_API_URL}/connectedUsers`
       const response = await axios.get(url, {
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
-      // console.log('---> response in getOnlineUserList ===> ', response.data)
-      // const res = response.data
+      console.log('---> response in getConnectedUsers ===> ', response.data)
       return response.data
   } catch (error) {
-    console.error('err getOnlineUserList in frontend/utility.js ===> ', err)
+    console.error('err getConnectedUsers in frontend/utility.js ===> ', error)
       throw error
   }
 }
@@ -86,7 +84,7 @@ export default {
   getDate,
   isBlocked,
   getAllTags,
-  getOnlineUserList,
+  getConnectedUsers,
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line
@@ -110,8 +108,8 @@ export default {
       const headers = { 'x-auth-token': token }
       const res = await axios.get(url, { headers })
       return res.data.msg ? [] : res.data
-    } catch (err) {
-    console.error('err sync in frontend/utility.js ===> ', err)
+    } catch (error) {
+    console.error('err sync in frontend/utility.js ===> ', error)
     }
   },
   syncNotif: async () => {
@@ -121,8 +119,8 @@ export default {
       const headers = { 'x-auth-token': token }
       const result = await axios.get(url, { headers })
       return result.data.msg ? [] : result.data
-    } catch (err) {
-    console.error('err syncNotif in frontend/utility.js ===> ', err)
+    } catch (error) {
+    console.error('err syncNotif in frontend/utility.js ===> ', error)
     }
   },
   calculateDistance: (from, to, mile) => {

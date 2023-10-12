@@ -57,7 +57,7 @@ export const auth = {
         dispatch('locate')
         dispatch('getTags')
         dispatch('getAllTags')
-        dispatch('getOnlineUserList')
+        dispatch('getConnectedUsers')
         dispatch('getNotif')
         dispatch('syncHistory')
         dispatch('syncMatches')

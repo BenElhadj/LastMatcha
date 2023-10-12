@@ -93,13 +93,19 @@ app.get('/api/', (req, res) => res.sendFile(path.resolve(__dirname, 'index.html'
 
 const io = socketIo(server, {
 	cors: {
-	  origin: process.env.APP_URL,
-	  methods: ["GET", "POST"],
-	  credentials: true
+        origin: process.env.APP_URL,
+        methods: ["GET", "POST"],
+        credentials: true
 	}
-  });
+});
 
 let users = {}
+
+function sendConnectedUsers(io) {
+    console.log('===> sendConnectedUsers')
+    const onlineUserList = Object.keys(users);
+    io.emit('onlineUsers', onlineUserList);
+}
 
 // let connectedUsers = {}
 
@@ -156,6 +162,9 @@ io.on('connection', socket => {
         try {
             users[id] = socket.id
             io.emit('online', Object.keys(users))
+            // io.emit('connectedUsers', Object.keys(users))
+            sendConnectedUsers(io)
+            // console.log('===> auth', id)
             // connectedUsers[id] = id
             // console.log(`User with ID ${id} authenticated and added to connectedUsers.`)
         } catch (err) {
@@ -170,6 +179,9 @@ io.on('connection', socket => {
 
             // delete connectedUsers[id]
             io.emit('online', Object.keys(users))
+            // io.emit('connectedUsers', Object.keys(users))
+            sendConnectedUsers(io)
+            // console.log('===> logout', id)
             // console.log(`User with ID ${id} logged out and removed from connectedUsers.`)
 
         } catch (err) {
@@ -185,6 +197,8 @@ io.on('connection', socket => {
                     delete users[key]
                     // delete connectedUsers[key]
                     io.emit('online', Object.keys(users))
+                    
+                    // io.emit('connectedUsers', Object.keys(users))
                     // console.log(`User with ID ${key} disconnected and removed from connectedUsers.`)
                     socket.disconnect()
                 } catch (err) {
@@ -199,7 +213,6 @@ app.get('/connectedUsers', (req, res) => {
     if (req.headers['x-requested-with'] !== 'XMLHttpRequest') {
         return res.status(403).send('Forbidden')
     }
-    
     const onlineUserList = Object.keys(connectedUsers)
     console.log('onlineUserList ===> ', onlineUserList)
     res.json(onlineUserList)

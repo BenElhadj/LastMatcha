@@ -39,10 +39,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, createApp } from 'vue'
+import { ref, computed, watchEffect, onMounted, createApp } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 import utility from '@/utility'
+
+// import io from 'socket.io-client'
+// const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
 
 const store = useStore()
 const app = createApp()
@@ -53,6 +56,14 @@ const props = defineProps({
     default: () => ({})
   }
 })
+
+// const onlineUserList = computed(() => store.state.onlineUserList)
+
+// const isConnected = computed(() => {
+//   // return onlineUserList.value ? onlineUserList.value.includes(props.user.user_id.toString()) : false
+//   return onlineUserList.value ? onlineUserList.value.includes(props.user.user_id.toString()) : false
+// })
+
 
 const location = computed(() => store.getters.location)
 
@@ -75,11 +86,25 @@ const lastSeen = computed(() => {
   } else {
     return props.user.lastSeen = moment(props.user.lastSeen).utc().fromNow()
   }
-}) 
+})
 
 const profileImage = (image) => {
   return utility.getFullPath(image)
 }
+
+// socket.on('onlineUsers', (onlineUserList) => {
+//   // Mettre à jour la liste des utilisateurs connectés dans le store
+//   store.commit('setOnlineUserList', onlineUserList)
+//   console.log('Nouvelle liste d\'utilisateurs en ligne :', onlineUserList);
+// })
+
+// watchEffect(() => {
+//   socket.on('onlineUsers', (onlineUserList) => {
+//       console.log('Nouvelle liste d\'utilisateurs en ligne :', onlineUserList);
+//       // Mettez à jour connectedUsers dans votre magasin Vuex ou dans un ref, par exemple.
+//   });
+// })
+
 </script>
 
 <style>
@@ -123,7 +148,7 @@ const profileImage = (image) => {
 .align-center {
   text-align: center;
   gap: 10px;
-  
+
 }
 
 .q-card:hover {

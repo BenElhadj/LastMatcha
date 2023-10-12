@@ -18,7 +18,7 @@ export const getters = {
   selectedConvo: (state) => state.selectedConvo,
   following: (state) => state.following,
   allTags: (state) => state.allTags,
-  onlineUserList: (state) => state.onlineUserList,
+  connectedUsers: (state) => state.connectedUsers,
   history: (state) => {
     return [
       ...state.history.map((cur) => ({ ...cur, type: 'history' })),

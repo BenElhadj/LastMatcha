@@ -4,6 +4,13 @@
       <q-page-container v-if="loaded" class="pt-5 px-0">
         <q-layout class="row wrap justify-center">
 
+          <!-- <h2>Utilisateurs en ligne</h2>
+          <ul>
+            <li v-for="user in connectedUsers" :key="user.id">
+              {{ user.username }}
+            </li>
+          </ul> -->
+
           <div class="col-2">
             <q-page-container class="px-5">
               <q-layout class="column">
@@ -78,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted, onBeforeUnmount } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
 import UserCard from '@/components/afterLogin/UserCard.vue'
@@ -89,11 +96,14 @@ import { matMenu } from '@quasar/extras/material-icons'
 import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 // import { router } from 'vue-router'
 
+import io from 'socket.io-client'
+const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
+
+const connectedUsers = computed(() => store.state.connectedUsers)
+
 const store = useStore()
 const { user, allTags, status, online, blocked, blockedBy } = store.getters
 const userLocation = store.state.location
-const onlineUserList = computed(() => store.state.onlineUserList)
-
 const model = ref(null)
 const max = ref(0)
 const step = ref(0)
@@ -124,6 +134,8 @@ const filters = {
       const { lat, lng } = val
       const distanceCalc = utility.calculateDistance(userLocation, { lat, lng })
       return distanceCalc >= distance.value.min && distanceCalc <= distance.value.max
+    } else {
+      return false
     }
   },
   age: val => {
@@ -152,16 +164,25 @@ const filtered = computed(() => {
 })
 
 const sorted = computed(() => {
-  if (!sort.value || sort.value === 'distance') {
-    return sortDir.value < 0 ? [...filtered.value].reverse() : filtered.value
-  }
+  const connectedUsers = [...filtered.value].filter((user) => user.isConnected)
+  const disconnectedUsers = [...filtered.value].filter((user) => !user.isConnected)
+
   let sortFunc
+    
+  if (!sort.value || sort.value === 'distance') {
+    if (sortDir.value < 0) {
+      connectedUsers.reverse()
+      disconnectedUsers.reverse()
+    }
+    return [...connectedUsers, ...disconnectedUsers]
+  }
   const ageCalc = (bd) => new Date() - new Date(bd)
   const commonTags = a => {
     if (!a || !a.length) return 0
     const tags = a.split(',')
     return user.tags.split(',').filter(val => tags.indexOf(val) !== -1).length
   }
+
   switch (sort.value) {
     case 'age':
       sortFunc = (a, b) => sortDir.value * (ageCalc(a.birthdate) - ageCalc(b.birthdate))
@@ -173,7 +194,9 @@ const sorted = computed(() => {
       sortFunc = (a, b) => sortDir.value * (commonTags(b.tags) - commonTags(a.tags))
       break
   }
-  return [...filtered.value].sort(sortFunc)
+  connectedUsers.sort(sortFunc)
+  disconnectedUsers.sort(sortFunc)
+  return [...connectedUsers, ...disconnectedUsers]
 })
 
 const calculateMaxDistance = () => {
@@ -199,10 +222,6 @@ watch(user, (newUser, oldUser) => {
   }
 })
 
-watch(onlineUserList, () => {
-  whoIsUp()
-})
-
 watch(age, () => {
   if (age.value[0] > age.value[1]) {
     const temp = age.value[0]
@@ -226,6 +245,19 @@ watch(distance, () => {
     distance.value[1] = temp
   }
 })
+ 
+function whoIsUp() {
+  users.value.forEach((user, i) => {
+    if (connectedUsers.value.includes(user.user_id.toString())) {
+      users.value[i].lastSeen = 'online'
+      users.value[i].isConnected = true
+    } else {
+      users.value[i].lastSeen = user.status
+      users.value[i].isConnected = false
+    }
+  })
+  return users.value
+}
 
 const shouldReset = ref(false)
 
@@ -241,21 +273,6 @@ function reset() {
 
 function changeSort() {
   sortDir.value = -sortDir.value
-}
-
-function whoIsUp() {
-  const userList = onlineUserList.value 
-
-  users.value.forEach((user, i) => {
-    if (userList.includes(user.user_id.toString())) {
-      users.value[i].lastSeen = 'online'
-      users.value[i].isConnected = true
-    } else {
-      users.value[i].lastSeen = user.status
-      users.value[i].isConnected = false
-    }
-  })
-  return users.value
 }
 
 const isComplete = computed(() => {
@@ -274,8 +291,8 @@ async function created() {
     }))
     
     await calculateMaxDistance()
-    distance.value.max = maxDis.value
     whoIsUp()
+    distance.value.max = maxDis.value
     loaded.value = true
   } else {
     console.log('res.data.msg ===> ', res.data.msg)
@@ -289,6 +306,10 @@ onMounted(async () => {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
     const headers = { 'x-auth-token': token }
     const res = await axios.get(url, { headers })
+    socket.on('onlineUsers', (users) => {
+    onlineUsers.value = users;
+    console.log('onlineUsers ===> ', onlineUsers.value)
+    });
     if (!res.data.msg && maxDis.value > 0) {
       const user = res.data
       if (user.birthdate) {
@@ -296,10 +317,39 @@ onMounted(async () => {
       }
       store.dispatch('login', user)
     }
+    socket.on('connectedUsers', (connectedUsers) => {
+      console.log('connectedUsers ===> ', connectedUsers)
+    store.dispatch('connectedUsers', connectedUsers)
+    })
   } catch (err) {
     console.error('err onMounted in frontend/DiscoverView.vue ===> ', err)
   }
 })
+
+function updateWhoIsUp(connectedUsers) {
+  users.value.forEach((user, i) => {
+    if (connectedUsers.includes(user.user_id.toString())) {
+      users.value[i].lastSeen = 'online'
+      users.value[i].isConnected = true
+    } else {
+      users.value[i].lastSeen = user.status
+      users.value[i].isConnected = false
+    }
+  });
+  
+  socket.emit('updateWhoIsUp', users.value);
+}
+
+watchEffect(() => {
+  // const socket = io(`${import.meta.env.VITE_APP_API_URL}`);
+  console.log('<======= watchEffect =======> ', connectedUsers.value)
+  socket.on('connectedUsers', (oldConnectedUsers, newConnectedUsers) => {
+    console.log('oldConnectedUsers ===> ', oldConnectedUsers)
+    console.log('newConnectedUsers ===> ', newConnectedUsers)
+    updateWhoIsUp(newConnectedUsers.value);
+  });
+});
+
 
 onMounted(created)
 

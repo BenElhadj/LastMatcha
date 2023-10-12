@@ -28,7 +28,7 @@ export default {
     let socket = null
 
     onMounted(() => {
-      socket = io(import.meta.env.VITE_APP_URL)
+      socket = io(`${import.meta.env.VITE_APP_API_URL}`)
     })
 
     watch(msg, () => {

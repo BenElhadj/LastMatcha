@@ -5,12 +5,12 @@ import { chat } from './chat'
 import { socket } from './socket'
 import { getters } from './getter'
 import { allTags } from './allTags'
-import { onlineUserList } from './onlineUserList'
+import { connectedUsers } from './connectedUsers'
 
 export const store = createStore({
   state: {
     allTags: allTags.state,
-    onlineUserList: onlineUserList.state,
+    connectedUsers: connectedUsers.state,
     user: user.state,
     auth: auth.state,
     chat: chat.state,
@@ -43,7 +43,7 @@ export const store = createStore({
     ...chat.actions,
     ...allTags.actions,
     ...socket.actions,
-    ...onlineUserList.actions,
+    ...connectedUsers.actions,
   },
   mutations: {
     ...auth.mutations,
@@ -51,6 +51,6 @@ export const store = createStore({
     ...chat.mutations,
     ...socket.mutations,
     ...allTags.mutations,
-    ...onlineUserList.mutations,
+    ...connectedUsers.mutations,
   }
 })
