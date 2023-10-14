@@ -18,10 +18,72 @@
       </div>
     </q-page>
     <LoaderView v-else />
+  
   </q-layout>
 </template>
 
-<script>
+<script setup>
+import { onBeforeUnmount, ref, computed, watch } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+import LoaderView from '@/views/LoaderView.vue'
+import MessengerList from '@/components/afterLogin/MessengerList.vue'
+import MessengerChat from '@/components/afterLogin/MessengerChat.vue'
+import MessengerForm from '@/components/afterLogin/MessengerForm.vue'
+
+const store = useStore()
+const router = useRouter()
+const loaded = ref(false)
+const user = computed(() => store.state.user)
+const convos = computed(() => store.state.convos)
+const selectedConvo = computed(() => store.state.selectedConvo)
+const data = ref(null)
+
+const getToId = () => {
+  for (const cur of convos.value) {
+    if (cur.id_conversation === selectedConvo.value) {
+      return cur.user_id
+    }
+  }
+}
+
+const messageSent = (msg) => {
+  store.dispatch('updateConvosOrder', msg.id_conversation)
+}
+
+watch(user, async (newUser) => {
+  const token = newUser.token || localStorage.getItem('token')
+  if (token) {
+    try {
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
+      const headers = { 'x-auth-token': token }
+      const res = await axios.get(url, { headers })
+      data.value = res.data
+      if (!res.data.msg) {
+        loaded.value = true
+        return
+      }
+    } catch (err) {
+      console.error('err watch user in frontend/MessengerView.vue ===> ', err)
+    }
+  }
+  store.dispatch('logout', newUser.id)
+  router.push('/login')
+}, { immediate: true })
+
+watch(convos, (newConvos) => {
+  if (newConvos.length && !selectedConvo.value) {
+    store.dispatch('syncConvo', newConvos[0])
+  }
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  store.dispatch('syncConvo', null)
+})
+</script>
+
+<!-- <script>
 import { onBeforeUnmount, ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
@@ -96,7 +158,7 @@ export default {
     }
   }
 }
-</script>
+</script> -->
 
 <style scoped>
 .messenger {

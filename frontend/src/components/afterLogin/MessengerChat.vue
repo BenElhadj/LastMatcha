@@ -49,6 +49,196 @@
 </template>
 
 
+<!-- <script setup>
+import moment from 'moment'
+import { ref, watch, onMounted } from 'vue'
+import utility from '@/utility.js'
+import { useStore } from 'vuex'
+
+const store = useStore()
+
+const key = ref(0)
+const messages = ref([])
+const page = ref(0)
+const limit = ref(false)
+const loadGif = 'https://i.giphy.com/media/uyCJt0OOhJBiE/giphy.webp'
+
+const {
+  user,
+  typingSec,
+  seenConvo,
+  newMessage,
+  imageConvo,
+  idUserConvo,
+  profileImage,
+  selectedConvo,
+  usernameConvo
+} = store.getters
+
+const typing = ref(false)
+
+const checkLimit = (res) => {
+  if (res.length < 50) {
+    limit.value = true
+  } else {
+    page.value++
+  }
+}
+
+const msgSent = (msg) => {
+  messages.value.push(msg)
+}
+
+const first = (msg, i) => {
+  if (!i) return true
+  return messages.value[i - 1].id_from !== msg.id_from
+}
+
+const last = (msg, i) => {
+  if (messages.value.length - 1 === i) return true
+  return messages.value[i + 1].id_from !== msg.id_from
+}
+
+const seen = (msg, i) => {
+  if (msg.id_from === user.id && msg.is_read) {
+    while (++i < messages.value.length) {
+      if (messages.value[i].id_from === user.id && messages.value[i].is_read) {
+        return false
+      }
+    }
+    return true
+  } else {
+    return false
+  }
+}
+
+const layoutClass = (msg, i) => {
+  return [
+    msg.id_from === user.id ? 'from' : 'to',
+    first(msg, i) ? 'top_msg' : '',
+    last(msg, i) ? 'bottom_msg' : '',
+    'py-0',
+    'px-2'
+  ].join(' ')
+}
+
+const bubbleClass = (msg) => {
+  return [
+    'mx-2',
+    'chat_bubble',
+    msg.id_from !== user.id ? 'grey lighten-3' : 'primary white--text'
+  ].join(' ')
+}
+
+const pushClass = (msg, i) => {
+  if (!last(msg, i) && msg.id_from !== user.id) {
+    return 'push_left'
+  } else if (!seen(msg, i) && msg.id_from === user.id) {
+    return 'push_right'
+  } else {
+    return 'd-none'
+  }
+}
+
+const showAvatar = (msg, i) => {
+  return last(msg, i) && msg.id_from !== user.id
+}
+
+const avatarClass = (msg, i) => {
+  return last(msg, i) && !first(msg, i) ? 'pull_up' : 'pull_up_single'
+}
+
+const newConvo = (msg, i) => {
+  if (!i) return true
+  return moment(msg.created_at).diff(messages.value[i - 1].created_at, 'minutes', true) > 60
+}
+
+const scroll = () => {
+  const top = document.querySelector('.top_chat')
+  top.scrollTop = top.scrollHeight - top.clientHeight
+}
+
+const getChat = async () => {
+  try {
+    const url = `${process.env.URL}/api/chat/messages`
+    const headers = { 'x-auth-token': user.token }
+    const data = {
+      id: selectedConvo,
+      page: page.value
+    }
+    const result = await store.dispatch('getChatMessages', data)
+    return result
+  } catch (err) {
+    console.log('Got error here ===> ', err)
+  }
+}
+
+watch(() => selectedConvo, async () => {
+  if (selectedConvo) {
+    page.value = 0
+    limit.value = false
+    try {
+      const result = await getChat()
+      checkLimit(result.body)
+      messages.value = result.body
+      store.dispatch('syncNotif')
+      store.dispatch('seenConvo', {
+        user: idUserConvo,
+        convo: selectedConvo
+      })
+    } catch (err) {
+      console.log('Got error here ===> ', err)
+    }
+  }
+})
+
+watch(() => messages, () => {
+  if (page.value < 2) {
+    scroll()
+  }
+})
+
+watch(() => newMessage, () => {
+  if (newMessage && selectedConvo === newMessage.id_conversation) {
+    messages.value.push(newMessage)
+    store.dispatch('messageClr')
+  }
+})
+
+watch(() => typingSec, () => {
+  if (typingSec) {
+    scroll()
+  }
+})
+
+watch(() => seenConvo, () => {
+  if (seenConvo) {
+    messages.value.forEach((cur, i) => {
+      if (cur.id_from === user.id && !cur.is_read) {
+        messages.value[i].is_read = 1
+        key.value++
+      }
+    })
+    store.dispatch('seenConvoClr')
+  }
+})
+
+onMounted(() => {
+  const top = document.querySelector('.top_chat')
+  top.addEventListener('scroll', async (e) => {
+    if (!limit.value && top.scrollTop <= 10) {
+      const result = await getChat()
+      checkLimit(result.body)
+      messages.value = [...result.body, ...messages.value]
+      top.scrollTop = 150
+    }
+  })
+})
+</script> -->
+
+
+
+
 <script setup>
 import { watch, ref, computed, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -79,8 +269,10 @@ const getChat = async () => {
     const headers = { 'x-auth-token': user.value.token }
     const data = {
       id: store.getters.selectedConvo,
+      // id: selectedConvo.value,
       page: page.value
     }
+    console.log('data ===> ', data)
     const result = await axios.post(url, data, { headers })
     return result
   } catch (err) {
@@ -94,29 +286,30 @@ const messageClr = () => store.dispatch('messageClr')
 const seenConvoClr = () => store.dispatch('seenConvoClr')
 const typingSecClr = () => store.dispatch('typingSecClr')
 
-const checkLimit = (res) => {
+
+const checkLimit = (res) => {//
   if (res.length < 50) {
     limit.value = true
   } else {
     page.value++
   }
-}
+}//
 
-const msgSent = (msg) => {
+const msgSent = (msg) => {//
   messages.value.push(msg)
-}
+}//
 
-const first = (msg, i) => {
+const first = (msg, i) => {//
   if (!i) return true
   return messages.value[i - 1].id_from !== msg.id_from
-}
+}//
 
-const last = (msg, i) => {
+const last = (msg, i) => {//
   if (messages.value.length - 1 === i) return true
   return messages.value[i + 1].id_from !== msg.id_from
-}
+}//
 
-const seen = (msg, i) => {
+const seen = (msg, i) => {//
   if (msg.id_from === user.value.id && msg.is_read) {
     while (++i < messages.value.length) {
       if (messages.value[i].id_from === user.value.id && messages.value[i].is_read) {
@@ -127,7 +320,7 @@ const seen = (msg, i) => {
   } else {
     return false
   }
-}
+}//
 
 const layoutClass = (msg, i) => [
   msg.id_from === user.value.id ? 'from' : 'to',
@@ -263,6 +456,10 @@ watch(() => store.getters.seenConvo, (seenConvo) => {
 
 // Define the rest of your watchers here...
 </script>
+
+
+
+
 <!-- <script>
 import { ref, watch, computed, nextTick } from 'vue'
 import { useStore } from 'vuex'

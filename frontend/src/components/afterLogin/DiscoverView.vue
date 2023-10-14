@@ -10,7 +10,7 @@
               {{ user.username }}
             </li>
           </ul> -->
-
+<!-- {{ user.username }} -->
           <div class="col-2">
             <q-page-container class="px-5">
               <q-layout class="column">
@@ -164,17 +164,17 @@ const filtered = computed(() => {
 })
 
 const sorted = computed(() => {
-  const connectedUsers = [...filtered.value].filter((user) => user.isConnected)
+  const onlineUsers = [...filtered.value].filter((user) => user.isConnected)
   const disconnectedUsers = [...filtered.value].filter((user) => !user.isConnected)
 
   let sortFunc
     
   if (!sort.value || sort.value === 'distance') {
     if (sortDir.value < 0) {
-      connectedUsers.reverse()
+      onlineUsers.reverse()
       disconnectedUsers.reverse()
     }
-    return [...connectedUsers, ...disconnectedUsers]
+    return [...onlineUsers, ...disconnectedUsers]
   }
   const ageCalc = (bd) => new Date() - new Date(bd)
   const commonTags = a => {
@@ -194,9 +194,9 @@ const sorted = computed(() => {
       sortFunc = (a, b) => sortDir.value * (commonTags(b.tags) - commonTags(a.tags))
       break
   }
-  connectedUsers.sort(sortFunc)
+  onlineUsers.sort(sortFunc)
   disconnectedUsers.sort(sortFunc)
-  return [...connectedUsers, ...disconnectedUsers]
+  return [...onlineUsers, ...disconnectedUsers]
 })
 
 const calculateMaxDistance = () => {
@@ -289,7 +289,6 @@ async function created() {
       ...cur,
       rating: Number(cur.rating)
     }))
-    
     await calculateMaxDistance()
     whoIsUp()
     distance.value.max = maxDis.value
@@ -321,34 +320,74 @@ onMounted(async () => {
       console.log('connectedUsers ===> ', connectedUsers)
     store.dispatch('connectedUsers', connectedUsers)
     })
+    // startUpdateTimer()
   } catch (err) {
     console.error('err onMounted in frontend/DiscoverView.vue ===> ', err)
   }
 })
 
-function updateWhoIsUp(connectedUsers) {
-  users.value.forEach((user, i) => {
-    if (connectedUsers.includes(user.user_id.toString())) {
-      users.value[i].lastSeen = 'online'
-      users.value[i].isConnected = true
-    } else {
-      users.value[i].lastSeen = user.status
-      users.value[i].isConnected = false
-    }
-  });
-  
-  socket.emit('updateWhoIsUp', users.value);
-}
 
-watchEffect(() => {
-  // const socket = io(`${import.meta.env.VITE_APP_API_URL}`);
-  console.log('<======= watchEffect =======> ', connectedUsers.value)
-  socket.on('connectedUsers', (oldConnectedUsers, newConnectedUsers) => {
-    console.log('oldConnectedUsers ===> ', oldConnectedUsers)
-    console.log('newConnectedUsers ===> ', newConnectedUsers)
-    updateWhoIsUp(newConnectedUsers.value);
-  });
-});
+// const updateTimer = ref(null)
+
+// function updateConnectedUsers() {
+//   const majConnectedUsers = computed(() => store.state.connectedUsers)
+//   console.log('majConnectedUsers', majConnectedUsers.value)
+//   console.log('connectedUsers', connectedUsers.value)
+//   if (connectedUsers !== majConnectedUsers) {
+//     // connectedUsers = computed(() => store.state.connectedUsers)
+//     console.log('connectedUsers.value !== majConnectedUsers.value')
+//     created()
+//     // users.value.forEach((user, i) => {
+//     //   if (majConnectedUsers.value.includes(user.user_id.toString())) {
+//     //     users.value[i].lastSeen = 'online'
+//     //     users.value[i].isConnected = true
+//     //   } else {
+//     //     users.value[i].lastSeen = user.status
+//     //     users.value[i].isConnected = false
+//     //   }
+//     // })
+//   // return users.value
+//   }
+// }
+
+// function startUpdateTimer() {
+//   updateTimer.value = setInterval(updateConnectedUsers, 2000);
+// }
+
+// function stopUpdateTimer() {
+//   console.log('Fonction pour arrêter le timer')
+//   clearInterval(updateTimer.value);
+// }
+
+
+// onBeforeUnmount(() => {
+//   stopUpdateTimer();
+// });
+
+
+// function updateWhoIsUp(connectedUsers) {
+//   users.value.forEach((user, i) => {
+//     if (connectedUsers.includes(user.user_id.toString())) {
+//       users.value[i].lastSeen = 'online'
+//       users.value[i].isConnected = true
+//     } else {
+//       users.value[i].lastSeen = user.status
+//       users.value[i].isConnected = false
+//     }
+//   });
+  
+//   socket.emit('updateWhoIsUp', users.value);
+// }
+
+// watchEffect(() => {
+//   // const socket = io(`${import.meta.env.VITE_APP_API_URL}`);
+//   console.log('<======= watchEffect =======> ', connectedUsers.value)
+//   socket.on('connectedUsers', (oldConnectedUsers, newConnectedUsers) => {
+//     console.log('oldConnectedUsers ===> ', oldConnectedUsers)
+//     console.log('newConnectedUsers ===> ', newConnectedUsers)
+//     updateWhoIsUp(newConnectedUsers.value);
+//   });
+// });
 
 
 onMounted(created)

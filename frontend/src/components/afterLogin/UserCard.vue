@@ -12,7 +12,7 @@
         </q-item-section>
       </div>
 
-
+<!-- {{ user.user_id }} -->
       <q-avatar class="justify-center" size="120px">
         <img :src="profileImage(user.name)" aspect-ratio="1"/>
       </q-avatar>
@@ -39,16 +39,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, onMounted, createApp } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 import utility from '@/utility'
 
-// import io from 'socket.io-client'
-// const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
-
+const location = computed(() => store.getters.location)
+const connectedUsers = computed(() => store.state.connectedUsers)
+const updateTimer = ref(null)
 const store = useStore()
-const app = createApp()
 
 const props = defineProps({
   user: {
@@ -57,26 +56,20 @@ const props = defineProps({
   }
 })
 
-// const onlineUserList = computed(() => store.state.onlineUserList)
-
-// const isConnected = computed(() => {
-//   // return onlineUserList.value ? onlineUserList.value.includes(props.user.user_id.toString()) : false
-//   return onlineUserList.value ? onlineUserList.value.includes(props.user.user_id.toString()) : false
-// })
-
-
-const location = computed(() => store.getters.location)
-
 const age = computed(() => {
   return new Date().getFullYear() - new Date(props.user.birthdate).getFullYear()
 })
 
 const distance = computed(() => {
+  const from = {
+    lat: store.getters.location.lat,
+    lng: store.getters.location.lng
+  }
   const to = {
     lat: props.user.lat,
     lng: props.user.lng
   }
-  return `${Math.round(utility.calculateDistance(location.value, to))} kms away`
+  return `${Math.round(utility.calculateDistance(from, to))} kms away`
 })
 
 const lastSeen = computed(() => {
@@ -84,7 +77,7 @@ const lastSeen = computed(() => {
   {
     return 'online'
   } else {
-    return props.user.lastSeen = moment(props.user.lastSeen).utc().fromNow()
+    return props.user.lastSeen = moment(props.user.status).utc().fromNow()
   }
 })
 
@@ -92,18 +85,33 @@ const profileImage = (image) => {
   return utility.getFullPath(image)
 }
 
-// socket.on('onlineUsers', (onlineUserList) => {
-//   // Mettre à jour la liste des utilisateurs connectés dans le store
-//   store.commit('setOnlineUserList', onlineUserList)
-//   console.log('Nouvelle liste d\'utilisateurs en ligne :', onlineUserList);
-// })
+function updateConnectedUsers() {
+  utility.getConnectedUsers()
+    .then(data => {
+      const connectedUserIds = data
+      const userId = props.user.user_id.toString()
 
-// watchEffect(() => {
-//   socket.on('onlineUsers', (onlineUserList) => {
-//       console.log('Nouvelle liste d\'utilisateurs en ligne :', onlineUserList);
-//       // Mettez à jour connectedUsers dans votre magasin Vuex ou dans un ref, par exemple.
-//   });
-// })
+      if (connectedUserIds.includes(userId)) {
+        props.user.lastSeen = 'online'
+        props.user.isConnected = true
+      } else {
+        props.user.lastSeen = moment(props.user.status, 'YYYY-MM-DD HH:mm:ss').utc().fromNow()
+        props.user.isConnected = false
+      }
+    })
+    .catch(error => {
+      console.error('Erreur lors de la récupération des données :', error)
+    });
+}
+
+onMounted(async () => {
+  updateConnectedUsers()
+  updateTimer.value = setInterval(updateConnectedUsers, 2000)
+});
+
+onBeforeUnmount(() => {
+  clearInterval(updateTimer.value)
+});
 
 </script>
 

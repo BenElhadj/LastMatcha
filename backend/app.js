@@ -101,16 +101,22 @@ const io = socketIo(server, {
 
 let users = {}
 
-function sendConnectedUsers(io) {
-    console.log('===> sendConnectedUsers')
-    const onlineUserList = Object.keys(users);
-    io.emit('onlineUsers', onlineUserList);
-}
+// function sendConnectedUsers(io) {
+//     console.log('===> sendConnectedUsers')
+//     const onlineUserList = Object.keys(users);
+//     io.emit('onlineUsers', onlineUserList);
+// }
 
 // let connectedUsers = {}
 
 io.on('connection', socket => {
-    socket.on('chat', data => {
+
+    // io.emit('connectedUsers', onlineUserList => {
+    //     onlineUserList = Object.keys(connectedUsers)
+    //     console.log('io.emit(connectedUsers ===> ', onlineUserList)
+    // })
+
+    io.on('chat', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('chat', data)
@@ -118,7 +124,7 @@ io.on('connection', socket => {
             console.error('app.js chat error ===> ', err)
         }
     })
-    socket.on('typing', data => {
+    io.on('typing', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('typing', data)
@@ -126,7 +132,7 @@ io.on('connection', socket => {
             console.error('app.js typing error ===> ', err)
         }
     })
-    socket.on('seenConvo', data => {
+    io.on('seenConvo', data => {
         try {
             const id = users[data.user]
             if (id) io.sockets.connected[id].emit('seenConvo', data.convo)
@@ -134,7 +140,7 @@ io.on('connection', socket => {
             console.error('app.js seenConvo error ===> ', err)
         }
     })
-    socket.on('match', data => {
+    io.on('match', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('match', data)
@@ -142,7 +148,7 @@ io.on('connection', socket => {
             console.error('app.js match error ===> ', err)
         }
     })
-    socket.on('visit', data => {
+    io.on('visit', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('visit', data)
@@ -150,7 +156,7 @@ io.on('connection', socket => {
             console.error('app.js visit error ===> ', err)
         }
     })
-    socket.on('block', data => {
+    io.on('block', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('block', data.id_from)
@@ -158,12 +164,16 @@ io.on('connection', socket => {
             console.error('app.js block error ===> ', err)
         }
     })
-    socket.on('auth', id => {
+    io.on('auth', id => {
         try {
             users[id] = socket.id
+
+            connectedUsers.add(id)
+            io.emit('connectedUsers', Array.from(connectedUsers))
+            io.emit('userConnected', id)
             io.emit('online', Object.keys(users))
             // io.emit('connectedUsers', Object.keys(users))
-            sendConnectedUsers(io)
+            // sendConnectedUsers(io)
             // console.log('===> auth', id)
             // connectedUsers[id] = id
             // console.log(`User with ID ${id} authenticated and added to connectedUsers.`)
@@ -171,16 +181,18 @@ io.on('connection', socket => {
             console.error('app.js auth error ===> ', err)
         }
     })
-    socket.on('logout', id => {
+    io.on('logout', id => {
         try {
             const sql = `UPDATE users SET status = NOW() WHERE id = ?`
             pool.query(sql, [id])
             delete users[id]
 
+            connectedUsers.delete(id)
             // delete connectedUsers[id]
+            io.emit('connectedUsers', Array.from(connectedUsers))
             io.emit('online', Object.keys(users))
             // io.emit('connectedUsers', Object.keys(users))
-            sendConnectedUsers(io)
+            // sendConnectedUsers(io)
             // console.log('===> logout', id)
             // console.log(`User with ID ${id} logged out and removed from connectedUsers.`)
 
@@ -188,7 +200,7 @@ io.on('connection', socket => {
             console.error('app.js logout error ===> ', err)
         }
     })
-    socket.on('disconnect', () => {
+    io.on('disconnect', () => {
         for (let key of Object.keys(users)) {
             if (users[key] === socket.id) {
                 try {
@@ -214,7 +226,7 @@ app.get('/connectedUsers', (req, res) => {
         return res.status(403).send('Forbidden')
     }
     const onlineUserList = Object.keys(connectedUsers)
-    console.log('onlineUserList ===> ', onlineUserList)
+    // console.log('onlineUserList ===> ', onlineUserList)
     res.json(onlineUserList)
 })
 

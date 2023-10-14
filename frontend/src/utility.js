@@ -72,7 +72,7 @@ const getConnectedUsers = async () => {
       const response = await axios.get(url, {
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
-      console.log('---> response in getConnectedUsers ===> ', response.data)
+      // console.log('---> response in getConnectedUsers ===> ', response.data)
       return response.data
   } catch (error) {
     console.error('err getConnectedUsers in frontend/utility.js ===> ', error)
@@ -123,22 +123,49 @@ export default {
     console.error('err syncNotif in frontend/utility.js ===> ', error)
     }
   },
+  // calculateDistance: (from, to, mile) => {
+  //   if (!from || !to) return 0
+  //   if (Math.abs(from.lat - to.lat) <= 0.005 && Math.abs(from.lng - to.lng) <= 0.005) {
+  //     return 0
+  //   } else {
+  //     const theta = from.lng - to.lng
+  //     const radtheta = Math.PI * theta / 180
+  //     from.rad = Math.PI * from.lat / 180
+  //     to.rad = Math.PI * to.lat / 180
+  //     let dist = Math.sin(from.rad) * Math.sin(to.rad) + Math.cos(from.rad) * Math.cos(to.rad) * Math.cos(radtheta)
+  //     dist = dist > 1 ? 1 : dist
+  //     dist = Math.acos(dist)
+  //     dist = dist * 180 / Math.PI
+  //     dist = dist * 60 * 1.1515
+  //     return !mile ? dist * 1.609344 : dist
+  //   }
+  // },
   calculateDistance: (from, to, mile) => {
-    if (!from || !to) return 0
-    if (Math.abs(from.lat - to.lat) <= 0.005 && Math.abs(from.lng - to.lng) <= 0.005) {
-      return 0
-    } else {
-      const theta = from.lng - to.lng
-      const radtheta = Math.PI * theta / 180
-      from.rad = Math.PI * from.lat / 180
-      to.rad = Math.PI * to.lat / 180
-      let dist = Math.sin(from.rad) * Math.sin(to.rad) + Math.cos(from.rad) * Math.cos(to.rad) * Math.cos(radtheta)
-      dist = dist > 1 ? 1 : dist
-      dist = Math.acos(dist)
-      dist = dist * 180 / Math.PI
-      dist = dist * 60 * 1.1515
-      return !mile ? dist * 1.609344 : dist
+    if (!from || !to) return 10
+    const radianConversion = Math.PI / 180
+    const earthRadius = 6371
+
+    const fromLat = from.lat * radianConversion
+    const fromLng = from.lng * radianConversion
+    const toLat = to.lat * radianConversion
+    const toLng = to.lng * radianConversion
+
+    const dLat = toLat - fromLat
+    const dLng = toLng - fromLng
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(fromLat) * Math.cos(toLat) *
+              Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+    let distance = earthRadius * c
+
+    if (mile) {
+      distance *= 0.621371
     }
+
+    return distance
   },
   updateLocation: () => {
     if (navigator.geolocation) {
