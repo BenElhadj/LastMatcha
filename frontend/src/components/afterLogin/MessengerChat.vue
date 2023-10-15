@@ -1,38 +1,69 @@
 <template>
   <q-layout v-if="selectedConvo" class="column chat_container">
     <q-img v-if="!limit && selectedConvo" class="chat_load" :src="loadGif"></q-img>
+    {{messages}}
+    
+    
+    <div id="q-app" style="min-height: 100vh;">
+      <div class="q-pa-md row justify-center">
+        <div style="width: 100%; max-width: 400px">
+          
+          <q-chat-message :name=user.username :avatar=utility.getFullPath(image) stamp="7 minutes ago" sent text-color="white" bg-color="primary">
+            <div>Hey there!</div>
+            <div>Have you seen Quasar?</div>
+          </q-chat-message>
+
+          <q-chat-message :name=usernameConvo :avatar=utility.getFullPath(imageConvo) bg-color="amber">
+            <q-spinner-dots size="2rem"></q-spinner-dots>
+          </q-chat-message>
+
+        </div>
+      </div>
+    </div>
+
+    
     <q-item v-for="(msg, i) in messages" :key="i + key">
+      
       <q-item-section>
+
         <h3 class="date_spacer subheading mb-2 mt-4" v-if="newConvo(msg, i)">{{ formatTime(msg.created_at) }}</h3>
         <div :class="layoutClass(msg, i)" align-start>
+          
           <q-tooltip>
             <template v-slot:activator="{ on }">
               <q-btn :to="`/user/${msg.id_from}`" v-if="showAvatar(msg, i)" :class="avatarClass(msg, i)">
                 <q-avatar size="40">
-                  <img v-on="on" :src="getFullPath(imageConvo)" :alt="usernameConvo">
+                  <img v-on="on" :src="utility.getFullPath(imageConvo)" :alt="usernameConvo">
                 </q-avatar>
               </q-btn>
             </template>
             <span>{{ usernameConvo }}</span>
           </q-tooltip>
+
           <div :class="pushClass(msg, i)"></div>
           <q-avatar size="20" v-if="seen(msg, i)" class="mt-2">
-            <img :src="getFullPath(imageConvo)" :alt="usernameConvo">
+            <img :src="utility.getFullPath(imageConvo)" :alt="usernameConvo">
           </q-avatar>
+            {{msg.message}}
+          
           <q-tooltip :left="msg.id_from === user.id" :right="msg.id_from != user.id">
             <template v-slot:activator="{ on }">
               <div :class="bubbleClass(msg)" v-on="on">{{msg.message}}</div>
             </template>
             <span>{{ formatTime(msg.created_at) }}</span>
           </q-tooltip>
+          
         </div>
+
       </q-item-section>
+
     </q-item>
+
     <q-item v-if="typing">
       <q-item-section class="to py-0 px-2 top_msg bottom_msg" align-start>
         <q-btn to="/" class="pull_up_single">
           <q-avatar size="40">
-            <img :src="getFullPath(imageConvo)" :alt="usernameConvo">
+            <img :src="utility.getFullPath(imageConvo)" :alt="usernameConvo">
           </q-avatar>
         </q-btn>
         <div class="mx-2 chat_bubble grey lighten-3">
@@ -49,11 +80,12 @@
 </template>
 
 
-<!-- <script setup>
+<script setup>
 import moment from 'moment'
-import { ref, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import utility from '@/utility.js'
 import { useStore } from 'vuex'
+import axios from 'axios'
 
 const store = useStore()
 
@@ -62,6 +94,7 @@ const messages = ref([])
 const page = ref(0)
 const limit = ref(false)
 const loadGif = 'https://i.giphy.com/media/uyCJt0OOhJBiE/giphy.webp'
+const image = computed(() => store.getters.profileImage)
 
 const {
   user,
@@ -78,12 +111,12 @@ const {
 const typing = ref(false)
 
 const checkLimit = (res) => {
-  if (res.length < 50) {
-    limit.value = true
+  if (res && res.length < 50) {
+    limit.value = true;
   } else {
-    page.value++
+    page.value++;
   }
-}
+};
 
 const msgSent = (msg) => {
   messages.value.push(msg)
@@ -110,6 +143,10 @@ const seen = (msg, i) => {
   } else {
     return false
   }
+}
+
+const formatTime = (timestamp) => {
+  return moment(timestamp).format('MMMM D, YYYY, h:mm A');
 }
 
 const layoutClass = (msg, i) => {
@@ -160,16 +197,17 @@ const scroll = () => {
 
 const getChat = async () => {
   try {
-    const url = `${process.env.URL}/api/chat/messages`
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/messages`
     const headers = { 'x-auth-token': user.token }
     const data = {
       id: selectedConvo,
       page: page.value
     }
-    const result = await store.dispatch('getChatMessages', data)
+    const result = await axios.post(url, data, { headers })
+    console.log('result ===> ', result)
     return result
   } catch (err) {
-    console.log('Got error here ===> ', err)
+    console.error('err getChat in frontend/MessengerChat.vue ===> ', err)
   }
 }
 
@@ -181,13 +219,14 @@ watch(() => selectedConvo, async () => {
       const result = await getChat()
       checkLimit(result.body)
       messages.value = result.body
+      console.log('messages.value ===> ', messages.value)
       store.dispatch('syncNotif')
       store.dispatch('seenConvo', {
         user: idUserConvo,
         convo: selectedConvo
       })
     } catch (err) {
-      console.log('Got error here ===> ', err)
+      console.error('err watch(selectedConvo) in frontend/MessengerChat.vue ===> ', err)
     }
   }
 })
@@ -228,18 +267,24 @@ onMounted(() => {
   top.addEventListener('scroll', async (e) => {
     if (!limit.value && top.scrollTop <= 10) {
       const result = await getChat()
-      checkLimit(result.body)
-      messages.value = [...result.body, ...messages.value]
+      console.log(result)
+      checkLimit(result.data)
+      console.log('result.data ===> ', result.data)
+      if (Array.isArray(result.data)) {
+        messages.value = [...result.data, ...messages.value]
+      } else {
+        console.error('Le résultat du serveur n\'est pas un tableau', result.body);
+      }
       top.scrollTop = 150
     }
   })
 })
-</script> -->
+</script>
 
 
 
 
-<script setup>
+<!-- <script setup>
 import { watch, ref, computed, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { io } from 'socket.io-client'
@@ -455,7 +500,7 @@ watch(() => store.getters.seenConvo, (seenConvo) => {
 })
 
 // Define the rest of your watchers here...
-</script>
+</script> -->
 
 
 

@@ -2,26 +2,13 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { promisify } = require('util')
 const sign = promisify(jwt.sign)
-// const auth = require('../middleware/auth')
 const validator = require('../utility/validator')
 const htmlspecialchars = require('htmlspecialchars')
 const userModel = require('../models/userModel')
-const { randomBytes } = require('crypto')
-const { AsyncResource } = require('async_hooks')
-const randomHex = () => randomBytes(10).toString('hex')
-
-// const io = require('socket.io')
-
-const http = require('http');
-const express = require('express');
-const { Server } = require('socket.io');
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
 
 const tokenExp = { expiresIn: 7 * 24 * 60 * 60 }
 const connectedUsers = {}
+
 // Login
 
 const login = async (req, res) => {
@@ -43,7 +30,6 @@ const login = async (req, res) => {
 				const decoded = await bcrypt.compare(password, user.password)
 				if (!decoded)
 					return res.json({ msg: 'Wrong password' })
-				// await userModel.updateStatus(user.id, null);
 				delete user.password
 				delete user.verified
 				delete user.tokenExpiration
@@ -54,12 +40,7 @@ const login = async (req, res) => {
 					return res.json(user)
 				})
 				connectedUsers[user.id] = user.id
-				// console.log(`User with ID ${user.id} connected`)
 				console.log('+++> ', connectedUsers)
-				io.emit('connectedUsersChange', connectedUsers)
-				// io.emit('onlineUsers', Object.keys(connectedUsers))
-				// io.emit('onlineUsers', connectedUsers)
-				// io.emit('connectedUsersUpdate', connectedUsers)
 			} catch (err) {
 				return res.json({ msg: 'Fatal error', err })
 			}
@@ -71,16 +52,11 @@ const login = async (req, res) => {
 
 // Logout 
 
-// const logout = (req, res) => {
 const logout = async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
 	delete connectedUsers[req.user.id]
-	// console.log(`User with ID ${req.user.id} disconnected`)
 	console.log('---> ', connectedUsers)
-	io.emit('connectedUsersChange', connectedUsers)
-	// io.emit('onlineUsers', Object.keys(connectedUsers))
-	// io.emit('connectedUsersUpdate', connectedUsers)
 	await userModel.updateStatus(req.user.id, new Date())
 	res.json({ ok: true })
 }

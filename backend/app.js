@@ -7,7 +7,6 @@ const http = require('http')
 const app = express()
 const socketIo = require('socket.io')
 const port = process.env.PORT || 3000
-const passport = require('passport')
 const path = require('path')
 const pool = require('./src/utility/database')
 const cors = require('cors')
@@ -85,12 +84,6 @@ app.get('/allTags', (req, res) => {
 
 app.get('/api/', (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
 
-
-// app.use((req, res, next) => {
-//     res.status(404).sendFile(path.resolve(__dirname, '404.html'));
-// });
-
-
 const io = socketIo(server, {
 	cors: {
         origin: process.env.APP_URL,
@@ -101,21 +94,8 @@ const io = socketIo(server, {
 
 let users = {}
 
-// function sendConnectedUsers(io) {
-//     console.log('===> sendConnectedUsers')
-//     const onlineUserList = Object.keys(users);
-//     io.emit('onlineUsers', onlineUserList);
-// }
-
-// let connectedUsers = {}
-
 io.on('connection', socket => {
-
-    // io.emit('connectedUsers', onlineUserList => {
-    //     onlineUserList = Object.keys(connectedUsers)
-    //     console.log('io.emit(connectedUsers ===> ', onlineUserList)
-    // })
-
+    
     io.on('chat', data => {
         try {
             const id = users[data.id_to]
@@ -167,16 +147,8 @@ io.on('connection', socket => {
     io.on('auth', id => {
         try {
             users[id] = socket.id
-
             connectedUsers.add(id)
-            io.emit('connectedUsers', Array.from(connectedUsers))
-            io.emit('userConnected', id)
             io.emit('online', Object.keys(users))
-            // io.emit('connectedUsers', Object.keys(users))
-            // sendConnectedUsers(io)
-            // console.log('===> auth', id)
-            // connectedUsers[id] = id
-            // console.log(`User with ID ${id} authenticated and added to connectedUsers.`)
         } catch (err) {
             console.error('app.js auth error ===> ', err)
         }
@@ -186,16 +158,8 @@ io.on('connection', socket => {
             const sql = `UPDATE users SET status = NOW() WHERE id = ?`
             pool.query(sql, [id])
             delete users[id]
-
             connectedUsers.delete(id)
-            // delete connectedUsers[id]
-            io.emit('connectedUsers', Array.from(connectedUsers))
             io.emit('online', Object.keys(users))
-            // io.emit('connectedUsers', Object.keys(users))
-            // sendConnectedUsers(io)
-            // console.log('===> logout', id)
-            // console.log(`User with ID ${id} logged out and removed from connectedUsers.`)
-
         } catch (err) {
             console.error('app.js logout error ===> ', err)
         }
@@ -207,11 +171,7 @@ io.on('connection', socket => {
                     const sql = `UPDATE users SET status = NOW() WHERE id = ?`
                     pool.query(sql, [key])
                     delete users[key]
-                    // delete connectedUsers[key]
                     io.emit('online', Object.keys(users))
-                    
-                    // io.emit('connectedUsers', Object.keys(users))
-                    // console.log(`User with ID ${key} disconnected and removed from connectedUsers.`)
                     socket.disconnect()
                 } catch (err) {
                     console.error('app.js disconnect error ===> ', err)
@@ -226,7 +186,6 @@ app.get('/connectedUsers', (req, res) => {
         return res.status(403).send('Forbidden')
     }
     const onlineUserList = Object.keys(connectedUsers)
-    // console.log('onlineUserList ===> ', onlineUserList)
     res.json(onlineUserList)
 })
 
