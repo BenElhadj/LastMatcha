@@ -49,7 +49,7 @@ const sendMsg = async (e) => {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/send`
         const headers = { 'x-auth-token': user.token }
         const data = {
-          id_conversation: selectedConvo,
+          id_conversation: store.state.selectedConvo,
           id_from: user.id,
           id_to: props.toId,
           message: msg.value
@@ -62,6 +62,7 @@ const sendMsg = async (e) => {
             .slice(0, 2048)
         }
         const result = await axios.post(url, data, { headers })
+        //console.log('result.data ===> ', store.state.selectedConvo)
         if (result.data.ok) {
           msg.value = ''
           store.dispatch('updateConvos', data)
@@ -79,20 +80,23 @@ const sendMsg = async (e) => {
 
 <style>
 .q-field--filled.q-field--dense input {
-  margin-top: 0 !important;
+  margin-top: 5 !important;
 }
 
 .send_msg > .q-field__control > .q-field__append > textarea {
   resize: none !important;
-  overflow-y: hidden;
+  overflow-y: none !important;
   margin-top: 5px;
 }
 .custom-q-input {
   position: fixed;
-  right: 120px;
-  bottom: 130px;
-  left: 370px;
-  z-index: 100;
+  bottom: 140px;
+  left: 25%;
+  right: 10%;
+  z-index: 10;
+  border-radius: 10px;
+  padding: 10px;
+  border: 10 solid white;
 }
 
 </style>

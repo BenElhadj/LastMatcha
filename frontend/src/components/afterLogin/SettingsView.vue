@@ -1,15 +1,17 @@
 <template>
   <q-layout v-if="loaded" view="hHh LpR lff" class="settings">
-    <div class="parallax" :style="`background-image: url(${coverPhoto});`">
-    </div>
-    <q-btn class="cover__btn" color="blue" round dense icon="mdi-image" flat @click.stop="pickFile" >
-      <q-tooltip anchor="bottom middle" self="top middle">
-        Change cover photo
-      </q-tooltip>
+<div class="parallax"></div>
+    <q-btn class="cover__btn" color="blue" round dense icon="mdi-image" flat @click.stop="pickFile">
+      <q-tooltip anchor="bottom middle" self="top middle">Change cover photo</q-tooltip>
     </q-btn>
     <input ref="imageRef" type="file" style="display: none" accept="image/*" @change="onFilePicked">
-    <div class="q-py-sm strap grey-3">
-      <q-card class="q-py-sm">
+    <div class="q-py-sm strap grey-3" style="height: 400px;
+    background-repeat: no-repeat;
+    background-size: cover;" :style="{ 'background-image': `url('${coverPhoto}')`}">
+      <q-card class="q-py-sm" style="background: initial !important; 
+          padding-top: 215px;
+    padding-bottom: 12px;
+    z-index: 1;">
         <q-card-section>
           <div class="row items-center">
             <div class="col-12 col-sm-8 col-md-4">
@@ -27,7 +29,7 @@
     </div>
     <q-card class="profile" style="height: calc(100vh - 60px);">
       <q-card-section>
-        <div class="row q-gutter-md">
+        <div class="row q-gutter-md" style="flex-wrap:initial !important; align-items:center;">
           <div class="col-12 col-sm-8 col-md-4">
             <profile-badge :user="user" settings></profile-badge>
           </div>
@@ -58,20 +60,20 @@
 </template>
 
 <script>
-import { ref, computed, watch, onMounted } from 'vue'
-import axios from 'axios'
-import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
-import Alert from '@/views/AlertView.vue'
-import LoaderView from '@/views/LoaderView.vue'
-import utility from '@/utility.js'
-import ProfileEditor from '@/components/afterLogin/ProfileEditor.vue'
-import ProfileBadge from '@/components/afterLogin/ProfileBadge.vue'
-import ProfileTabs from '@/components/afterLogin/ProfileTabs.vue'
-import ProfileForm from '@/components/afterLogin/ProfileForm.vue'
-import ProfileSettings from '@/components/afterLogin/ProfileSettings.vue'
-import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue'
-import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue'
+import { ref, computed, watch, onMounted } from 'vue';
+import axios from 'axios';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import Alert from '@/views/AlertView.vue';
+import LoaderView from '@/views/LoaderView.vue';
+import utility from '@/utility.js';
+import ProfileEditor from '@/components/afterLogin/ProfileEditor.vue';
+import ProfileBadge from '@/components/afterLogin/ProfileBadge.vue';
+import ProfileTabs from '@/components/afterLogin/ProfileTabs.vue';
+import ProfileForm from '@/components/afterLogin/ProfileForm.vue';
+import ProfileSettings from '@/components/afterLogin/ProfileSettings.vue';
+import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue';
+import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue';
 
 export default {
   name: 'SettingsView',
@@ -86,100 +88,80 @@ export default {
     ProfileGallery,
     ProfileSettings
   },
-  setup (props, { emit }) {
-    const store = useStore()
-    const { user, status, online, blocked, userLocation, blockedBy } = store.getters
-    const router = useRouter()
-    const profileEditor = ref(null)
-    const coverPhoto = computed(() => store.getters.coverPhoto)
-    console.log('coverPhoto ===> ', store.getters.coverPhoto)
-    const profileImage = computed(() => store.getters.profileImage)
-    console.log('profileImage ===> ', store.getters)
-    const error = ref(null)
-    const formRef = ref(null)
-    const loaded = ref(false)
-    const activeTab = ref('tab-profile')
-    const imageRef = ref(null)
+  setup(props, { emit }) {
+    const store = useStore();
+    const { user, status, online, blocked, userLocation, blockedBy } = store.getters;
+    const router = useRouter();
+    const profileEditor = ref(null);
+    const coverPhoto = computed(() => store.getters.coverPhoto);
+    const profileImage = computed(() => store.getters.profileImage);
+    const error = ref(null);
+    const formRef = ref(null);
+    const loaded = ref(false);
+    const activeTab = ref('tab-profile');
+    const imageRef = ref(null);
     const alert = ref({
       state: false,
       color: '',
       text: ''
-    })
+    });
 
     const filteredImages = computed(() => {
-      if (!user.images) return []
-      return user.images.filter(cur => !cur.cover)
-    })
+      if (!user.images) return [];
+      return user.images.filter((cur) => !cur.cover);
+    });
 
-    watch(user, async (newValue, oldValue) => {
-      const token = user.token || localStorage.getItem('token')
-      if (token) {
-        try {
-          const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-          const headers = { 'x-auth-token': token }
-          const res = await axios.get(url, { headers })
-          if (!res.data.msg) {
-            loaded.value = true
-            return
+    watch(
+      user,
+      async (newValue, oldValue) => {
+        const token = user.token || localStorage.getItem('token');
+        if (token) {
+          try {
+            const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`;
+            const headers = { 'x-auth-token': token };
+            const res = await axios.get(url, { headers });
+            if (!res.data.msg) {
+              loaded.value = true;
+              return;
+            }
+          } catch (err) {
+            console.error('err watch user in frontend/SettingsView.vue ===> ', err);
           }
-        } catch (err) {
-          console.error('err watch user in frontend/SettingsView.vue ===> ', err)
         }
-      }
-      store.dispatch('logout', newValue.id)
-      router.push('/login')
-    }, { immediate: true })
+        store.dispatch('logout', newValue.id);
+        router.push('/login');
+      },
+      { immediate: true }
+    );
 
     onMounted(() => {
       if (user.id) {
-        store.dispatch('syncHistory', user.id)
-        store.dispatch('syncMatches', user.id)
+        store.dispatch('syncHistory', user.id);
+        store.dispatch('syncMatches', user.id);
       }
-    })
-    
+    });
+
     onMounted(async () => {
       try {
-        const token = localStorage.getItem('token')
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-        const headers = { 'x-auth-token': token }
-        const res = await axios.get(url, { headers })
+        const token = localStorage.getItem('token');
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`;
+        const headers = { 'x-auth-token': token };
+        const res = await axios.get(url, { headers });
         if (!res.data.msg) {
-          const user = res.data
+          const user = res.data;
           if (user.birthdate) {
-            user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+            user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10);
           }
-          store.dispatch('login', user)
+          store.dispatch('login', user);
         }
       } catch (err) {
-        console.error('err onMounted async in frontend/SettingsView.vue ===> ', err)
+        console.error('err onMounted async in frontend/SettingsView.vue ===> ', err);
       }
-    })
+    });
 
-    // const updateUser = async () => {
-    //   try {
-    //     let msg
-
-    //     const token = localStorage.getItem('token')
-    //     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
-    //     const headers = { 'x-auth-token': token }
-    //     const res = await axios.post(url, user, { headers })
-        
-    //     if (res && res.data && !res.data.msg) {
-    //       msg = 'Your account has been updated successfuly'
-    //       utility.showAlert('green', msg, this)
-    //       store.dispatch('updateUser', user)
-    //       formRef.value.toggleEdit()
-    //     } else {
-    //       msg = res.data.msg ? res.data.msg : 'Ouups something went wrong!'
-    //       utility.showAlert('red', msg, this)
-    //     }
-    //   } catch (err) {
-    //     console.error('err updateUser in frontend/SettingsView.vue ===> ', err)
-    //   }
-    // }
-     const updateUser = async () => {
+    const updateUser = async () => {
       try {
-        const token = localStorage.getItem('token')
+        const token = localStorage.getItem('token');
         const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`;
         const headers = { 'x-auth-token': token };
         const response = await axios.post(url, user, { headers });
@@ -187,7 +169,7 @@ export default {
         if (response.data && !response.data.msg) {
           const msg = 'Your account has been updated successfully';
           showAlert('green', msg);
-          store.commit('updateUser', user); // assuming you have an updateUser mutation
+          store.commit('updateUser', user);
           formRef.value.toggleEdit();
         } else {
           const msg = response.data.msg ? response.data.msg : 'Oops, something went wrong!';
@@ -196,7 +178,7 @@ export default {
             state: true,
             color: 'error',
             text: msg
-          }
+          };
         }
       } catch (err) {
         console.error('Error updating user:', err);
@@ -206,83 +188,83 @@ export default {
     const updateImage = async (data) => {
       if (!error.value) {
         try {
-          let msg
-          const fd = new FormData()
-          fd.append('image', data)
-          const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
-          const headers = { 'x-auth-token': user.token }
-          const res = await axios.post(url, fd, { headers })
+          let msg;
+          const fd = new FormData();
+          fd.append('image', data);
+          const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`;
+          const headers = { 'x-auth-token': user.token };
+          const res = await axios.post(url, fd, { headers });
           if (res && res.data && !res.data.msg) {
-            msg = 'You profile image has been updated successfully'
-            store.commit('updateProfileImage', res.data)
+            msg = 'You profile image has been updated successfully';
+            store.commit('updateProfileImage', res.data);
           } else {
-            msg = 'Something went wrong!'
+            msg = 'Something went wrong!';
           }
           alert.value = {
             state: true,
             color: res && res.data && !res.data.msg ? 'success' : 'error',
             text: msg
-          }
+          };
         } catch (err) {
-          console.error('err updateImage in frontend/SettingsView.vue ===> ', err)
+          console.error('err updateImage in frontend/SettingsView.vue ===> ', err);
         }
       }
     }
 
     const syncUser = (updatedUser) => {
-      store.commit('updateUser', updatedUser)
+      store.commit('updateUser', updatedUser);
     }
 
     const changeTab = (tab) => {
-      activeTab.value = tab
+      activeTab.value = tab;
     }
 
     const openEditor = () => {
-      profileEditor.value.pickFile()
+      profileEditor.value.pickFile();
     }
 
     const pickFile = () => {
-      imageRef.value.click()
+      imageRef.value.click();
     }
 
     const onFilePicked = async (e) => {
-      const files = e.target.files
+      const files = e.target.files;
       if (files[0]) {
-        const imageFile = files[0]
-        const imageName = imageFile.name
-        if (imageName.lastIndexOf('.') <= 0) return
+        const imageFile = files[0];
+        const imageName = imageFile.name;
+        if (imageName.lastIndexOf('.') <= 0) return;
         if (imageFile.size > 1024 * 1024) {
           alert.value = {
             state: true,
             color: 'red',
             text: 'Image is too large..'
-          }
+          };
         } else {
           try {
-            let msg
-            const fd = new FormData()
-            fd.append('image', imageFile)
-            const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
-            const headers = { 'x-auth-token': user.token }
-            const res = await axios.post(url, fd, { headers })
+            let msg;
+            const fd = new FormData();
+            fd.append('image', imageFile);
+            const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`;
+            const headers = { 'x-auth-token': user.token };
+            const res = await axios.post(url, fd, { headers });
             if (res && res.data && !res.data.msg) {
-              msg = 'You cover image has been updated successfully'
+              msg = 'You cover image has been updated successfully';
               alert.value = {
                 state: true,
                 color: 'success',
                 text: msg
-              }
-              store.commit('updateCoverImage', res.data)
+              };
+              store.commit('updateCoverImage', res.data);
             } else {
-              msg = res.data.msg ? res.data.msg : 'Oops something went wrong!'
+              msg = res.data.msg ? res.data.msg : 'Oops something went wrong!';
               alert.value = {
                 state: true,
                 color: 'red',
                 text: msg
-              }
+              };
             }
           } catch (err) {
-            console.error('err onFilePicked in frontend/SettingsView.vue ===> ', err)
+            console.error('err onFilePicked in frontend/SettingsView.vue ===> ', err);
           }
         }
       }
@@ -305,14 +287,14 @@ export default {
       openEditor,
       pickFile,
       onFilePicked
-    }
+    };
   }
 }
 </script>
 
 <style scoped>
 .container {
-    width: 100%;
-    padding: 4em;
+  width: 100%;
+  padding: 4em;
 }
 </style>

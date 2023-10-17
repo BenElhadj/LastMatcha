@@ -9,13 +9,16 @@
         <q-item-section >Pas de conversations</q-item-section>
       </q-item>
 
-      <q-item clickable v-ripple v-for="(convo) in sortedConvos.sort(sortByLastSeen)" :key="convo.id_conversation" @click="syncConvo(convo)">
+
+      <q-item clickable v-ripple v-for="(convo) in sortedConvos.sort(sortByLastSeen)"
+        :key="convo.id_conversation" @click="syncConvo(convo)"
+        :class="{ 'selected-convo': convo === selectedConvo }">
         <q-item-section :value="!!unRead(convo)" overlap color="primary" class="mx-2" left>
             <template v-slot:badge>
               <span>{{ unRead(convo) }}</span>
             </template>
             <q-avatar>
-              <img :src="getFullPath(convo.profile_image)">
+              <img :src="utility.getFullPath(convo.profile_image)">
             </q-avatar>
         </q-item-section>
         <q-item-section class="hidden-sm-and-down">
@@ -29,9 +32,7 @@
           </q-tooltip>
           <q-badge v-if="notTyping(convo)" small rounded :color="lastSeen[convo.user_id] == 'online' ? 'green' : 'grey'" />
           <div v-else class="typing">
-            <div class="typing_point"></div>
-            <div class="typing_point"></div>
-            <div class="typing_point"></div>
+            <q-spinner-dots size="2rem" />
           </div>
 
         </q-item-section>
@@ -45,11 +46,10 @@
 <script setup>
 import utility from '@/utility.js'
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { useStore } from 'vuex'
+import { useStore, mapActions  } from 'vuex'
 import moment from 'moment'
 
 const store = useStore()
-
 const convos = computed(() => store.state.convos)
 const online = computed(() => store.state.online)
 const notif = computed(() => store.state.notif)
@@ -57,11 +57,12 @@ const typingSec = computed(() => store.state.typingSec)
 const convosStatus = ref([])
 const lastSeen = ref([])
 const updateTimer = ref(null)
-
-
 const connectedUsers = computed(() => store.state.connectedUsers)
+const selectedConvo = ref(null);
+
 const syncConvo = (convo) => {
   store.dispatch('syncConvo', convo)
+  selectedConvo.value = convo
 }
 
 const unRead = (convo) => {
@@ -97,9 +98,6 @@ function updateConnectedUsers() {
           convosStatus.value[cur.user_id] = false
         }
       })
-      // console.log('lastSeen', lastSeen)
-      // console.log('convosStatus', convosStatus)
-      // console.log('convos', convos.value.map(cur => cur.user_id.toString()))
     })
     .catch(error => {
       console.error('Erreur lors de la récupération des données :', error)
@@ -117,10 +115,6 @@ onBeforeUnmount(() => {
 
 watch([online, convos], updateConnectedUsers,{ immediate: true })
 
-const getFullPath = (image) => utility.getFullPath(image)
-
-const isNotTyping = notTyping
-
 const sortByLastSeen = (a, b) => {
   if (lastSeen.value[a.user_id] === 'online' && lastSeen.value[b.user_id] !== 'online') {
     return -1
@@ -131,23 +125,21 @@ const sortByLastSeen = (a, b) => {
   }
 };
 
-
-// const sortedConvos = computed(() => convos.value.slice().sort(sortByLastSeen))
 const sortedConvos = computed(() => {
   const uniqueConvos = Array.from(new Set(convos.value.map(convo => convo.user_id)))
     .map(user_id => convos.value.find(convo => convo.user_id === user_id));
 
   return uniqueConvos.sort(sortByLastSeen);
 });
-// const sortedConvos = computed(() => {
-//   const indexes = Array.from({ length: convos.value.length }, (_, i) => i);
-//   return indexes.sort(sortByLastSeen).map(i => convos.value[i]);
-// });
 
 </script>
 
 <style scoped>
 .typing_point {
-  /* background: var(--color-primary); */
+  background: var(--color-primary);
+}
+.selected-convo {
+  background-color: silver; /* Change this to the desired color */
+  /*color: white;  Change this to the desired text color */
 }
 </style>

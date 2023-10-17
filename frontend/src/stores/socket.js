@@ -21,27 +21,16 @@ export const socket = {
         state.socket = io(`${import.meta.env.VITE_APP_API_URL}`);
         state.socket.emit('auth', state.user.id);
         state.isConnected = true;
-    
-        // Écoutez l'événement 'online' pour mettre à jour la liste des utilisateurs en ligne
         state.socket.on('online', (onlineUsers) => {
           state.online = onlineUsers.filter((userId) => userId !== state.user.id).map((userId) => Number(userId));
         });
       }
-      // if (!state.isConnected && state.user.id) {
-      //   const app = createApp({})
-      //   app.config.globalProperties.$socket = io(`${import.meta.env.VITE_APP_API_URL}`)
-      //   app.config.globalProperties.$socket.emit('auth', state.user.id)
-      //   state.isConnected = true
-      // }
-      // console.log('connected')
     },
     SOCKET_disconnect (state) {
       if (state.socket) {
         state.socket.disconnect();
         state.isConnected = false;
       }
-      // state.isConnected = false
-      // console.log('disconnected')
     },
     SOCKET_chat: async (state, data) => {
       try {

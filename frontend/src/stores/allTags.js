@@ -16,7 +16,7 @@ export const allTags = {
               const allTags = await utility.getAllTags()
               commit('setAllTags', allTags)
             } catch (err) {
-              console.error('err getAllTags in frontend/user.js ===> ', err)
+              console.error('err getAllTags in frontend/stores/allTags.js ===> ', err)
             }
         }
     },
