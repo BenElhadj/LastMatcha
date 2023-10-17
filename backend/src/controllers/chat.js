@@ -73,7 +73,7 @@ const sendMsg = async (req, res) => {
 			id_conversation: req.body.id_conversation,
 			id_from: req.body.id_from,
 			message: req.body.message.trim(),
-			date: new Date().toISOString().substr(0, 19)
+			date: new Date(new Date().getTime() + 2 * 60 * 60 * 1000)
 		}
 		if (msg.message.length > 2048)
 			return res.json({ msg: 'Message too long' })

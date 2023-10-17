@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
 }
 
 .top_chat {
-  flex: 0 20% 100% !important;
+  flex: 0% 50% 100% !important;
 }
 
 .top_chat::-webkit-scrollbar {

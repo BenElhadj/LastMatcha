@@ -4,13 +4,6 @@
       <q-page-container v-if="loaded" class="pt-5 px-0">
         <q-layout class="row wrap justify-center">
 
-          <!-- <h2>Utilisateurs en ligne</h2>
-          <ul>
-            <li v-for="user in connectedUsers" :key="user.id">
-              {{ user.username }}
-            </li>
-          </ul> -->
-<!-- {{ user.username }} -->
           <div class="col-2">
             <q-page-container class="px-5">
               <q-layout class="column">
@@ -94,7 +87,6 @@ import countries from '@/nats.json'
 import utility from '@/utility'
 import { matMenu } from '@quasar/extras/material-icons'
 import { mdiAbTesting } from '@quasar/extras/mdi-v5'
-// import { useRouter } from 'vue-router'
 
 import io from 'socket.io-client'
 const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
@@ -306,9 +298,9 @@ onMounted(async () => {
     const headers = { 'x-auth-token': token }
     const res = await axios.get(url, { headers })
     socket.on('onlineUsers', (users) => {
-    onlineUsers.value = users;
+    onlineUsers.value = users
     console.log('onlineUsers ===> ', onlineUsers.value)
-    });
+    })
     if (!res.data.msg && maxDis.value > 0) {
       const user = res.data
       if (user.birthdate) {
@@ -320,75 +312,10 @@ onMounted(async () => {
       console.log('connectedUsers ===> ', connectedUsers)
     store.dispatch('connectedUsers', connectedUsers)
     })
-    // startUpdateTimer()
   } catch (err) {
     console.error('err onMounted in frontend/DiscoverView.vue ===> ', err)
   }
 })
-
-
-// const updateTimer = ref(null)
-
-// function updateConnectedUsers() {
-//   const majConnectedUsers = computed(() => store.state.connectedUsers)
-//   console.log('majConnectedUsers', majConnectedUsers.value)
-//   console.log('connectedUsers', connectedUsers.value)
-//   if (connectedUsers !== majConnectedUsers) {
-//     // connectedUsers = computed(() => store.state.connectedUsers)
-//     console.log('connectedUsers.value !== majConnectedUsers.value')
-//     created()
-//     // users.value.forEach((user, i) => {
-//     //   if (majConnectedUsers.value.includes(user.user_id.toString())) {
-//     //     users.value[i].lastSeen = 'online'
-//     //     users.value[i].isConnected = true
-//     //   } else {
-//     //     users.value[i].lastSeen = user.status
-//     //     users.value[i].isConnected = false
-//     //   }
-//     // })
-//   // return users.value
-//   }
-// }
-
-// function startUpdateTimer() {
-//   updateTimer.value = setInterval(updateConnectedUsers, 2000);
-// }
-
-// function stopUpdateTimer() {
-//   console.log('Fonction pour arrêter le timer')
-//   clearInterval(updateTimer.value);
-// }
-
-
-// onBeforeUnmount(() => {
-//   stopUpdateTimer();
-// });
-
-
-// function updateWhoIsUp(connectedUsers) {
-//   users.value.forEach((user, i) => {
-//     if (connectedUsers.includes(user.user_id.toString())) {
-//       users.value[i].lastSeen = 'online'
-//       users.value[i].isConnected = true
-//     } else {
-//       users.value[i].lastSeen = user.status
-//       users.value[i].isConnected = false
-//     }
-//   });
-  
-//   socket.emit('updateWhoIsUp', users.value);
-// }
-
-// watchEffect(() => {
-//   // const socket = io(`${import.meta.env.VITE_APP_API_URL}`);
-//   console.log('<======= watchEffect =======> ', connectedUsers.value)
-//   socket.on('connectedUsers', (oldConnectedUsers, newConnectedUsers) => {
-//     console.log('oldConnectedUsers ===> ', oldConnectedUsers)
-//     console.log('newConnectedUsers ===> ', newConnectedUsers)
-//     updateWhoIsUp(newConnectedUsers.value);
-//   });
-// });
-
 
 onMounted(created)
 
@@ -435,7 +362,6 @@ a{
 .v-select-list.v-card.theme--light > .v-list,
 .theme--light.q-btn-toggle,
 .v-menu__content.menuable__content__active.v-autocomplete__content > .v-select-list > .v-list {
-  /* background-color: #FAFAFA; */
 }
 
 .q-btn-toggle {
@@ -481,10 +407,10 @@ a{
   transform: rotate(180deg);
 }
 .user {
-  margin: 16px; /* ajustez cette valeur selon vos besoins */
+  margin: 16px;
 }
 
 .filters-container {
-  margin-bottom: 32px; /* ajustez cette valeur selon vos besoins */
+  margin-bottom: 32px;
 }
 </style>

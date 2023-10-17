@@ -60,6 +60,7 @@ const sendMsg = async (e) => {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;')
             .slice(0, 2048)
+         
         }
         const result = await axios.post(url, data, { headers })
         //console.log('result.data ===> ', store.state.selectedConvo)
@@ -89,14 +90,15 @@ const sendMsg = async (e) => {
   margin-top: 5px;
 }
 .custom-q-input {
-  position: fixed;
-  bottom: 140px;
-  left: 25%;
-  right: 10%;
-  z-index: 10;
-  border-radius: 10px;
-  padding: 10px;
-  border: 10 solid white;
+    position: fixed;
+    bottom: 140px;
+    left: 24%;
+    right: 10%;
+    z-index: 10;
+    border-radius: 10px;
+    padding: 10px;
+    border: 5% solid white !important;
+    background: white;
 }
 
 </style>

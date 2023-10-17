@@ -2,11 +2,11 @@
   <q-layout v-if="selectedConvo" class="chat_container">
     <q-img v-if="!selectedConvo" class="chat_load" :src="loadGif"></q-img>
 
-    <div id="q-app" style=" overflow-y:hidden;">
-      <div class="row">
-        <div style="width: 120%; ">
+    <div id="q-app" >
+      <div class="row" >
+        <div style="max-width: 85%; min-widh: 40%; padding-bottom: 50px;">
 
-          <q-item v-for="(msg, i) in messages" :key="i + key" :class="{rtl: msg.id_from === user.id}">
+          <q-item v-for="(msg, i) in messages" :key="i + key" :class="{rtl: msg.id_from === user.id}" >
 
             <q-chat-message v-if="msg.id_from === user.id" :name="user.username"
               :avatar="utility.getFullPath(image)" :stamp="formatTime(msg.created_at)"
@@ -170,32 +170,32 @@ onBeforeUnmount(() => {
 
 const fetchNewMessages = async () => {
   try {
-    const result = await getChat();
-    checkLimit(result.data);
+    const result = await getChat()
+    checkLimit(result.data)
     const newMessages = result.data.filter((message) => {
-      return !messages.value.some((msg) => msg.id === message.id);
-    });
+      return !messages.value.some((msg) => msg.id === message.id)
+    })
 
     if (newMessages.length > 0) {
-      messages.value = [...messages.value, ...newMessages];
-      scroll();
+      messages.value = [...messages.value, ...newMessages]
+      scroll()
     }
   } catch (err) {
-    console.error('Error fetching new messages:', err);
+    console.error('Error fetching new messages:', err)
   }
-};
+}
 
-const messagePollingInterval = setInterval(fetchNewMessages, 2000);
+const messagePollingInterval = setInterval(fetchNewMessages, 1000)
 
 onBeforeUnmount(() => {
-  clearInterval(messagePollingInterval);
-});
+  clearInterval(messagePollingInterval)
+})
 
 </script>
 
 <style>
 .chat_container {
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .chat_load {

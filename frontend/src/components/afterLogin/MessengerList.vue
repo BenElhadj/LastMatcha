@@ -58,7 +58,7 @@ const convosStatus = ref([])
 const lastSeen = ref([])
 const updateTimer = ref(null)
 const connectedUsers = computed(() => store.state.connectedUsers)
-const selectedConvo = ref(null);
+const selectedConvo = ref(null)
 
 const syncConvo = (convo) => {
   store.dispatch('syncConvo', convo)
@@ -123,14 +123,14 @@ const sortByLastSeen = (a, b) => {
   } else {
     return 0
   }
-};
+}
 
 const sortedConvos = computed(() => {
   const uniqueConvos = Array.from(new Set(convos.value.map(convo => convo.user_id)))
-    .map(user_id => convos.value.find(convo => convo.user_id === user_id));
+    .map(user_id => convos.value.find(convo => convo.user_id === user_id))
 
-  return uniqueConvos.sort(sortByLastSeen);
-});
+  return uniqueConvos.sort(sortByLastSeen)
+})
 
 </script>
 
@@ -139,7 +139,6 @@ const sortedConvos = computed(() => {
   background: var(--color-primary);
 }
 .selected-convo {
-  background-color: silver; /* Change this to the desired color */
-  /*color: white;  Change this to the desired text color */
+  background-color: silver;
 }
 </style>
