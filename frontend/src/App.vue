@@ -43,16 +43,14 @@ onMounted(() => {
 
 
 <style scoped>
-* {
-  font-family: 'Elliane' !important;
-  margin: 0;
-  padding: 0;
-  color: black;
-}
 *,
 *::after,
 *::before {
   box-sizing: inherit;
+  font-family: 'Elliane' !important;
+  margin: 0;
+  padding: 0;
+  color: black;
 }
 
 html {
@@ -128,10 +126,6 @@ footer {
     flex-wrap: wrap;
   }
 }
-
-
-
-
 
 .strap {
   height: 4rem;

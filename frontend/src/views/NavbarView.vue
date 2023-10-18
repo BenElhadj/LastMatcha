@@ -31,7 +31,7 @@
         </q-input> 
         
         <div>
-          <img src="@/assets/Navbar/notification.png" alt="notifMenu" class="icon-size mx-2 q-ml-xl">
+          <img src="@/assets/Navbar/notification.png" :nudge-width="250" alt="notifMenu" class="icon-size mx-2 q-ml-xl">
           <q-menu v-model="notifMenu" :nudge-width="250">
             <template #activator="{ on }">
               <q-btn text icon large color="grey" v-on="on">
@@ -42,7 +42,7 @@
                 </q-badge>
               </q-btn>
             </template>
-            <q-list padding class="pa-0 q-ml-xl">
+            <q-list padding class=" notif-msg pa-0 q-ml-xl">
               <q-item v-for="(item, i) in notifs" :key="i" clickable @click="toUserProfile(item.id_from)">
                 <q-item-section avatar>
                   <q-avatar :src="getFullPath(item.profile_image)"></q-avatar>
@@ -70,7 +70,7 @@
         </div>
         
         <div>
-          <img src="@/assets/Navbar/chat.png" alt="Messages" class="icon-size mx-2 q-ml-xl">
+          <img src="@/assets/Navbar/chat.png" :nudge-width="250" alt="Messages" class="icon-size mx-2 q-ml-xl">
           <q-menu v-model="msgMenu" anchor="top right" :content-class="'grey lighten-5'">
             <template #activator="{ on }">
               <q-btn ripple flat round dense class="icon-size" v-on="on">
@@ -81,12 +81,12 @@
                 </q-badge>
               </q-btn>
             </template>
-            <q-list padding class="pa-0">
+            <q-list padding class="notif-msg pa-0">
             
-              <q-item v-for="(item, i) in menuConvos" :key="i" clickable @click="toUserChat(item)">
+              <q-item v-for="(item, i) in menuConvos" class="notif-text" :key="i" clickable @click="toUserChat(item)">
                 <!-- {{ item.profile_image }} -->
                 <q-item-section avatar>
-                  <q-avatar size="55px">
+                  <q-avatar size="37px">
                     <img :src="getFullPath(item.profile_image)">
                   </q-avatar>
                 </q-item-section>
@@ -94,9 +94,9 @@
                 <q-item-section>
                   <q-item-label class="notif_msg">
                     <q-item-section >
-                      <q-item-section class="font-size: smaller !important;">
-                        <span font-size="7px">{{ item.first_name }} {{ item.last_name }}</span>
-                        <span >{{ formatNotifDate(item.last_update) }}</span>
+                      <q-item-section >
+                        <strong class="notif_username">{{ item.first_name }} {{ item.last_name }}</strong>
+                        <span class="ml-auto chat_time">{{ formatNotifDate(item.last_update) }}</span>
                       </q-item-section>
                     </q-item-section>
                   </q-item-label>
@@ -357,7 +357,7 @@ export default {
     })
 
     const menuConvos = computed(() => {
-      return convos.value.slice(0, 7)
+      return convos.value.slice(0, 5)
     })
     console.log('menuConvos', menuConvos.value)
 
@@ -406,6 +406,7 @@ export default {
 * {
   font-weight: bold;
   font-size: x-large;
+  font-family: 'Elliane' !important;
   align-items: center;
   color: black;
 }
@@ -428,6 +429,7 @@ q-drawer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  top: 70px;
 }
 
 .search-field {
@@ -438,6 +440,7 @@ q-drawer {
 .icon-size {
   width: 42px;
   margin: 7px;
+
 }
 
 .q-header {
@@ -445,11 +448,6 @@ q-drawer {
   box-shadow: none !important;
   border: none !important;
   padding: 7px;
-
-}
-
-.black-text {
-  font-size: xx-large !important;
 }
 
 .circular-icon {
@@ -459,6 +457,22 @@ q-drawer {
 .text-link {
   cursor: pointer;
   color: black;
+}
+
+.notif-text {
+  line-height: 3.2em !important;
+}
+
+.notif-msg {
+  font-size: normal !important;
+  font-weight: normal !important;
+  width: 330px;
+  right: 55px;
+  top: auto;
+  height: auto;
+  visibility: visible;
+  max-width: 330px;
+  overflow: hidden;
 }
 
 </style>
