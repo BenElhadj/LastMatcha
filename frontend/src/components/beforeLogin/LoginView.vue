@@ -53,7 +53,7 @@ export default {
     ])
     const usernameRules = ref([
       v => !!v || 'This field is required',
-      v => (v.length >= 7 && v.length <= 25) || 'Username must be between 8 and 25 characters long',
+      v => (v.length >= 7 && v.length <= 35) || 'Username must be between 8 and 25 characters long',
       v => !(/[^a-zA-Z0-9]+/.test(v)) || 'Username can contain only letters and numbers'
     ])
     const emailRules = ref([

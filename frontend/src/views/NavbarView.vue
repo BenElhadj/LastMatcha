@@ -31,7 +31,7 @@
         </q-input> 
         
         <div>
-          <img src="@/assets/Navbar/notification.png" alt="Notifications" class="icon-size mx-2 q-ml-xl">
+          <img src="@/assets/Navbar/notification.png" alt="notifMenu" class="icon-size mx-2 q-ml-xl">
           <q-menu v-model="notifMenu" :nudge-width="250">
             <template #activator="{ on }">
               <q-btn text icon large color="grey" v-on="on">
@@ -81,25 +81,28 @@
                 </q-badge>
               </q-btn>
             </template>
-            <q-list padding class="pa-0 q-ml-xl ">
+            <q-list padding class="pa-0">
+            
               <q-item v-for="(item, i) in menuConvos" :key="i" clickable @click="toUserChat(item)">
+                <!-- {{ item.profile_image }} -->
                 <q-item-section avatar>
-                  <q-avatar :src="getFullPath(item.profile_image)"></q-avatar>
+                  <q-avatar size="55px">
+                    <img :src="getFullPath(item.profile_image)">
+                  </q-avatar>
                 </q-item-section>
+
                 <q-item-section>
                   <q-item-label class="notif_msg">
-                    <q-item-section horizontal>
-                      <q-item-section>
-                        <strong class="notif_username">{{ item.username }}</strong>
-                      </q-item-section>
-                      <q-item-section side>
-                        <span class="ml-auto chat_time">{{ formatNotifDate(item) }}</span>
+                    <q-item-section >
+                      <q-item-section class="font-size: smaller !important;">
+                        <span font-size="7px">{{ item.first_name }} {{ item.last_name }}</span>
+                        <span >{{ formatNotifDate(item.last_update) }}</span>
                       </q-item-section>
                     </q-item-section>
                   </q-item-label>
-                  <q-item-label caption>
-                    <span v-if="item.message_from === user.id" class="notif_date">You: </span>
-                    <span class="notif_date text-truncate">{{ item.message }}</span>
+                  <q-item-label>
+                    <!-- <span v-if="item.message_from === user.id" class="notif_date">You: </span> -->
+                    <!-- <span class="notif_date text-truncate">{{ item.message }}</span> -->
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -225,14 +228,22 @@ export default {
 
     const user = computed(() => store.getters.user)
     const notif = computed(() => store.getters.notif)
-    const notifs = computed(() => store.getters.notifs)
     const status = computed(() => store.getters.status || localStorage.getItem('token'))
     const convos = computed(() => store.getters.convos)
     const typingSec = computed(() => store.getters.typingSec)
     const profileImage = computed(() => store.getters.profileImage)
+
     const typingConvos = computed(() => typingSec.value.convos ? typingSec.value.convos.length : false)
+    const notifs = computed(() => store.getters.notifs)
 
     const getFullPath = utility.getFullPath
+
+    // console.log('typingConvos ===> ', typingConvos)
+    // console.log('notifs ===> ', notifs)
+    // console.log('notif.value ===> ', notif.value)
+    console.log('store.getters ===> ', store.getters)
+    console.log('convos ===> ', convos.value)
+
 
     const seenNotif = async () => {
       try {
@@ -243,6 +254,7 @@ export default {
       } catch (err) {
         console.error('err seenNotif in frontend/NavbarView.view ===> ', err)
       }
+      console.log('seenNotif')
     }
 
     const typingSecClr = (convId) => {
@@ -326,8 +338,12 @@ export default {
     }
 
     watch(notif, (newNotif) => {
-      newMsgNum.value = newNotif.filter(cur => cur.type === 'chat' && !cur.is_read).length
       notifNum.value = newNotif.filter(cur => cur.type !== 'chat' && !cur.is_read).length
+      newMsgNum.value = newNotif.filter(cur => cur.type === 'chat' && !cur.is_read).length
+      // notifNum.value = 15
+      // newMsgNum.value = 20
+      console.log('newMsgNum.value', newMsgNum.value)
+      console.log('notifNum.value', notifNum.value)
     })
 
     watch(typingConvos, (value) => {
@@ -337,11 +353,13 @@ export default {
         if (timer[convId]) clearTimeout(timer[convId])
         timer[convId] = setTimeout(() => typingSecClr(convId), 1200)
       }
+      console.log('typingConvos.value', typingConvos.value)
     })
 
     const menuConvos = computed(() => {
-      return convos.value.slice(0, 7);
+      return convos.value.slice(0, 7)
     })
+    console.log('menuConvos', menuConvos.value)
 
     const handleNotifMenu = () => {
       notifMenu.value = !notifMenu.value

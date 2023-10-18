@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
 }
 
 .top_chat {
-  flex: 0% 50% 100% !important;
+  flex: 0% 20% 100% !important;
 }
 
 .top_chat::-webkit-scrollbar {
@@ -109,12 +109,14 @@ onBeforeUnmount(() => {
 
 .top_chat::-webkit-scrollbar-thumb {
   background-color: #ccc;
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 .left {
   padding: 0 !important;
   margin: 0 !important;
+  max-width: 270px;
+  min-width: 120px;
 }
 
 .right, .chat_layout, .parent {
@@ -130,8 +132,19 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
+  width: 25%;
+  min-width: 120px;
 }
-
+/*.left-scroll {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  width: 25%;
+  max-width: 270px;
+  min-width: 120px;
+}
+*/
 .right-scroll {
   height: 100%;
   overflow-y: auto;
@@ -141,7 +154,7 @@ onBeforeUnmount(() => {
 
 .left-scroll::-webkit-scrollbar,
 .right-scroll::-webkit-scrollbar {
-  width: 12px;
+  width: 5px;
 }
 
 .left-scroll::-webkit-scrollbar-thumb,

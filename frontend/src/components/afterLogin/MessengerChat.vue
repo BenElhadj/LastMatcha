@@ -4,7 +4,7 @@
 
     <div id="q-app" >
       <div class="row" >
-        <div style="max-width: 85%; min-widh: 40%; padding-bottom: 50px;">
+        <div style="max-width: 85%; min-width: 20%; padding-bottom: 50px;">
 
           <q-item v-for="(msg, i) in messages" :key="i + key" :class="{rtl: msg.id_from === user.id}" >
 
@@ -83,7 +83,8 @@ const checkLimit = (res) => {
 }
 
 const formatTime = (created_at) => {
-  return moment(created_at, 'YYYY-MM-DD HH:mm:ss').fromNow()
+  
+  return moment(created_at).fromNow()
 }
 
 const scroll = () => {
@@ -199,7 +200,6 @@ onBeforeUnmount(() => {
 }
 
 .chat_load {
-  width: 3rem;
   height: 3rem;
   margin: auto;
 }

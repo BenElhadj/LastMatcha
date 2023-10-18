@@ -53,14 +53,6 @@ const sendMsg = async (e) => {
           id_from: user.id,
           id_to: props.toId,
           message: msg.value
-            .trim()
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;')
-            .slice(0, 2048)
-         
         }
         const result = await axios.post(url, data, { headers })
         //console.log('result.data ===> ', store.state.selectedConvo)

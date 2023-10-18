@@ -9,10 +9,10 @@
         <q-item-section >Pas de conversations</q-item-section>
       </q-item>
 
-
       <q-item clickable v-ripple v-for="(convo) in sortedConvos.sort(sortByLastSeen)"
         :key="convo.id_conversation" @click="syncConvo(convo)"
         :class="{ 'selected-convo': convo === selectedConvo }">
+
         <q-item-section :value="!!unRead(convo)" overlap color="primary" class="mx-2" left>
             <template v-slot:badge>
               <span>{{ unRead(convo) }}</span>
@@ -21,8 +21,9 @@
               <img :src="utility.getFullPath(convo.profile_image)">
             </q-avatar>
         </q-item-section>
+        
         <q-item-section class="hidden-sm-and-down">
-          <q-item-label>{{ convo.username }}</q-item-label>
+          <q-item-label class="truncate-text">{{ convo.username }}</q-item-label>
         </q-item-section>
 
         <q-item-section side>
@@ -30,6 +31,7 @@
           <q-tooltip bottom class="status_container">
             <span>{{ lastSeen[convo.user_id] }}</span>
           </q-tooltip>
+
           <q-badge v-if="notTyping(convo)" small rounded :color="lastSeen[convo.user_id] == 'online' ? 'green' : 'grey'" />
           <div v-else class="typing">
             <q-spinner-dots size="2rem" />
@@ -140,5 +142,11 @@ const sortedConvos = computed(() => {
 }
 .selected-convo {
   background-color: silver;
+}
+.truncate-text {
+  min-width: 40px; /* Ajustez cette valeur en fonction de votre préférence */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 </style>

@@ -31,8 +31,7 @@
                   <q-avatar>
                     <img
                       :src="getFullPath(entry.profile_image)"
-                      :alt="entry.username"
-                    >
+                      :alt="entry.username">
                   </q-avatar>
                   <div class="q-ml-md">
                     <router-link
