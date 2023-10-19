@@ -59,7 +59,12 @@ const getNotif = (id) => {
 
 // Update Seen √ Notif 
 
-const seenNotif = (id) => {
+const seenOneNotif = (from, to) => {
+	let request = `UPDATE notifications SET is_read = 1 WHERE type != 'chat' AND id_from = ? AND id_to = ?`
+	return db.query(request, [from, to])
+}
+
+const seenNotif  = (id) => {
 	let request = `UPDATE notifications SET is_read = 1 WHERE type != 'chat' AND id_to = ?`
 	return db.query(request, [id])
 }
@@ -78,6 +83,7 @@ module.exports = {
 	delNotif,
 	insertNotifConv,
 	getNotif,
+	seenOneNotif,
 	seenNotif,
 	seenMsgNotif
 }

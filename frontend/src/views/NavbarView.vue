@@ -52,8 +52,14 @@
                     <span class="ml-auto chat_time" style="font-size:16px !important;">{{ getNotifMsg(item) }}</span>
                   </q-item-label>
                   <q-item-label>
-                    <q-icon small color="blue lighten-2" class="mr-2 q-ml-xl">
-                      <span :class=" 'mdi ' + getNotifIcon(item.type)"></span>&nbsp;
+                    <q-icon small style="font-size:16px !important;" class="mr-2 q-ml-xl">
+                      <span :class="['mdi', getNotifIcon(item.type),
+                        {
+                          'text-blue': getNotifIcon(item.type) === 'mdi-eye',
+                          'text-green': getNotifIcon(item.type) === 'mdi-heart-pulse',
+                          'text-red': getNotifIcon(item.type) === 'mdi-heart',
+                          'text-black': getNotifIcon(item.type) === 'mdi-heart-broken'
+                        }]"></span>&nbsp;
                     </q-icon>
                     <span class="ml-auto chat_time" style="font-size:16px !important;">{{ formatNotifDate(item.last_update) }}</span>
                   </q-item-label>
@@ -240,6 +246,7 @@ export default {
         const headers = { 'x-auth-token': user.value.token }
         await axios.post(url, {}, { headers })
         store.dispatch('seenNotif')
+        console.log('seenNotif in frontend/NavbarView.view ===> ', 'ok')
       } catch (err) {
         console.error('err seenNotif in frontend/NavbarView.view ===> ', err)
       }
@@ -252,6 +259,7 @@ export default {
     const toUserProfile = (id) => {
       try {
         router.push(`/user/${id}`)
+        // is_read
       } catch (err) {
         console.error('err toUserProfile in frontend/NavbarView.view ===> ', err)
       }
@@ -356,17 +364,15 @@ export default {
 
     var showList = false
 
-
     const updateNotificationCount = () => {
-      console.log('updateNotificationCount')
       notifNum.value = notif.value.filter(cur => cur.type !== 'chat' && !cur.is_read).length
       newMsgNum.value = notif.value.filter(cur => cur.type === 'chat' && !cur.is_read).length
+      console.log('updateNotificationCount')
     }
-    const notificationUpdater = setInterval(updateNotificationCount, 2000)
+    const notificationUpdater = setInterval(updateNotificationCount, 5000)
     onUnmounted(() => {
       clearInterval(notificationUpdater)
     })
-
 
     return {
       user,

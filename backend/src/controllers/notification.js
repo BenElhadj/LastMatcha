@@ -59,8 +59,20 @@ const updateNotif = async (req, res) => {
 	}
 }
 
+const updateOneNotif = async (req, res) => {
+	if (!req.user.id_to)
+		return res.json({ msg: 'Not logged in' })
+	try {
+		await notifModel.seenOneNotif(req.user.id_from, req.user.id_to)
+		res.json({ ok: true })
+	} catch (err) {
+		return res.json({ msg: 'Fatal error', err })
+	}
+}
+
 module.exports = {
 	insertChatNotif,
 	getAllNotif,
+	updateOneNotif,
 	updateNotif
 }

@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -123,6 +123,14 @@ export default {
       }
       await logout(newUser.id)
     }, { immediate: true })
+
+    onMounted(() => {
+      if (user.value && user.value.token) {
+        // console.log('============ seenNotif ============')
+        // store.commit('seenNotif', {id: user.value.id})
+        store.dispatch('seenNotif', {id: user.value.id})
+      }
+    })
 
     return {
       user,
