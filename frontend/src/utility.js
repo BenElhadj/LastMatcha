@@ -72,7 +72,6 @@ const getConnectedUsers = async () => {
       const response = await axios.get(url, {
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
-      // console.log('---> response in getConnectedUsers ===> ', response.data)
       return response.data
   } catch (error) {
     console.error('err getConnectedUsers in frontend/utility.js ===> ', error)
@@ -191,11 +190,11 @@ export default {
       case 'visit':
         return 'mdi-eye'
       case 'like':
-        return 'mdi-heart'
+        return 'mdi-heart-pulse'
       case 'like_back':
         return 'mdi-heart'
       case 'unlike':
-        return 'mdi-heart-outline'
+        return 'mdi-heart-broken'
     }
   },
   filterBlocked: (state, type) => {
