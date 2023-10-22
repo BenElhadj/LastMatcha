@@ -15,6 +15,8 @@ const login = async (req, res) => {
 	const username = htmlspecialchars(req.body.username)
 	const password = htmlspecialchars(req.body.password)
 
+	// console.log('username: ', username)
+
 	if (!validator(username, 'username'))
 		return res.json({ msg: 'Username is invalid' })
 	if (!validator(password, 'password'))

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@johmun/vue-tags-input": "^2.1.0",
+    "@kyvg/vue3-notification": "^3.0.2",
     "@mdi/font": "^7.2.96",
     "@mdi/js": "^7.2.96",
     "@quasar/extras": "^1.16.5",

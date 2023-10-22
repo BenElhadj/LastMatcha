@@ -167,13 +167,13 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <alert :data="alert"></alert>
+      <AlertView :alert="alert"></AlertView>
     </div>
   </q-layout>
 </template>
 
 <script>
-import Alert from '@/views/AlertView.vue'
+import AlertView from '@/views/AlertView.vue'
 import moment from 'moment'
 import loader from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
@@ -188,7 +188,7 @@ import axios from 'axios'
 export default {
   name: 'UserProfile',
   components: {
-    Alert,
+    AlertView,
     loader,
     ProfileTabs,
     // ProfileForm,
@@ -345,9 +345,9 @@ export default {
       this.activeTab = tab
     },
     getProfileImage () {
-      if (!this.user || !this.user.images) return 'default.png'
+      if (!this.user || !this.user.images) return 'defaut_profile.png'
       const image = this.user.images.find(cur => cur.profile === 1)
-      return image ? image.name : 'default.png'
+      return image ? image.name : 'defaut_profile.png'
     },
     async match () {
       const url = `${import.meta.env.VITE_APP_API_URL}/api/matching/match`
@@ -364,7 +364,7 @@ export default {
           date: new Date(),
           id_from: this.loggedIn.id,
           username: this.loggedIn.username,
-          profile_image: profileImg ? profileImg.name : 'default.png',
+          profile_image: profileImg ? profileImg.name : 'defaut_profile.png',
           id_to: this.$route.params.id
         }
         if (!this.liked) {
@@ -428,7 +428,7 @@ export default {
               date: new Date(),
               id_from: this.loggedIn.id,
               username: this.loggedIn.username,
-              profile_image: profileImg ? profileImg.name : 'default.png',
+              profile_image: profileImg ? profileImg.name : 'defaut_profile.png',
               id_to: id,
               type: 'visit'
             }
@@ -447,9 +447,13 @@ export default {
       const res = await axios.post(url, data, { headers })
       if (!res.data.msg) {
         this.reportDialog = false
-        this.showAlert('green', 'User reported successfuly', this)
+        this.alert.state = true
+        this.alert.color = 'green'
+        this.alert.text = 'User reported successfuly'
       } else {
-        this.showAlert('red', res.data.msg, this)
+        this.alert.state = true
+        this.alert.color = 'red'
+        this.alert.text = res.data.msg
       }
     }
   }

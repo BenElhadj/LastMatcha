@@ -24,7 +24,7 @@
               <span>{{ formatTime(entry.date) }}</span>
             </q-tooltip>
           </div>
-          <div class="col-9">
+          <div style="font-family: 'Elliane' !important;" class="col-9">
             <q-card class="notif_bubble">
               <q-card-section>
                 <div class="row items-center">
@@ -38,10 +38,20 @@
                       :to="`/user/${entry.id_from}`"
                       class="timeline_link"
                     >
-                      {{ entry.username }}
+                    <span class="text-h6 text-weight-bold">{{ entry.username }}</span>
                     </router-link>
+                    <q-icon small style="font-size:16px !important;" class="mr-2 q-ml-xl">
+                      <span :class="['mdi', getNotifIcon(entry.type),
+                        {
+                          'text-blue': getNotifIcon(entry.type) === 'mdi-eye',
+                          'text-green': getNotifIcon(entry.type) === 'mdi-heart-pulse',
+                          'text-red': getNotifIcon(entry.type) === 'mdi-heart',
+                          'text-black': getNotifIcon(entry.type) === 'mdi-heart-broken'
+                        }]"></span>&nbsp;
+                    </q-icon>
                     <div class="subtitle">
-                      {{ getNotifMsg(entry) }}
+                    <span class="text-weight-bold">{{ getNotifMsg(entry) }}</span>
+                    <span class="text-weight-bold">{{ ' on ' + moment(entry.date).format('D MMMM, YYYY, h:mm A') }}</span>
                     </div>
                   </div>
                 </div>
@@ -69,6 +79,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import utility from '@/utility.js'
+import moment from 'moment'
 
 export default {
   name: 'NotificationsView',
@@ -81,7 +92,7 @@ export default {
     const notif = computed(() => store.state.notif)
     const notChats = computed(() => notif.value.filter(cur => cur.type !== 'chat'))
     const notifs = computed(() => [...notChats.value].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, limit.value))
-    const { fromNow, formatTime, getFullPath, getNotifMsg } = utility
+    const { fromNow, formatTime, getFullPath, getNotifMsg, getNotifIcon } = utility
 
     const increaseLimit = () => {
       if (limit.value + 11 < notChats.value.length) {
@@ -125,11 +136,7 @@ export default {
     }, { immediate: true })
 
     onMounted(() => {
-      if (user.value && user.value.token) {
-        // console.log('============ seenNotif ============')
-        // store.commit('seenNotif', {id: user.value.id})
-        store.dispatch('seenNotif', {id: user.value.id})
-      }
+      store.dispatch('seenNotif', {id: user.value.id})
     })
 
     return {
@@ -143,7 +150,9 @@ export default {
       fromNow,
       formatTime,
       getFullPath,
-      getNotifMsg
+      getNotifMsg,
+      moment,
+      getNotifIcon
     }
   }
 }

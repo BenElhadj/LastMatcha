@@ -54,7 +54,7 @@
       </q-flex>
     </v-layout>
   </q-page-container>
-  <alert :data="alert"></alert>
+  <AlertView :alert="alert"></AlertView>
   <profile-editor @file_error="error = true" @file_succes="error = false" @update-image="updateImage" ref="profile_editor"></profile-editor>
 </v-layout>
 <loader v-else/>
@@ -77,7 +77,7 @@ import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue'
 export default {
   name: 'Settings',
   components: {
-    Alert,
+    AlertView,
     loader,
     ProfileTabs,
     ProfileForm,
@@ -159,13 +159,15 @@ export default {
         const headers = { 'x-auth-token': this.user.token }
         const res = await this.$http.post(url, this.user, { headers })
         if (res && res.body && !res.body.msg) {
-          msg = 'Your account has been updated successfuly'
-          this.showAlert('green', msg, this)
+          this.alert.state = true
+          this.alert.color = 'green'
+          this.alert.text = 'Your account has been updated successfuly';
           this.update(this.user)
           this.$refs.form.toggleEdit()
         } else {
-          msg = res.body.msg ? res.body.msg : 'Ouups something went wrong!'
-          this.showAlert('red', msg, this)
+          this.alert.state = true
+          this.alert.color = res.body.msg ? res.body.msg : 'Ouups something went wrong!'
+          this.alert.text = 'red'
         }
       } catch (err) {
         console.log('got error here --> ', err)
@@ -181,12 +183,14 @@ export default {
           const headers = { 'x-auth-token': this.user.token }
           const res = await this.$http.post(url, fd, { headers })
           if (res && res.body && !res.body.msg) {
-            msg = 'You profile image has been updated successfuly'
-            this.showAlert('success', msg, this)
+            this.alert.state = true
+            this.alert.color = 'green'
+            this.alert.text = 'You profile image has been updated successfuly'
             this.$store.commit('updateProfileImage', res.body)
           } else {
-            msg = 'Something went wrong!'
-            this.showAlert('red', msg, this)
+            this.alert.state = true
+            this.alert.color = 'red'
+            this.alert.text = 'Something went wrong!'
           }
         } catch (err) {
           console.log('got error here --> ', err)
@@ -212,7 +216,9 @@ export default {
         const imageName = imageFile.name
         if (imageName.lastIndexOf('.') <= 0) return
         if (imageFile.size > 1024 * 1024) {
-          this.showAlert('red', 'Image is too large..', this)
+          this.alert.state = true
+          this.alert.color = 'red'
+          this.alert.text = 'Image is too large..'
         } else {
           try {
             let msg
@@ -222,12 +228,14 @@ export default {
             const headers = { 'x-auth-token': this.user.token }
             const res = await this.$http.post(url, fd, { headers })
             if (res && res.body && !res.body.msg) {
-              msg = 'You cover image has been updated successfuly'
-              this.showAlert('success', msg, this)
+              this.alert.state = true
+              this.alert.color = 'green'
+              this.alert.text = 'You cover image has been updated successfuly'
               this.$store.commit('updateCoverImage', res.body)
             } else {
-              msg = res.body.msg ? res.body.msg : 'Ouups something went wrong!'
-              this.showAlert('red', msg, this)
+              this.alert.state = true
+              this.alert.color = 'red'
+              this.alert.text = res.body.msg ? res.body.msg : 'Ouups something went wrong!'
             }
           } catch (err) {
             console.log('Got error here --> ', err)

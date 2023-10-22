@@ -2,7 +2,7 @@
   <q-header class="black-text">
     <q-toolbar>
 
-      <div v-if="status" @click="drawer = true">
+      <div v-if="connected" @click="drawer = true">
         <q-item>
           <q-btn flat round dense>
             <q-avatar size="60px">
@@ -23,7 +23,7 @@
 
       <q-space></q-space>
       
-      <div v-if="status" justify-end class="search-notif-msg">
+      <div v-if="connected" justify-end class="search-notif-msg">
         
         <q-input v-model="searchText" margin-right="37px" class="search-field q-ml-xl" dense outlined hide-details placeholder="Recherche">
           <template #prepend>
@@ -61,7 +61,7 @@
                           'text-black': getNotifIcon(item.type) === 'mdi-heart-broken'
                         }]"></span>&nbsp;
                     </q-icon>
-                    <span class="ml-auto chat_time" style="font-size:16px !important;">{{ formatNotifDate(item.last_update) }}</span>
+                    &nbsp;<span class="ml-auto chat_time" style="font-size:16px !important;">{{ formatNotifDate(item.last_update) }}</span>
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -89,10 +89,13 @@
                     <img :src="getFullPath(item.profile_image)">
                   </q-avatar>
                 </q-item-section>
+                <div>
+                  <q-badge small :color="item.is_read == 0 ? 'blue' : 'grey'" />
+                </div>
                 <q-item-section>
                   <q-item-label class="notif_msg">
-                      <strong class="notif_username" style="font-size:16px !important;">{{ item.first_name }} {{ item.last_name }}</strong>&nbsp;
-                      <span class="ml-auto chat_time" style="font-size:16px !important;">{{ formatNotifDate(item.last_update) }}</span>
+                    <strong class="notif_username" style="font-size:16px !important;">{{ item.first_name }} {{ item.last_name }}</strong>&nbsp;
+                    <span class="ml-auto chat_time" style="font-size:16px !important;">{{ formatNotifDate(item.last_update) }}</span>
                   </q-item-label>
                   <q-item-label>
                     <span v-if="item.message_from === user.id" class="notif_username" style="font-size:16px !important;">You: </span>
@@ -118,7 +121,7 @@
       
     </q-toolbar>
 
-    <q-drawer v-if="status" v-model="drawer" overlay>
+    <q-drawer v-if="connected" v-model="drawer" overlay>
       <div class="drawer-bg"></div>
       <q-list padding>
         <div @click="drawer = !drawer">
@@ -135,7 +138,7 @@
         </div>
         <q-separator></q-separator>
         <div v-for="link in links" :key="link.text">
-          <q-item v-if="link.public || status" clickable @click="$router.push(link.route)">
+          <q-item v-if="link.public || connected" clickable @click="$router.push(link.route)">
             <img :src="link.image" alt="Icon" class="icon-size">
             <q-item-section>
               <q-item-label>{{ link.text }}</q-item-label>
@@ -156,7 +159,7 @@
 
 <script>
 import utility from '@/utility.js'
-import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
+import { computed, watch, ref, onMounted, onUnmounted, onBeforeUnmount } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -173,14 +176,9 @@ export default {
     const store = useStore()
     const router = useRouter()
     const timer = {}
-    const notifMenu = ref(false)
-    const msgMenu = ref(false)
-    const notifNum = ref(0)
-    const newMsgNum = ref(0)
     const searchText = ref('')
     const drawer = ref(false)
     const image = computed(() => store.getters.profileImage)
-
     const links = [
       {
         text: 'Accueil',
@@ -219,49 +217,54 @@ export default {
         image: parametreImage
       }
     ]
+    let notifMenu = ref(false)
+    let msgMenu = ref(false)
+    let notifNum = ref(0)
+    let newMsgNum = ref(0)
 
     const user = computed(() => store.getters.user)
-    const notif = computed(() => store.getters.notif)
-    const status = computed(() => store.getters.status || localStorage.getItem('token'))
-    const convos = computed(() => store.getters.convos)
-    const typingSec = computed(() => store.getters.typingSec)
+    const connected = computed(() => store.getters.status || localStorage.getItem('token'))
     const profileImage = computed(() => store.getters.profileImage)
-    const typingConvos = computed(() => typingSec.value.convos ? typingSec.value.convos.length : false)
+
+    let notif = ref([])
+    notif.value = store.getters.notif
+
+    let convos = ref([])
+    convos.value = store.getters.convos
+
+    let notifs = ref([])
+    notifs.value = notif.value.sort((a, b) => { if (a.is_read !== b.is_read) 
+                      { return a.is_read - b.is_read }
+                    return new Date(b.date) - new Date(a.date)}).slice(0, 5)
+    
+    let menuConvos = ref([])
+    let newMessage = ref([])
+
 
     const getFullPath = utility.getFullPath
     const getNotifMsg = utility.getNotifMsg
     const getNotifIcon = utility.getNotifIcon
     const formatNotifDate = utility.formatTime
-
-    const notifs = computed(() => {
-      return notif.value
-        .filter(notification => notification.type !== 'chat')
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 5);
-    });
-
-    const seenNotif = async () => {
-      try {
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/update`
-        const headers = { 'x-auth-token': user.value.token }
-        await axios.post(url, {}, { headers })
-        store.dispatch('seenNotif')
-        console.log('seenNotif in frontend/NavbarView.view ===> ', 'ok')
-      } catch (err) {
-        console.error('err seenNotif in frontend/NavbarView.view ===> ', err)
-      }
-    }
+    const updateOneNotif = utility.updateOneNotif
 
     const typingSecClr = (convId) => {
       store.dispatch('typingSecClr', convId)
     }
 
-    const toUserProfile = (id) => {
+    const toUserProfile = (id_from) => {
       try {
-        router.push(`/user/${id}`)
-        // is_read
+        updateOneNotif(id_from, user.value.id)
+        router.push(`/user/${id_from}`)
       } catch (err) {
         console.error('err toUserProfile in frontend/NavbarView.view ===> ', err)
+      }
+    }
+
+    const toUserChat = (convo) => {
+      try {
+        syncConvo(convo)
+      } catch (err) {
+        console.error('err toUserChat in frontend/NavbarView.view ===> ', err)
       }
     }
 
@@ -292,19 +295,14 @@ export default {
             user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
           }
           store.dispatch('login', user)
+          updateNotifAndMsg()
         }
       } catch (err) {
         console.error('err async onMounted in frontend/NavbarView.view ===> ', err)
       }
     })
 
-    const toUserChat = (convo) => {
-      try {
-        syncConvo(convo)
-      } catch (err) {
-        console.error('err toUserChat in frontend/NavbarView.view ===> ', err)
-      }
-    }
+
 
     const syncConvo = async (convo) => {
       try {
@@ -333,56 +331,81 @@ export default {
       }
     }
 
-    watch(notif, (newNotif) => {
-      notifNum.value = newNotif.filter(cur => cur.type !== 'chat' && !cur.is_read).length
-      newMsgNum.value = newNotif.filter(cur => cur.type === 'chat' && !cur.is_read).length
-    })
 
-    watch(typingConvos, (value) => {
-      if (typingSec.value.status) {
-        const len = typingSec.value.convos.length
-        const convId = typingSec.value.convos[len - 1].id_conversation
-        if (timer[convId]) clearTimeout(timer[convId])
-        timer[convId] = setTimeout(() => typingSecClr(convId), 1200)
+    function sortAndFilterMessages(messages) {
+        messages.sort((a, b) => {
+            if (a.is_read !== b.is_read) {
+                return a.is_read - b.is_read;
+            } else if (a.id_conversation === b.id_conversation) {
+                const dateA = new Date(a.last_update);
+                const dateB = new Date(b.last_update);
+                return dateB - dateA;
+            } else {
+                return b.id_conversation - a.id_conversation;
+            }
+        });
+
+        const uniqueConversations = new Set();
+        const uniqueMessages = [];
+
+        for (const message of messages) {
+            if (!uniqueConversations.has(message.id_conversation)) {
+                uniqueMessages.push(message);
+                uniqueConversations.add(message.id_conversation);
+            }
+        }
+
+        return uniqueMessages.slice(0, 5);
+    }
+    
+    menuConvos.value = sortAndFilterMessages(newMessage.value)
+
+    const getNewMsg = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/getInChat`
+        const headers = { 'x-auth-token': token }
+        const result = await axios.get(url, { headers })
+        return result.data
+      } catch (err) {
+        console.error('Error fetching new messages:', err)
       }
-    })
+    };
 
-    const menuConvos = computed(() => {
-      return convos.value.slice(0, 5)
-    })
+     const updateNotifAndMsg = async () => {
+      if (connected.value !== null) {
+        
+        notifs.value = notif.value.sort((a, b) => { if (a.is_read !== b.is_read) 
+                          { return a.is_read - b.is_read }
+                        return new Date(b.date) - new Date(a.date)}).slice(0, 5)
+        menuConvos.value = sortAndFilterMessages(newMessage.value)
+        convos.value = store.getters.convos
+        notif.value = store.getters.notif
+        newMessage.value = await getNewMsg()
+        const newNotif = computed(() => store.getters.notif)
+        notifNum.value = newNotif.value.filter(cur => !cur.is_read).length
+        newMsgNum.value = newMessage.value.filter(cur => !cur.is_read).length
 
-    const handleNotifMenu = () => {
-      notifMenu.value = !notifMenu.value
-    }
-
-    const handleMsgMenu = () => {
-      msgMenu.value = !msgMenu.value
-      if (msgMenu.value) {
-        newMsgNum.value = 0;
       }
     }
 
-    var showList = false
+    const dataUpdate = setInterval(updateNotifAndMsg, 2000)
 
-    const updateNotificationCount = () => {
-      notifNum.value = notif.value.filter(cur => cur.type !== 'chat' && !cur.is_read).length
-      newMsgNum.value = notif.value.filter(cur => cur.type === 'chat' && !cur.is_read).length
-      console.log('updateNotificationCount')
-    }
-    const notificationUpdater = setInterval(updateNotificationCount, 5000)
     onUnmounted(() => {
-      clearInterval(notificationUpdater)
+      clearInterval(dataUpdate)
+    })
+
+    onBeforeUnmount(() => {
+      clearInterval(dataUpdate)
     })
 
     return {
       user,
       notif,
       notifs,
-      status,
+      connected,
       convos,
-      typingSec,
       profileImage,
-      typingConvos,
       searchText,
       drawer,
       links,
@@ -391,19 +414,17 @@ export default {
       getFullPath,
       formatNotifDate,
       image,
-      seenNotif,
       syncConvo,
       typingSecClr,
       toUserProfile,
       toUserChat,
       logout,
-      handleNotifMenu,
       menuConvos,
       notifNum,
       newMsgNum,
       getNotifMsg,
       getNotifIcon,
-      handleMsgMenu
+      newMessage
     }
   }
 }

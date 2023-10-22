@@ -25,7 +25,7 @@
         Go back
       </q-btn>
       <LoaderView v-if="loading" />
-      <AlertView :value="alert.state"></AlertView>
+      <AlertView :alert="alert"></AlertView>
     </q-container>
   </q-layout>
 </template>
@@ -106,9 +106,13 @@ export default {
         this.loading = false
         if (res.data.ok) {
           this.notSubmited = false
-          this.showAlert('green', 'Votre mot de passe a été réinitialisé !', this)
+          this.alert.state = true
+          this.alert.color = 'green'
+          this.alert.text = 'Votre mot de passe a été réinitialisé !'
         } else {
-          this.showAlert('red', 'Oups, une erreur s\'est produite. Merci de réessayer.', this)
+          this.alert.state = true
+          this.alert.color = 'red'
+          this.alert.text = 'Oups, une erreur s\'est produite. Merci de réessayer.'
         }
       } catch (err) {
         console.error('err submit in frontend/RecoverView.vue ===> ', err)

@@ -59,9 +59,9 @@ const getNotif = (id) => {
 
 // Update Seen √ Notif 
 
-const seenOneNotif = (from, to) => {
-	let request = `UPDATE notifications SET is_read = 1 WHERE type != 'chat' AND id_from = ? AND id_to = ?`
-	return db.query(request, [from, to])
+const seenOneNotif = (id_from, id_to) => {
+	let request = `UPDATE notifications SET is_read = 1 WHERE id_to = ? AND id_from = ?`
+	return db.query(request, [id_to, id_from])
 }
 
 const seenNotif  = (id) => {

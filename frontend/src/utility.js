@@ -18,7 +18,7 @@ const getDate = item => {
     default:
       return item
   }
-}
+} 
 const getId = tab => {
   switch (tab) {
     case 'notif':
@@ -53,6 +53,23 @@ const syncLocation = async location => {
   }
 }
 
+const updateOneNotif = async (id_from, id_to) => {
+  try {
+    const token = localStorage.getItem('token');
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/updateOneNotif`;
+    const headers = { 'x-auth-token': token };
+    const response = await axios.put(url, { id_from, id_to }, { headers });
+
+    if (response.status === 200) {
+      console.log('Notification marked as seen successfully.');
+    } else {
+      console.error('Failed to mark the notification as seen.');
+    }
+  } catch (error) {
+    console.error('Error in seenOneNotif:', error);
+  }
+}
+
 const getAllTags = async () => {
   try {
       const url = `${import.meta.env.VITE_APP_API_URL}/allTags`
@@ -82,12 +99,13 @@ const getConnectedUsers = async () => {
 export default {
   getDate,
   isBlocked,
+  updateOneNotif,
   getAllTags,
   getConnectedUsers,
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line
-  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'default.png'}`,
+  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'defaut_profile.png'}`,
   // consoleLog: ('utility.js getFullPath => ', getFullPath),
   formatTime (date) {
     const when = moment(getDate(date))
@@ -201,11 +219,12 @@ export default {
     return state[type].filter(cur => !isBlocked(state, cur[getId(type)]))
   },
   showAlert (color, text) {
-    alert.value = {
+    console.log('showAlert color, text => ', color, text)
+    return {
       state: true,
-      color,
-      text
+      color: color,
+      text: text
     }
-  },
+  },  
   passMatch: (p1, p2) => !p1.length || p2 === p1 ? '' : 'Passwords must match'
 }

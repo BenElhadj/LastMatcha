@@ -13,7 +13,7 @@
           Envoyer
         </q-btn>
       </div>
-      <AlertView :value="alert.state"></AlertView>
+      <AlertView :alert="alert"></AlertView>
     </q-page>
   </q-layout>
 </template>
@@ -41,20 +41,18 @@ export default {
         const res = await axios.post(url, { email: email.value })
         email.value = ''
         if (res.data.ok) {
-          showAlert('green', 'Please check your email ..')
+          alert.value.state = true
+          alert.value.color = 'green'
+          alert.value.text = 'Please check your email ..'
         } else {
-          showAlert('red', 'Ouups something went wrong!')
+          alert.value.state = true
+          alert.value.color = 'red'
+          alert.value.text = 'Ouups something went wrong!'
         }
       } else {
-        showAlert('red', 'Please provide a valid email')
-      }
-    }
-
-    const showAlert = (color, text) => {
-      alert.value = {
-        state: true,
-        color,
-        text
+        alert.value.state = true
+        alert.value.color = 'red'
+        alert.value.text = 'Please provide a valid email'
       }
     }
 

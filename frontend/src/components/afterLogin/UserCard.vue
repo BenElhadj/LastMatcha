@@ -95,7 +95,7 @@ function updateConnectedUsers() {
         props.user.lastSeen = 'online'
         props.user.isConnected = true
       } else {
-        props.user.lastSeen = moment(props.user.status, 'YYYY-MM-DD HH:mm:ss').utc().fromNow()
+        props.user.lastSeen = moment(props.user.status, 'YYYY-MM-DD HH:mm:ss').fromNow()
         props.user.isConnected = false
       }
     })

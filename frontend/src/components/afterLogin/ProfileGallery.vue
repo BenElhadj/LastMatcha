@@ -11,7 +11,7 @@
         <img :src="profileImage(image.name)" class="image full-width">
       </div>
     </div>
-    <AlertView :value="alert.state" />
+    <AlertView v-if="alert.state" :data="alert"/>
   </q-page>
 </template>
 
@@ -53,9 +53,9 @@ export default {
         const res = await axios.post(url, data, { headers })
         if (res.data.ok) {
           await store.dispatch('delImg', image.id)
-          showAlert('green', 'Photo has been removed', this)
+          utility.showAlert('green', 'Photo has been removed', this)
         } else {
-          showAlert('red', 'Oups.. something went wrong', this)
+          utility.showAlert('red', 'Oups.. something went wrong', this)
         }
       } catch (err) {
         console.error('err deleteImg in frontend/ProfileGallery.vue ===> ', err)

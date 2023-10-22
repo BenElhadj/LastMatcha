@@ -101,7 +101,7 @@
         <map-location-selector :latitude="latitude" :longitude="longitude" @location-updated="locationUpdated"></map-location-selector>
       </q-card>
     </q-dialog>
-    <AlertView :value="alert.state"></AlertView>
+    <AlertView v-if="alert.state" :data="alert"></AlertView>
   </q-page-container>
 </template>
 
@@ -109,6 +109,7 @@
 import { ref, reactive, watch, computed, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
+import utility from '@/utility'
 import AlertView from '@/views/AlertView.vue'
 
 // import mapLocationSelector from 'vue-google-maps-location-selector/src/GoogleMapsLocationSelector'
@@ -199,11 +200,11 @@ export default {
       }
     }
 
-    const showAlert = (color, msg) => {
-      alert.state = true
-      alert.color = color
-      alert.text = msg
-    }
+    // const showAlert = (color, msg) => {
+    //   alert.state = true
+    //   alert.color = color
+    //   alert.text = msg
+    // }
     const saveEmail = async () => {
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/users/changeemail`
@@ -216,13 +217,13 @@ export default {
         password.value = ''
         valid.value = false
         if (res.ok) {
-          showAlert('green', 'Your email has been updated')
+          utility.showAlert('green', 'Your email has been updated')
           emailDialog.value = false
           updateUserEmail(email.value)
           email.value = ''
           reRenderComp()
         } else {
-          showAlert('red', res.msg)
+          utility.showAlert('red', res.msg)
         }
       } catch (err) {
         console.error('err saveEmail in frontend/ProfileSettings.vue ===> ', err)
@@ -245,10 +246,10 @@ export default {
         valid.value = false
         reRenderComp()
         if (res.ok) {
-          showAlert('green', 'Your password has been updated')
+          utility.showAlert('green', 'Your password has been updated')
           passDialog.value = false
         } else {
-          showAlert('red', res.msg)
+          utility.showAlert('red', res.msg)
         }
       } catch (err) {
         console.error('err savePass in frontend/ProfileSettings.vue ===> ', err)
@@ -290,9 +291,9 @@ export default {
       const result = await httpPost(url, loc.value, { headers })
       if (result.ok) {
         store.commit('locate', loc.value)
-        showAlert('green', 'Your location has been updated')
+        utility.showAlert('green', 'Your location has been updated')
       } else {
-        showAlert('red', result.msg)
+        utility.showAlert('red', result.msg)
       }
     }
 
@@ -308,9 +309,9 @@ export default {
         }
         store.commit('syncBlocked', blacklist)
         syncBlacklist(blacklist.blocked)
-        showAlert('green', `${username} has been unblocked`)
+        utility.showAlert('green', `${username} has been unblocked`)
       } else {
-        showAlert('red', result.msg)
+        utility.showAlert('red', result.msg)
       }
     }
 

@@ -1,33 +1,23 @@
 <template>
-  <q-banner v-if="data.state" class="q-ma-md" :color="data.color">
-    {{ data.text }}
-    <template v-slot:action>
-      <q-btn flat round dense icon="close" @click="data.state = false" />
-    </template>
-  </q-banner>
+  <div>
+    <q-dialog v-model="alert.state" persistent transition-show="flip-down" transition-hide="flip-up">
+      <q-card :class="`bg-${alert.color} text-white`" style="width: 300px">
+        <q-card-section>
+          <div class="text-h6">Alert</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          {{ alert.text }}
+        </q-card-section>
+        <q-card-actions align="right" class="bg-white text-teal">
+          <q-btn flat label="OK" @click="alert.state = false"></q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
 </template>
 
-<script>
-export default {
-  name: 'AlertView',
-  props: {
-    data: {
-      type: Object,
-      default: () => {
-        return {
-          state: false,
-          color: '',
-          text: ''
-        };
-      }
-    }
-  }
-};
-</script>
+<script setup>
+import { defineProps } from 'vue'
+const { alert } = defineProps(['alert'])
 
-<style>
-.v-snack__content {
-padding: .75rem 1.5rem !important;
-}
-/* Vous pouvez ajuster le style ici si nécessaire */
-</style>
+</script>

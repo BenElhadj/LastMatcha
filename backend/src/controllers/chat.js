@@ -21,6 +21,31 @@ const getConAll = async (req, res) => {
 	}
 }
 
+const getInChat = async (req, res) => {
+	if (!req.user.id)
+		return res.json({ msg: 'Not logged in' })
+	try {
+		let result = await chatModel.getInChat(req.user.id)
+		// console.log(result)
+		
+		res.json(result)
+	} catch (err) {
+		return res.json({ msg: 'Fatal error', err })
+	}
+}
+
+// get not seen messages for a user 
+const getNotSeenMsg = async (req, res) => {
+	if (!req.user.id)
+		return res.json({ msg: 'Not logged in' })
+	try {
+		const result = await chatModel.getNotSeenMsgModel(req.user.id)
+		res.json(result)
+	} catch (err) {
+		return res.json({ msg: 'Fatal error', err })
+	}
+}
+
 //  get messages / Seen √ / notif 
 
 const getMessages = async (req, res) => {
@@ -91,5 +116,7 @@ module.exports = {
 	getConAll,
 	getMessages,
 	updateConv,
-	sendMsg
+	sendMsg,
+	getNotSeenMsg,
+	getInChat
 }

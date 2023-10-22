@@ -16,7 +16,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <AlertView :value="alert.state"></AlertView>
+    <AlertView v-if="alert.state" :data="alert"></AlertView>
   </div>
 </template>
 

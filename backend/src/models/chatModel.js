@@ -108,6 +108,35 @@ const getConvAll = (user1) => {
 	return db.query(request, [user1, user1])
 }
 
+const getInChat = (user) => {
+	let request = `SELECT 
+    chat.id_conversation,
+    chat.id_from,
+    chat.message,
+    chat.is_read,
+    conversations.id_user1,
+    conversations.id_user2,
+    conversations.last_update,
+    users.first_name,
+    users.last_name,
+    users.username,
+    images.name AS profile_image
+FROM chat
+INNER JOIN conversations ON chat.id_conversation = conversations.id_conversation
+INNER JOIN users ON chat.id_from = users.id
+INNER JOIN images ON chat.id_from = images.user_id
+WHERE (conversations.id_user1 = ? OR conversations.id_user2 = ?)
+    AND chat.id_from <> ? 
+    AND images.profile = 1
+    AND conversations.last_update = (
+        SELECT MAX(last_update)
+        FROM conversations AS c
+        WHERE c.id_conversation = chat.id_conversation
+    )  
+ORDER BY conversations.last_update DESC;`
+return db.query(request, [user, user, user])
+}
+
 // Get chat 
 
 const getChat = (id, limit) => {
@@ -155,5 +184,6 @@ module.exports = {
 	seenMsg,
 	getConversation,
 	insertMsg,
-	updateConv
+	updateConv,
+	getInChat
 }

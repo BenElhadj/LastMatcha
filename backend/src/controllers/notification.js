@@ -52,6 +52,7 @@ const updateNotif = async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
 	try {
+		// console.log('id: ', req.user.id)
 		await notifModel.seenNotif(req.user.id)
 		res.json({ ok: true })
 	} catch (err) {
@@ -60,10 +61,11 @@ const updateNotif = async (req, res) => {
 }
 
 const updateOneNotif = async (req, res) => {
-	if (!req.user.id_to)
-		return res.json({ msg: 'Not logged in' })
+	if (!req.user.id)
+		return res.json({ msg: 'not logged in' })
+	const { id_from, id_to } = req.body;
 	try {
-		await notifModel.seenOneNotif(req.user.id_from, req.user.id_to)
+		await notifModel.seenOneNotif(id_from, id_to)
 		res.json({ ok: true })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })

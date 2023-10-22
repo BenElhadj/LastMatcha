@@ -191,8 +191,24 @@ export const user = {
         console.error('err getNotif in frontend/user.js ===> ', err)
       }
     },
-    seenNotif: ({ commit }) => {
-      commit('seenNotif')
+    seenNotif: async ({ commit, state }) => {
+      // commit('seenNotif')
+      try {
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/update`
+        const headers = { 'x-auth-token': state.user.token }
+        const data = {
+          id: state.user.id
+        }
+        const result = await axios.post(url, data, { headers })
+
+        if (result.data) {
+          commit('seenNotif')
+        } else {
+          console.error('Error marking notifications as seen:', result.data.message)
+        }
+      } catch (err) {
+        console.error('Error in seenNotif action:', err)
+      }
     },
     delImg: ({ commit }, id) => {
       commit('delImg', id)

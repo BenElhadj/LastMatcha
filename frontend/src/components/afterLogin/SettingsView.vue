@@ -53,7 +53,7 @@
         </div>
       </q-card-section>
     </q-card>
-    <alert :data="alert"></alert>
+    <AlertView :alert="alert"></AlertView>
     <profile-editor ref="profileEditor" @file_error="error = true" @file_succes="error = false" @update-image="updateImage"></profile-editor>
   </q-layout>
   <LoaderView v-else />
@@ -64,7 +64,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import Alert from '@/views/AlertView.vue';
+import AlertView from '@/views/AlertView.vue';
 import LoaderView from '@/views/LoaderView.vue';
 import utility from '@/utility.js';
 import ProfileEditor from '@/components/afterLogin/ProfileEditor.vue';
@@ -78,7 +78,7 @@ import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue';
 export default {
   name: 'SettingsView',
   components: {
-    Alert,
+    AlertView,
     LoaderView,
     ProfileTabs,
     ProfileForm,
@@ -167,18 +167,15 @@ export default {
         const response = await axios.post(url, user, { headers });
 
         if (response.data && !response.data.msg) {
-          const msg = 'Your account has been updated successfully';
-          showAlert('green', msg);
+          alert.value.state = true
+          alert.value.color = 'green'
+          alert.value.text = 'Your account has been updated successfully'
           store.commit('updateUser', user);
           formRef.value.toggleEdit();
         } else {
-          const msg = response.data.msg ? response.data.msg : 'Oops, something went wrong!';
-          utility.showAlert('red', msg);
-          alert = {
-            state: true,
-            color: 'error',
-            text: msg
-          };
+          alert.value.state = true
+          alert.value.color = 'red'
+          alert.value.text = response.data.msg ? response.data.msg : 'Oops, something went wrong!'
         }
       } catch (err) {
         console.error('Error updating user:', err);

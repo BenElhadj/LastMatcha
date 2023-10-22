@@ -16,7 +16,8 @@
         </div>
       </q-form>
     </div>
-    <AlertView :message="alert"></AlertView>
+    <AlertView :alert="alert"></AlertView>
+
   </q-layout>
 </template>
 
@@ -82,9 +83,9 @@ export default {
         })
         const data = await res.json()
         if (data.msg) {
-          console.log("Response: ", data.msg);
-          alert.value = { state: true, color: 'red', text: data.msg }
-          utility.showAlert('red', data.msg)
+          alert.value.state = true
+          alert.value.color = 'red'
+          alert.value.text = data.msg
         } else {
           const user = data
           if (user.id) {
