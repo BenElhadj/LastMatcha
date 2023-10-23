@@ -192,7 +192,6 @@ export const user = {
       }
     },
     seenNotif: async ({ commit, state }) => {
-      // commit('seenNotif')
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/notif/update`
         const headers = { 'x-auth-token': state.user.token }

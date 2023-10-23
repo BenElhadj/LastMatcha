@@ -105,7 +105,7 @@ export default {
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line
-  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'defaut_profile.png'}`,
+  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'default.png'}`,
   // consoleLog: ('utility.js getFullPath => ', getFullPath),
   formatTime (date) {
     const when = moment(getDate(date))
@@ -225,6 +225,7 @@ export default {
       color: color,
       text: text
     }
-  },  
+  },
+
   passMatch: (p1, p2) => !p1.length || p2 === p1 ? '' : 'Passwords must match'
 }

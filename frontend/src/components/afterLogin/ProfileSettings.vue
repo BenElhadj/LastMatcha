@@ -122,6 +122,12 @@ export default {
     AlertView,
     mapLocationSelector
   },
+  props: {
+    images: {
+      type: Array,
+      default: () => []
+    }
+  },
   setup () {
     const flag = ref(false)
     const valid = ref(false)

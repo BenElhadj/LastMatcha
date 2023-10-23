@@ -78,7 +78,8 @@ header {
 
 footer {
   position: fixed;
-  bottom: 10px;
+  bottom: 0px;
+  margin-bottom: 0;
   margin-top: 0;
   width: 100%;
   height: 145px;

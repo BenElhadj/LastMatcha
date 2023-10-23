@@ -12,21 +12,25 @@
     "@kyvg/vue3-notification": "^3.0.2",
     "@mdi/font": "^7.2.96",
     "@mdi/js": "^7.2.96",
+    "@quasar/app": "^3.3.3",
     "@quasar/extras": "^1.16.5",
-    "axios": "^1.4.0",
+    "axios": "^1.5.1",
     "express": "^4.18.2",
     "moment": "^2.29.4",
-    "quasar": "^2.12.4",
+    "quasar": "^2.13.0",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
     "vue": "^3.2.36",
     "vue-google-maps-location-selector": "^1.0.1",
     "vue-router": "^4.0.13",
+    "vue3-tags-input": "^1.0.12",
     "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.4.1",
     "@vitejs/plugin-vue": "^4.2.3",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "sass": "^1.64.1",
     "vite": "^4.4.6"
   }

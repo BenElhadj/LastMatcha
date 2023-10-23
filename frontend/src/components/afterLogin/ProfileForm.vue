@@ -1,141 +1,148 @@
 <template>
-  <q-page-container>
-    <q-btn round class="edit" color="grey-3" fab small @click="isEditing = !isEditing">
-      <q-icon v-if="isEditing" name="mdi-close-circle"/>
-      <q-icon v-else name="mdi-pencil"/>
-    </q-btn>
-    <h1 class="pt-4 pb-3 mb-4">
-      Informations
-    </h1>
-    <q-form class="mt-4">
-      <q-layout wrap>
-        <q-col cols="12">
-          <q-input v-model="user.username" :disable="!isEditing" color="primary" label="Username"
-          />
-        </q-col>
-        <q-col cols="12" sm="6">
-          <q-input v-model="user.first_name" :disable="!isEditing" label="First Name" color="primary"/>
-        </q-col>
-        <q-col cols="12" sm="6">
-          <q-input v-model="user.last_name" :disable="!isEditing" label="Last Name" color="primary"/>
-        </q-col>
-        <q-col cols="12" sm="6">
-          <q-input v-model="user.phone" :disable="!isEditing" label="Phone Number" color="primary"/>
-        </q-col>
-        <q-col cols="12" sm="6">
-          <q-menu v-model="menu" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
-            <template #activator="{ on }">
-              <q-input :disable="!isEditing" color="primary" :value="user.birthdate" label="Birth Date" readonly v-on="on"></q-input>
-            </template>
-            <q-date v-model="user.birthdate" color="primary" @input="menu = false"></q-date>
-          </q-menu>
-        </q-col>
-        <q-col cols="12" sm="6">
-          <q-select v-model="user.gender" :disable="!isEditing" color="primary" :options="genders" label="Gender"></q-select>
-        </q-col>
-        <q-col cols="12" sm="6">
-          <q-select v-model="user.looking" :disable="!isEditing" color="primary" :options="looking" label="Looking For"></q-select>
-        </q-col>
-        <q-col cols="12">
-          <q-input v-model="user.address" :disable="!isEditing" label="Address" color="primary"/>
-        </q-col>
-        <q-col cols="12" sm="4">
-          <q-input v-model="user.city" :disable="!isEditing" label="City" color="primary"/>
-        </q-col>
-        <q-col cols="12" sm="4">
-          <q-input v-model="user.country" :disable="!isEditing" label="Country" color="primary"/>
-        </q-col>
-        <q-col cols="12" sm="4">
-          <q-input v-model="user.postal_code" :disable="!isEditing" color="primary" label="Postal Code" type="number"/>
-        </q-col>
-        <q-col cols="12">
-          <q-chips-input v-model='tags' :disable='!isEditing' color='primary' label='Tags'></q-chips-input>
-          <q-select v-model='newTag' use-input :disable='!isEditing' color='primary' @new-value='addTag' label='Add Tag'></q-select>
-          <!-- This may require some extra work to integrate -->
-        </q-col>
-        <q-col cols="12">
-          <q-input v-model="user.biography" :disable="!isEditing" :maxlength="500" color="primary" label="Bio" type="textarea"/>
-        </q-col>
-        <q-col cols="12" text-xs-right>
-          <q-btn :disable="!isEditing" class="mx-0 font-weight-light" color="primary" large label="Enregistrer" @click.prevent="updateUser"/>
-        </q-col>
-      </q-layout>
-    </q-form>
-  </q-page-container>
+  <q-page>
+    <q-page-container>
+      <h1 class="q-pb-md" style="margin-top: -10px; text-align: center;">Informations</h1>
+      
+      <q-btn v-if="isEditing" class="edit" color="grey-5" fab icon="mdi-close-circle" @click="isEditing = false" />
+      <q-btn v-else class="edit" color="grey-5" fab icon="mdi-pencil" @click="isEditing = true" />
+
+      <q-form @submit.prevent.stop="updateUser" @reset.prevent.stop="onReset" class="q-gutter-md">
+
+          <q-input v-model="user.username" :readonly="!isEditing" label="Username" class="one-input"/>
+
+          <div class="q-gutter-md row">
+            <q-input v-model="user.first_name" :readonly="!isEditing" label="First Name" class="tow-input"/>
+            <q-separator vertical spacing class="separator-margin"></q-separator>
+            <q-input v-model="user.last_name" :readonly="!isEditing" label="Last Name" class="tow-input"/>
+          </div>
+
+          <q-input v-model="user.birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
+          <q-input v-model="user.phone" :readonly="!isEditing" label="Phone Number" class="one-input"/>
+          
+          <div class="q-gutter-md row">
+            <q-select v-model="user.gender" :readonly="!isEditing" label="Gender" :options="genders" dropdown-icon="mdi-chevron-down" class="tow-input"/>
+            <q-separator vertical spacing class="separator-margin"></q-separator>
+            <q-select v-model="user.looking" :readonly="!isEditing" label="Looking For" :options="looking" dropdown-icon="mdi-chevron-down" class="tow-input"/>
+          </div>
+
+          <q-input v-model="user.address" :readonly="!isEditing" label="Address" class="one-input"/>
+          
+          <div class="q-gutter-md row">
+            <q-input v-model="user.city" :readonly="!isEditing" label="City" class="tow-input"/>
+            <q-separator vertical spacing ></q-separator>
+            <q-input v-model="user.postal_code" :readonly="!isEditing" label="Postal Code" type="number" class="tow-input"/>
+          </div>
+
+          <q-input v-model="user.country" :readonly="!isEditing" label="Country" class="one-input"/>
+          
+          <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :disabled="!isEditing" :tags="tags" v-model="tags" @on-tags-changed="newTags => tags = newTags" class="one-input"/>
+          <q-input v-model="user.biography" :readonly="!isEditing" :counter="500" label="Bio" filled type="textarea" class="one-input"/>
+          
+          <q-btn v-if="isEditing" class="q-mt-md" color="primary" large dark @click.prevent="updateUser"> Enregistrer</q-btn>
+          <div v-if="isEditing" >
+            <q-btn label="Enregistrer" type="submit" color="primary"/>
+            <q-btn label="annuler" type="reset" color="primary" flat class="q-ml-sm"/>
+          </div>
+
+      </q-form>
+      <AlertView :alert="alert"></AlertView>
+    </q-page-container>
+  </q-page>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useStore, mapActions } from 'vuex'
 import utility from '@/utility.js'
-import { VueTagsInput, createTags } from '@johmun/vue-tags-input'
+import { createTags } from '@johmun/vue-tags-input'
+import axios from 'axios'
+import AlertView from '@/views/AlertView.vue'
 
-export default {
-  name: 'ProfileForm',
-  components: { VueTagsInput },
-  data () {
-    return {
-      isEditing: false,
-      menu: false,
-      tag: '',
-      tags: [],
-      genders: ['male', 'female'],
-      looking: ['male', 'female', 'both'],
-      tagEsc: [13, ':', ',', ';']
+
+const store = useStore()
+
+const user = computed(() => store.getters.user)
+const isEditing = ref(false)
+const menu = ref(false)
+const tag = ref('')
+const date = ref('')
+const tags = ref([])
+const genders = ['male', 'female']
+const looking = ['male', 'female', 'both']
+const tagEsc = [13, ':', ',', ';']
+const allTags = computed(() => store.getters.allTags)
+const alert = ref({
+  state: false,
+  color: '',
+  text: ''
+});
+
+const serverDate = computed(() => isEditing.value ? toServerDate(displayDate.value) : user.value.birthdate)
+
+const syncUser = () => {
+  console.log('-------- in syncUser')
+  const tag = user.value.tags
+  console.log('--------first tag', typeof(tag))
+  const list = tag ? tag.split(', ') : []
+  console.log('-------- list', list)
+  tags.value = list ? createTags(list) : []
+  console.log('-------- tags', tags.value)
+}
+
+
+const updateUser = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
+    const headers = { 'x-auth-token': token }
+    const res = await axios.post(url, user.value, { headers })
+    console.log('-------- in updateUser',  res.data)
+
+    if (res && res.data && !res.data.msg) {
+      isEditing.value = false
+      store.dispatch('updateUser', user.value)
+      alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
+      console.log('Alert, green, Your account has been updated successfully')
+    } else {
+      alert.value = { state: true, color: 'red', text: res.body.msg ? res.body.msg : 'Oops... something went wrong!'}
+      console.log('Alert, red, Oops... something went wrong!')
     }
-  },
-  computed: {
-    ...mapGetters({ tags: 'tags' }),
-    formatedTags (val) {
-      return createTags(this.tags).filter(cur => {
-        const txt = cur.text.toLowerCase()
-        const tag = this.tag.toLowerCase()
-        return txt.length && txt.indexOf(tag) !== -1
-      })
-    }
-  },
-  props: {
-    user: {
-      type: Object,
-      default: function () { return {} }
-    }
-  },
-  watch: {
-    user: {
-      handler: 'syncUser',
-      immediate: true
-    },
-    tags () {
-      this.user.tags = this.tags
-        .map(cur => cur.text.toLowerCase())
-        .join(',')
-    }
-  },
-  methods: {
-    ...utility,
-    syncUser () {
-      const tags = this.user.tags
-      const list = tags ? tags.split(',') : []
-      this.tags = list ? createTags(list) : []
-      this.$emit('sync-user', this.user)
-    },
-    updateUser () {
-      this.$emit('update-user', this.user)
-    },
-    toggleEdit () {
-      this.isEditing = !this.isEditing
-    }
+  } catch (err) {
+    alert.value = { state: true, color: 'red', text: res.body.msg ? res.body.msg : 'Oops... error update User!'}
+    console.log('Alert, red, Oops... something went wrong!')
+    console.error('err updateUser in frontend/ProfileForm.vue ===> ', err)
   }
 }
+
+onMounted(() => {
+  syncUser()
+})
 </script>
 
 <style scoped>
-/* .edit, .edit:hover, .edit:focus {
+.one-input {
+  min-width: 40px;
+  margin-left: 30px;
+  margin-right: 55px;
+  color: "primary"; 
+}
+
+.tow-input {
+  min-width: 330px;
+  color: "primary";
+}
+
+.separator-margin {
+  margin-left: 20px;
+}
+
+.edit, .edit:hover, .edit:focus {
   position: absolute;
-} */
+}
 
 .edit {
   right: 0;
-  transform: translate(-50%, 60%);
+  transform: translate(-150%, -170%);
   position: absolute !important;
 }
 

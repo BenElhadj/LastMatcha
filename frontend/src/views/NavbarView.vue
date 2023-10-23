@@ -247,10 +247,6 @@ export default {
     const formatNotifDate = utility.formatTime
     const updateOneNotif = utility.updateOneNotif
 
-    const typingSecClr = (convId) => {
-      store.dispatch('typingSecClr', convId)
-    }
-
     const toUserProfile = (id_from) => {
       try {
         updateOneNotif(id_from, user.value.id)
@@ -374,18 +370,16 @@ export default {
 
      const updateNotifAndMsg = async () => {
       if (connected.value !== null) {
-        
+        convos.value = store.getters.convos
+        notif.value = store.getters.notif
         notifs.value = notif.value.sort((a, b) => { if (a.is_read !== b.is_read) 
                           { return a.is_read - b.is_read }
                         return new Date(b.date) - new Date(a.date)}).slice(0, 5)
-        menuConvos.value = sortAndFilterMessages(newMessage.value)
-        convos.value = store.getters.convos
-        notif.value = store.getters.notif
         newMessage.value = await getNewMsg()
+        menuConvos.value = sortAndFilterMessages(newMessage.value)
+        newMsgNum.value = newMessage.value.filter(cur => !cur.is_read).length
         const newNotif = computed(() => store.getters.notif)
         notifNum.value = newNotif.value.filter(cur => !cur.is_read).length
-        newMsgNum.value = newMessage.value.filter(cur => !cur.is_read).length
-
       }
     }
 
@@ -411,20 +405,19 @@ export default {
       links,
       notifMenu,
       msgMenu,
-      getFullPath,
-      formatNotifDate,
       image,
       syncConvo,
-      typingSecClr,
       toUserProfile,
       toUserChat,
       logout,
       menuConvos,
       notifNum,
       newMsgNum,
+      newMessage,
+      formatNotifDate,
+      getFullPath,
       getNotifMsg,
-      getNotifIcon,
-      newMessage
+      getNotifIcon
     }
   }
 }

@@ -309,8 +309,7 @@ onMounted(async () => {
       store.dispatch('login', user)
     }
     socket.on('connectedUsers', (connectedUsers) => {
-      console.log('connectedUsers ===> ', connectedUsers)
-    store.dispatch('connectedUsers', connectedUsers)
+      store.dispatch('connectedUsers', connectedUsers)
     })
   } catch (err) {
     console.error('err onMounted in frontend/DiscoverView.vue ===> ', err)
