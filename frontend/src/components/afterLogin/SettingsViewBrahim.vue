@@ -235,11 +235,7 @@ const onFilePicked = async (e) => {
     const imageName = imageFile.name;
     if (imageName.lastIndexOf('.') <= 0) return;
     if (imageFile.size > 1024 * 1024) {
-      alert.value = {
-        state: true,
-        color: 'red',
-        text: 'Image is too large..',
-      };
+      alert.value = { state: true, color: 'red', text: 'Image is too large..'};
     } else {
       try {
         let msg;
@@ -250,19 +246,11 @@ const onFilePicked = async (e) => {
         const res = await axios.post(url, fd, { headers });
         if (res && res.data && !res.data.msg) {
           msg = 'You cover image has been updated successfully';
-          alert.value = {
-            state: true,
-            color: 'success',
-            text: msg,
-          };
+          alert.value = { state: true, color: 'success', text: msg};
           store.commit('updateCoverImage', res.data);
         } else {
           msg = res.data.msg ? res.data.msg : 'Oops something went wrong!';
-          alert.value = {
-            state: true,
-            color: 'red',
-            text: msg,
-          };
+          alert.value = { state: true, color: 'red', text: msg};
         }
       } catch (err) {
         console.error('err onFilePicked in frontend/SettingsView.vue ===> ', err);

@@ -2,12 +2,12 @@
   <q-page class="page-container">
     <q-page-container v-if="loaded">
 
-      <div class="parallax">
+      <div>
         <div class="profile__cover">
           <img :src="coverPhoto" alt="Cover Photo" class="cover__img">
         </div>
 
-        <q-btn @click.stop="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:85px;">
+        <q-btn @click="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:85px;">
           <q-icon name="mdi-image"></q-icon>
           <q-tooltip left>
             <span>Changer votre photo de couverture</span>
@@ -17,10 +17,10 @@
 
       <div class="avatar">
         <q-avatar slot="offset" class="profile__avatar mx-auto" size="250px">
-          <img :src="profileImage" class="avatar__img">
+          <img :src="profileImage">
         </q-avatar>
 
-        <q-btn @click.stop="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:470px;left:190px;">
+        <q-btn @click="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:470px;left:190px;">
           <q-icon name="mdi-image"></q-icon>
           <q-tooltip left>
             <span>Changer votre photo de profil</span>
@@ -28,43 +28,39 @@
         </q-btn>
       </div>
 
-      <!-- <q-separator></q-separator> -->
+      <q-separator spacing class="separator-margin"></q-separator>
+      <div class=" centered-tabs" style="max-width: 800px;">  
+        <q-card>
 
+          <q-tabs v-model="activeTab" class="bg-grey-2 text-grey q-tabs__content" active-color="primary" indicator-color="bg-grey-2">
+            <q-tab name="tab-profile" label="Profile"></q-tab>
+            <q-tab  name="tab-photo" label="Photos"></q-tab>
+            <q-tab  name="tab-history" label="History"></q-tab>
+            <q-tab name="tab-setting" label="Setting"></q-tab>
+          </q-tabs>
 
-        <div class="q-pa-md">
-          <div class="q-gutter-y-md centered-tabs" style="max-width: 800px;">
-            <q-card>
-              <q-tabs v-model="activeTab" class="bg-grey-2 text-grey" active-color="primary" indicator-color="bg-grey-2" align="justify" align-items="justify-center">
-                
-                <q-tab name="tab-profile" label="Profile"></q-tab>
-                <q-tab  name="tab-photo" label="Photos"></q-tab>
-                <q-tab  name="tab-history" label="History"></q-tab>
-                <q-tab name="tab-setting" label="Setting"></q-tab>
+          <q-separator spacing class="separator-margin"></q-separator>
 
-              </q-tabs>
+          <q-tab-panels v-model="activeTab" animated class="bg-grey-2 text-black">
+            <q-tab-panel name="tab-profile">
+              <profile-form ref="form" :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
+            </q-tab-panel>
 
-              <q-tab-panels v-model="activeTab" animated class="bg-grey-2 text-black">
+            <q-tab-panel  name="tab-photo">
+              <profile-gallery :images="filteredImages"></profile-gallery>
+            </q-tab-panel>
 
-                <q-tab-panel name="tab-profile">
-                  <profile-form ref="form" :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
-                </q-tab-panel>
+            <q-tab-panel  name="tab-history">
+              <profile-history></profile-history>
+            </q-tab-panel>
 
-                <q-tab-panel  name="tab-photo">
-                  <profile-gallery :images="filteredImages"></profile-gallery>
-                </q-tab-panel>
+            <q-tab-panel name="tab-setting">
+              <profile-settings></profile-settings>
+            </q-tab-panel>
+          </q-tab-panels>
 
-                <q-tab-panel  name="tab-history">
-                  <profile-history></profile-history>
-                </q-tab-panel>
-
-                <q-tab-panel name="tab-setting">
-                  <profile-settings></profile-settings>
-                </q-tab-panel>
-              </q-tab-panels>
-            </q-card>
-
-          </div>
-        </div>
+        </q-card>
+      </div>
 
       <AlertView :alert="alert"></AlertView>
       <!-- <profile-editor @file_error="error = true" @file_succes="error = false" @update-image="updateImage" ref="profile_editor"></profile-editor> -->
@@ -119,12 +115,11 @@ const filteredImages = computed(() => {
   return user.value.images.filter(cur => !cur.cover)
 })
 
-const showAlert = utility.showAlert
 
 const updateUser = async () => {
   try {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
-    const headers = { 'x-auth-token': user.value.token }
+    const headers = { 'x-auth-token': user.token }
     const res = await axios.post(url, user.value, { headers })
 
     if (res && res.body && !res.body.msg) {
@@ -147,7 +142,7 @@ const updateImage = async (data) => {
       const fd = new FormData()
       fd.append('image', data)
       const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
-      const headers = { 'x-auth-token': user.value.token }
+      const headers = { 'x-auth-token': user.token }
       const res = await axios.post(url, fd, { headers })
       if (res && res.body && !res.body.msg) {
         console.log('Alert, green, Your profile image has been updated successfully')
@@ -164,7 +159,7 @@ const updateImage = async (data) => {
 }
 
 onMounted(async () => {
-  const token = user.value.token || localStorage.getItem('token')
+  const token = user.token || localStorage.getItem('token')
   if (token) {
     try {
       const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
@@ -178,26 +173,32 @@ onMounted(async () => {
       console.log('Got error here --> ', err)
     }
   }
-  // Remplacez les actions à effectuer lorsque l'utilisateur n'est pas connecté
-  logout(user.value.id) // Remplacez cette ligne par votre propre logique de déconnexion
-  // Utilisez le router pour rediriger l'utilisateur
-  router.push('/login') // Remplacez '/login' par l'URL de redirection appropriée
+  // logout(user.value.id) // Remplacez cette ligne par votre propre logique de déconnexion
+  router.push('/login')
 })
 
-const syncUser = (newUser) => {
-  user.value = { ...newUser }
+const syncUser = (updatedUser) => {
+  store.commit('updateUser', updatedUser)
 }
 
 const changeTab = (tab) => {
   activeTab.value = tab
 }
 
+const $refs = ref({})
 const openEditor = () => {
+  console.log('openEditor', $refs.profile_editor)
   $refs.profile_editor.pickFile()
 }
 
 const pickFile = () => {
-  $refs.image.click()
+  console.log('pickFile', $refs.image.value)
+  $refs.image.value = null
+  $refs.image.value.click()
+}
+
+const toggleEdit = () => {
+  isEditing.value = !isEditing.value;
 }
 
 const onFilePicked = async (e) => {
@@ -205,8 +206,9 @@ const onFilePicked = async (e) => {
   if (files[0]) {
     const imageFile = files[0]
     const imageName = imageFile.name
-    if (imageName.lastIndexOf('.') <= 0) return
-    if (imageFile.size > 1024 * 1024) {
+    if (imageName.lastIndexOf('.') <= 0) {
+      alert.value = { state: true, color: 'red', text: 'The selected file is not an image!' }
+    } else if (imageFile.size > 1024 * 1024) {
       alert.value = { state: true, color: 'red', text: 'Image is too large..' }
     } else {
       try {
@@ -214,14 +216,12 @@ const onFilePicked = async (e) => {
         const fd = new FormData()
         fd.append('image', imageFile)
         const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
-        const headers = { 'x-auth-token': user.value.token }
+        const headers = { 'x-auth-token': user.token }
         const res = await axios.post(url, fd, { headers })
-        if (res && !res.data.msg) {
-          console.log('Alert, green, Your cover image has been updated successfully')
+        if (res && !res.data.msg && !res.data.msg) {
           alert.value = { state: true, color: 'green', text: 'Your cover image has been updated successfully' }
           store.commit('updateCoverImage', res.data)
         } else {
-          console.log('Alert, red, Oops, something went wrong!')
           alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops, something went wrong!' }
         }
       } catch (err) {
@@ -233,11 +233,22 @@ const onFilePicked = async (e) => {
 </script>
 
 <style scoped>
+.q-tabs__content {
+  align: "justify";
+  align-items: "justify-center";
+  justify-content: "justify-center";
+  padding: 0;
+}
+.separator-margin {
+  margin-left: -2000px;
+  margin-right: -2000px;
+  z-index: 1;
+}
 .page-container {
   font-family: 'Elliane' !important;
   color: black;
-  margin-top: -77px !important;
-  margin-bottom: 10px !important;
+  margin-top: -87px !important;
+  margin-bottom: 0px !important;
 }
 .container {
   width: 100%;
@@ -254,7 +265,7 @@ const onFilePicked = async (e) => {
   top: 0;
   margin-top: 0;
   overflow: hidden;
-  position: relative; /* Nécessaire pour le positionnement absolu */
+  position: relative;
 }
 .cover__img {
   width: 100%;
@@ -267,6 +278,7 @@ const onFilePicked = async (e) => {
   size: 170px;
   top: 470px;
   left: 3%;
+  z-index: 7;
 }
 .update__img {
   z-index: 10;

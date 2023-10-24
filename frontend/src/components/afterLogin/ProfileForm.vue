@@ -6,7 +6,7 @@
       <q-btn v-if="isEditing" class="edit" color="grey-5" fab icon="mdi-close-circle" @click="isEditing = false" />
       <q-btn v-else class="edit" color="grey-5" fab icon="mdi-pencil" @click="isEditing = true" />
 
-      <q-form @submit.prevent.stop="updateUser" @reset.prevent.stop="onReset" class="q-gutter-md">
+      <q-form @submit.prevent="updateUser" class="q-gutter-md">
 
           <q-input v-model="user.username" :readonly="!isEditing" label="Username" class="one-input"/>
 
@@ -17,7 +17,7 @@
           </div>
 
           <q-input v-model="user.birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
-          <q-input v-model="user.phone" :readonly="!isEditing" label="Phone Number" class="one-input"/>
+          <q-input v-model="user.phone" mask="## ## ## ## ##" fill-mask :readonly="!isEditing" label="Phone Number" class="one-input"/>
           
           <div class="q-gutter-md row">
             <q-select v-model="user.gender" :readonly="!isEditing" label="Gender" :options="genders" dropdown-icon="mdi-chevron-down" class="tow-input"/>
@@ -35,13 +35,20 @@
 
           <q-input v-model="user.country" :readonly="!isEditing" label="Country" class="one-input"/>
           
-          <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :disabled="!isEditing" :tags="tags" v-model="tags" @on-tags-changed="newTags => tags = newTags" class="one-input"/>
+
+
+          <vue3-tags-input v-model="tags" :max-tags="20" :maxlength="25" disable readonly :autocomplete-items="allTags.value" :add-on-key="tagEsc" :disabled="!isEditing" :tags="tag" @on-tags-changed="newTags => tags = newTags" class="one-input"/>
+          
+          <!-- <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :disabled="!isEditing" :tags="tags" v-model="tags" @on-tags-changed="newTags => tags = newTags" class="one-input"/> -->
+          
+          
           <q-input v-model="user.biography" :readonly="!isEditing" :counter="500" label="Bio" filled type="textarea" class="one-input"/>
           
-          <q-btn v-if="isEditing" class="q-mt-md" color="primary" large dark @click.prevent="updateUser"> Enregistrer</q-btn>
+          <!-- <q-btn v-if="isEditing" class="q-mt-md" color="primary" large dark @click.prevent="updateUser"> Enregistrer</q-btn> -->
           <div v-if="isEditing" >
             <q-btn label="Enregistrer" type="submit" color="primary"/>
-            <q-btn label="annuler" type="reset" color="primary" flat class="q-ml-sm"/>
+            <q-btn label="Reset" @click="resetForm" color="red" flat class="q-ml-sm" />
+            <!-- <q-btn label="annuler" type="reset" color="primary" flat class="q-ml-sm"/> -->
           </div>
 
       </q-form>
@@ -61,33 +68,43 @@ import AlertView from '@/views/AlertView.vue'
 
 const store = useStore()
 
-const user = computed(() => store.getters.user)
 const isEditing = ref(false)
 const menu = ref(false)
-const tag = ref('')
 const date = ref('')
-const tags = ref([])
 const genders = ['male', 'female']
 const looking = ['male', 'female', 'both']
 const tagEsc = [13, ':', ',', ';']
+let tag = ref('')
+let tags = ref([])
+const user = computed(() => store.getters.user)
 const allTags = computed(() => store.getters.allTags)
+const initialUser = { ...user.value }
 const alert = ref({
   state: false,
   color: '',
   text: ''
 });
 
-const serverDate = computed(() => isEditing.value ? toServerDate(displayDate.value) : user.value.birthdate)
+onMounted(() => {
+  syncUser()
+})
 
 const syncUser = () => {
-  console.log('-------- in syncUser')
-  const tag = user.value.tags
-  console.log('--------first tag', typeof(tag))
-  const list = tag ? tag.split(', ') : []
-  console.log('-------- list', list)
-  tags.value = list ? createTags(list) : []
-  console.log('-------- tags', tags.value)
+  tags.value = user.value.tags ? user.value.tags.split(', ').map(tag => tag.trim()) : []
+  tag = tags.value[0].split(',').map(tag => tag.trim())
 }
+
+const resetForm = () => {
+  event.preventDefault()
+  user.value = { ...initialUser }; // Restaurez les valeurs initiales
+  tags.value = initialUser.tags ? initialUser.tags.split(', ').map(tag => tag.trim()) : [];
+  isEditing.value = false;
+}
+
+// const onReset = (event) => {
+//   event.preventDefault(); // Empêchez la réinitialisation par défaut du formulaire
+//   resetForm();
+// }
 
 
 const updateUser = async () => {
@@ -96,27 +113,22 @@ const updateUser = async () => {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
     const headers = { 'x-auth-token': token }
     const res = await axios.post(url, user.value, { headers })
-    console.log('-------- in updateUser',  res.data)
 
     if (res && res.data && !res.data.msg) {
       isEditing.value = false
       store.dispatch('updateUser', user.value)
+      store.dispatch('sync-user', user.value)
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
-      console.log('Alert, green, Your account has been updated successfully')
     } else {
-      alert.value = { state: true, color: 'red', text: res.body.msg ? res.body.msg : 'Oops... something went wrong!'}
-      console.log('Alert, red, Oops... something went wrong!')
+      alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}
     }
   } catch (err) {
-    alert.value = { state: true, color: 'red', text: res.body.msg ? res.body.msg : 'Oops... error update User!'}
-    console.log('Alert, red, Oops... something went wrong!')
+    alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... error update User!'}
     console.error('err updateUser in frontend/ProfileForm.vue ===> ', err)
   }
 }
 
-onMounted(() => {
-  syncUser()
-})
+
 </script>
 
 <style scoped>

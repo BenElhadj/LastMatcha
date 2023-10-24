@@ -1,8 +1,6 @@
 <template>
-  <q-page-container>
-    <h1 class="py-3 mb-4">
-      Paramètres
-    </h1>
+  <q-page-container style="marging-top: 900px;">
+    <h1 class="row justify-center">Paramètres</h1>
     <div class="q-pa-md row justify-center">
       <div class="col-xs-12 col-sm-6 q-pa-md">
         <div class="row items-center">
