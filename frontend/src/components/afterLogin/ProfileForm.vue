@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-page-container>
-      <h1 class="q-pb-md" style="margin-top: -10px; text-align: center;">Informations</h1>
+      <h1 class="q-pb-md" style="margin-top: -10px; text-align: center;">Profile</h1>
       
       <q-btn v-if="isEditing" class="edit" color="grey-5" fab icon="mdi-close-circle" @click="isEditing = false" />
       <q-btn v-else class="edit" color="grey-5" fab icon="mdi-pencil" @click="isEditing = true" />

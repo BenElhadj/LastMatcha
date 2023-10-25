@@ -1,16 +1,18 @@
 <template>
-  <q-page padding>
-    <h1 class="row justify-center">
-      Gallery
-    </h1>
-    <div class="row q-gutter-md mt-4">
-      <div v-for="image in images" :key="image.id" class="col-xs-12 col-sm-6 col-md-4 img_container">
-        <q-btn v-if="user.id == image.user_id" icon="mdi-delete-forever" size="lg" color="negative" round flat class="del_img" @click="deleteImg(image)">
-        </q-btn>
-        <img :src="profileImage(image.name)" class="image full-width">
+  <q-page>
+    <q-page-container>
+      <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">
+        Photos
+      </h1>
+      <div class="row q-gutter-md mt-4">
+        <div v-for="image in images" :key="image.id" class="col-xs-12 col-sm-6 col-md-4 img_container">
+          <q-btn v-if="user.id == image.user_id" icon="mdi-delete-forever" size="lg" color="negative" round flat class="del_img" @click="deleteImg(image)">
+          </q-btn>
+          <img :src="profileImage(image.name)" class="image full-width">
+        </div>
       </div>
-    </div>
-    <AlertView v-if="alert.state" :data="alert"/>
+      <AlertView v-if="alert.state" :data="alert"/>
+    </q-page-container>
   </q-page>
 </template>
 
@@ -32,7 +34,7 @@ export default {
   },
   setup () {
     const store = useStore()
-    const { getFullPath, showAlert } = utility
+    const { getFullPath } = utility
     const user = computed(() => store.state.user)
     const alert = ref({
       state: false,
@@ -53,6 +55,7 @@ export default {
         if (res.data.ok) {
           await store.dispatch('delImg', image.id)
           utility.showAlert('green', 'Photo has been removed', this)
+          alert
         } else {
           utility.showAlert('red', 'Oups.. something went wrong', this)
         }

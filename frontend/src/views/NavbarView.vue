@@ -53,13 +53,7 @@
                   </q-item-label>
                   <q-item-label>
                     <q-icon small style="font-size:16px !important;" class="mr-2 q-ml-xl">
-                      <span :class="['mdi', getNotifIcon(item.type),
-                        {
-                          'text-blue': getNotifIcon(item.type) === 'mdi-eye',
-                          'text-green': getNotifIcon(item.type) === 'mdi-heart-pulse',
-                          'text-red': getNotifIcon(item.type) === 'mdi-heart',
-                          'text-black': getNotifIcon(item.type) === 'mdi-heart-broken'
-                        }]"></span>&nbsp;
+                      <span :class="getNotifIcon(item.type)"></span>&nbsp;
                     </q-icon>
                     &nbsp;<span class="ml-auto chat_time" style="font-size:16px !important;">{{ formatNotifDate(item.last_update) }}</span>
                   </q-item-label>

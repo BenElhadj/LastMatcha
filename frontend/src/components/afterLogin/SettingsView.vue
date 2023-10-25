@@ -126,7 +126,7 @@ const updateUser = async () => {
       console.log('Alert, green, Your account has been updated successfully')
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
       store.dispatch('updateUser', user.value)
-      $refs.form.toggleEdit()
+      profileEditor.form.toggleEdit()
     } else {
       console.log('Alert, red, Oops... something went wrong!')
       alert.value = { state: true, color: 'red', text: res.body.msg ? res.body.msg : 'Oops... something went wrong!'}
@@ -135,6 +135,8 @@ const updateUser = async () => {
     console.error('err updateUser in frontend/SettingsView.vue ===> ', err)
   }
 }
+
+
 
 const updateImage = async (data) => {
   if (!error.value) {
@@ -162,6 +164,10 @@ onMounted(async () => {
   const token = user.token || localStorage.getItem('token')
   if (token) {
     try {
+      
+     // store.dispatch('syncHistory', user.id)
+      //store.commit('syncMatches', user.id)
+      // syncMatches(user.id)
       const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
       const headers = { 'x-auth-token': token }
       const res = await axios.get(url, { headers })
@@ -174,7 +180,7 @@ onMounted(async () => {
     }
   }
   // logout(user.value.id) // Remplacez cette ligne par votre propre logique de déconnexion
-  router.push('/login')
+ // router.push('/login')
 })
 
 const syncUser = (updatedUser) => {
@@ -185,16 +191,18 @@ const changeTab = (tab) => {
   activeTab.value = tab
 }
 
-const $refs = ref({})
+const profileEditor = ref(null)
 const openEditor = () => {
-  console.log('openEditor', $refs.profile_editor)
-  $refs.profile_editor.pickFile()
+  console.log('openEditor', profileEditor.profile_editor)
+  
+  profileEditor.profile_editor.pickFile()
 }
 
 const pickFile = () => {
-  console.log('pickFile', $refs.image.value)
-  $refs.image.value = null
-  $refs.image.value.click()
+  console.log('pickFile', profileEditor.image.value)
+  
+  profileEditor.image.value = null
+  profileEditor.image.value.click()
 }
 
 const toggleEdit = () => {

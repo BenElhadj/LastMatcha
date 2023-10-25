@@ -21,11 +21,22 @@ export const getters = {
   connectedUsers: (state) => state.connectedUsers,
   history: (state) => {
     return [
-      ...state.history.map((cur) => ({ ...cur, type: 'history' })),
-      ...state.visitor.map((cur) => ({ ...cur, type: 'visitor' })),
-      ...state.visited.map((cur) => ({ ...cur, type: 'visited' })),
-      ...state.followers.map((cur) => ({ ...cur, type: 'follower' })),
-      ...state.following.map((cur) => ({ ...cur, type: 'following' }))
+      ...state.visitor.map(cur => ({
+        ...cur,
+        type: 'visitor'
+      })),
+      ...state.visited.map(cur => ({
+        ...cur,
+        type: 'visited'
+      })),
+      ...state.followers.map(cur => ({
+        ...cur,
+        type: 'follower'
+      })),
+      ...state.following.map(cur => ({
+        ...cur,
+        type: 'following'
+      }))
     ]
   },
   matches: (state) =>
@@ -69,4 +80,5 @@ export const getters = {
     )
     return convo ? convo.user_id : null
   }
-}
+
+}  

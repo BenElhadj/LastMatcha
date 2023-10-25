@@ -228,6 +228,26 @@ export const user = {
       } catch (err) {
         console.error('err syncBlacklist in frontend/user.js ===> ', err)
       }
-    }
+    },
+    syncHistory: async ({ commit }) => {
+      try {
+        let visitor = []
+        let visited = []
+        const merge = cur => ({
+          id: cur[cur.visitor_id ? 'visitor_id' : 'visited_id'],
+          visit_date: cur.visit_date,
+          username: cur.username,
+          profile_image: cur.profile_image
+        })
+        const res = await utility.sync('browse/history')
+        if (Array.isArray(res.body)) {
+          visitor = res.body.filter(cur => cur.visitor_id).map(merge)
+          visited = res.body.filter(cur => cur.visited_id).map(merge)
+        }
+        commit('syncHistory', { visitor, visited })
+      } catch (err) {
+        console.log('Got error here --> ', err)
+      }
+    },
   }
 }

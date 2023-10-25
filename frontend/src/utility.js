@@ -105,7 +105,7 @@ export default {
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line
-  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'default.png'}`,
+  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'defaut.png'}`,
   // consoleLog: ('utility.js getFullPath => ', getFullPath),
   formatTime (date) {
     const when = moment(getDate(date))
@@ -177,6 +177,7 @@ export default {
     }
   },
   getHistoryAction (type) {
+  
     switch (type) {
       case 'visited':
         return 'You visited'
@@ -205,14 +206,20 @@ export default {
   },
   getNotifIcon (type) {
     switch (type) {
-      case 'visit':
-        return 'mdi-eye'
-      case 'like':
-        return 'mdi-heart-pulse'
-      case 'like_back':
-        return 'mdi-heart'
-      case 'unlike':
-        return 'mdi-heart-broken'
+      case 'visit' || 'you_visit' || 'he_visit':
+        return ['mdi', 'mdi-eye', 'text-blue']
+      case 'like' || 'you_like' || 'he_like':
+        return ['mdi', 'mdi-heart-pulse', 'text-green']
+      case 'like_back' || 'you_like_back' || 'he_like_back':
+        return ['mdi', 'mdi-heart', 'text-red']
+      case 'unlike' || 'you_unlike' || 'he_unlike':
+        return ['mdi', 'mdi-heart-broken', 'text-black']
+      case 'block' || 'you_block' || 'he_block':
+        return ['mdi', 'mdi-block-helper', 'text-black']
+      case 'talk':
+        return ['mdi', 'mdi-wechat', 'text-black']
+      case 'image':
+        return ['mdi', 'mdi-image', 'text-black']
     }
   },
   filterBlocked: (state, type) => {

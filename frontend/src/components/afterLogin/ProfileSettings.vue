@@ -1,106 +1,108 @@
 <template>
-  <q-page-container style="marging-top: 900px;">
-    <h1 class="row justify-center">Paramètres</h1>
-    <div class="q-pa-md row justify-center">
-      <div class="col-xs-12 col-sm-6 q-pa-md">
-        <div class="row items-center">
-          <q-input v-model="user.email" class="col" disabled label="Email" color="primary"></q-input>
-          <q-icon class="col-auto q-ml-md" color="primary" name="edit" @click="emailDialog = true"></q-icon>
+  <q-page>
+    <q-page-container>
+      <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">Settings</h1>
+      <div class="q-pa-md row justify-center">
+        <div class="col-xs-12 col-sm-6 q-pa-md">
+          <div class="row items-center">
+            <q-input v-model="user.email" class="col" disabled label="Email" color="primary"></q-input>
+            <q-icon class="col-auto q-ml-md" color="primary" name="edit" @click="emailDialog = true"></q-icon>
+          </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 q-pa-md">
+          <div class="row items-center">
+            <q-input class="col" disabled color="primary" value="**********" label="Password" type="password"></q-input>
+            <q-icon class="col-auto q-ml-md" color="primary" name="edit" @click="passDialog = true"></q-icon>
+          </div>
+        </div>
+        <div class="col-xs-12">
+          <q-btn outline block large color="primary" @click="openLoc">
+            <span>Changer la location</span>
+            <q-icon right name="place"></q-icon>
+          </q-btn>
         </div>
       </div>
-      <div class="col-xs-12 col-sm-6 q-pa-md">
-        <div class="row items-center">
-          <q-input class="col" disabled color="primary" value="**********" label="Password" type="password"></q-input>
-          <q-icon class="col-auto q-ml-md" color="primary" name="edit" @click="passDialog = true"></q-icon>
-        </div>
-      </div>
-      <div class="col-xs-12">
-        <q-btn outline block large color="primary" @click="openLoc">
-          <span>Changer la location</span>
-          <q-icon right name="place"></q-icon>
-        </q-btn>
-      </div>
-    </div>
-    <q-expansion-item v-model="blacklistPanel" :disable="closePanel" class="blacklist" expand-icon="arrow_downward" default-opened label="Liste des utilisateurs bloqués">
-      <q-list class="blacklist_list">
-        <q-item v-for="banned in blacklist" :key="banned.id" class="blacklist_item mx-2">
-          <q-item-section>
-            <q-item-label>{{ banned.username }}</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-icon name="close" @click="unBlock(banned)"></q-icon>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-expansion-item>
-    <q-dialog v-if="reRender" v-model="emailDialog" max-width="500" persistent>
-      <q-card class="q-pa-md q-ma-md">
-        <h5 class="display-1 text-xs-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">
-          Changer l'email
-        </h5>
-        <div class="my-4">
-          <q-input v-model="password" color="primary" label="Current password" :rules="passRules" required :type="showPass ? 'text' : 'password'">
-            <template #append>
-              <q-icon :name="showPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPass = !showPass"></q-icon>
-            </template>
-          </q-input>
-          <q-input v-model="email" color="primary" class="my-3" :rules="emailRules" label="Email" required></q-input>
-        </div>
-        <q-card-actions :align="right">
-          <q-btn flat color="primary" :disable="!valid" @click="saveEmail">
-            Enregistrer
-          </q-btn>
-          <q-btn flat color="primary" @click="closeEmail">
-            Annuler
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <q-dialog v-if="reRender" v-model="passDialog" max-width="500px" persistent>
-      <q-card class="q-pa-md q-ma-md">
-        <h5 class="display-1 text-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">
-          Changer le mot de passe
-        </h5>
-        <div class="my-4">
-          <q-input v-model="password" color="primary" class="mb-4" :rules="passRules" label="Current password" autocomplete="off" required :type="showPass ? 'text' : 'password'">
-            <template #append>
-              <q-icon :name="showPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPass = !showPass"></q-icon>
-            </template>
-          </q-input>
-          <q-input v-model="newPassword" color="primary" class="mb-4" :rules="passRules" label="New password" autocomplete="off" required :type="showNewPass ? 'text' : 'password'">
-            <template #append>
-              <q-icon :name="showNewPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showNewPass = !showNewPass"></q-icon>
-            </template>
-          </q-input>
-          <q-input v-model="confNewPassword" color="primary" class="mb-4" label="Confirm new password" autocomplete="off" required :type="showConfNewPass ? 'text' : 'password'" :error="!passwordMatch()">
-            <template #append>
-              <q-icon :name="showConfNewPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showConfNewPass = !showConfNewPass"></q-icon>
-            </template>
-          </q-input>
-        </div>
-        <q-card-actions :align="right">
-          <q-btn flat color="primary" :disable="!valid" @click="savePass">
-            Enregistrer
-          </q-btn>
-          <q-btn flat color="primary" @click="closePass">
-            Annuler
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <q-dialog v-model="locDialog" fullscreen transition-show="fade" transition-hide="fade">
-      <q-card>
-        <q-toolbar dark color="primary">
-          <q-btn flat icon="close" @click="locDialog = false"></q-btn>
-          <q-toolbar-title>Location</q-toolbar-title>
-          <q-space></q-space>
-          <q-btn flat label="Enregistrer" @click="changeLoc"></q-btn>
-        </q-toolbar>
-        <map-location-selector :latitude="latitude" :longitude="longitude" @location-updated="locationUpdated"></map-location-selector>
-      </q-card>
-    </q-dialog>
-    <AlertView v-if="alert.state" :data="alert"></AlertView>
-  </q-page-container>
+      <q-expansion-item v-model="blacklistPanel" :disable="closePanel" class="blacklist" expand-icon="arrow_downward" default-opened label="Liste des utilisateurs bloqués">
+        <q-list class="blacklist_list">
+          <q-item v-for="banned in blacklist" :key="banned.id" class="blacklist_item mx-2">
+            <q-item-section>
+              <q-item-label>{{ banned.username }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="close" @click="unBlock(banned)"></q-icon>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-expansion-item>
+      <q-dialog v-if="reRender" v-model="emailDialog" max-width="500" persistent>
+        <q-card class="q-pa-md q-ma-md">
+          <h5 class="display-1 text-xs-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">
+            Changer l'email
+          </h5>
+          <div class="my-4">
+            <q-input v-model="password" color="primary" label="Current password" :rules="passRules" required :type="showPass ? 'text' : 'password'">
+              <template #append>
+                <q-icon :name="showPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPass = !showPass"></q-icon>
+              </template>
+            </q-input>
+            <q-input v-model="email" color="primary" class="my-3" :rules="emailRules" label="Email" required></q-input>
+          </div>
+          <q-card-actions :align="right">
+            <q-btn flat color="primary" :disable="!valid" @click="saveEmail">
+              Enregistrer
+            </q-btn>
+            <q-btn flat color="primary" @click="closeEmail">
+              Annuler
+            </q-btn>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      <q-dialog v-if="reRender" v-model="passDialog" max-width="500px" persistent>
+        <q-card class="q-pa-md q-ma-md">
+          <h5 class="display-1 text-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">
+            Changer le mot de passe
+          </h5>
+          <div class="my-4">
+            <q-input v-model="password" color="primary" class="mb-4" :rules="passRules" label="Current password" autocomplete="off" required :type="showPass ? 'text' : 'password'">
+              <template #append>
+                <q-icon :name="showPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPass = !showPass"></q-icon>
+              </template>
+            </q-input>
+            <q-input v-model="newPassword" color="primary" class="mb-4" :rules="passRules" label="New password" autocomplete="off" required :type="showNewPass ? 'text' : 'password'">
+              <template #append>
+                <q-icon :name="showNewPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showNewPass = !showNewPass"></q-icon>
+              </template>
+            </q-input>
+            <q-input v-model="confNewPassword" color="primary" class="mb-4" label="Confirm new password" autocomplete="off" required :type="showConfNewPass ? 'text' : 'password'" :error="!passwordMatch()">
+              <template #append>
+                <q-icon :name="showConfNewPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showConfNewPass = !showConfNewPass"></q-icon>
+              </template>
+            </q-input>
+          </div>
+          <q-card-actions :align="right">
+            <q-btn flat color="primary" :disable="!valid" @click="savePass">
+              Enregistrer
+            </q-btn>
+            <q-btn flat color="primary" @click="closePass">
+              Annuler
+            </q-btn>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      <q-dialog v-model="locDialog" fullscreen transition-show="fade" transition-hide="fade">
+        <q-card>
+          <q-toolbar dark color="primary">
+            <q-btn flat icon="close" @click="locDialog = false"></q-btn>
+            <q-toolbar-title>Location</q-toolbar-title>
+            <q-space></q-space>
+            <q-btn flat label="Enregistrer" @click="changeLoc"></q-btn>
+          </q-toolbar>
+          <map-location-selector :latitude="latitude" :longitude="longitude" @location-updated="locationUpdated"></map-location-selector>
+        </q-card>
+      </q-dialog>
+      <AlertView v-if="alert.state" :data="alert"></AlertView>
+    </q-page-container>
+  </q-page>
 </template>
 
 <script>
@@ -204,11 +206,6 @@ export default {
       }
     }
 
-    // const showAlert = (color, msg) => {
-    //   alert.state = true
-    //   alert.color = color
-    //   alert.text = msg
-    // }
     const saveEmail = async () => {
       try {
         const url = `${import.meta.env.VITE_APP_API_URL}/api/users/changeemail`

@@ -41,13 +41,7 @@
                     <span class="text-h6 text-weight-bold">{{ entry.username }}</span>
                     </router-link>
                     <q-icon small style="font-size:16px !important;" class="mr-2 q-ml-xl">
-                      <span :class="['mdi', getNotifIcon(entry.type),
-                        {
-                          'text-blue': getNotifIcon(entry.type) === 'mdi-eye',
-                          'text-green': getNotifIcon(entry.type) === 'mdi-heart-pulse',
-                          'text-red': getNotifIcon(entry.type) === 'mdi-heart',
-                          'text-black': getNotifIcon(entry.type) === 'mdi-heart-broken'
-                        }]"></span>&nbsp;
+                      <span :class="getNotifIcon(entry.type)"></span>&nbsp;
                     </q-icon>
                     <div class="subtitle">
                     <span class="text-weight-bold">{{ getNotifMsg(entry) }}</span>

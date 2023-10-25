@@ -118,6 +118,18 @@ const getHistory = async (req, res) => {
 	}
 }
 
+
+const getAllHistory = async (req, res) => {
+	if (!req.user.id)
+		return res.json({ msg: 'not logged in' })
+	try {
+		let history = await historyModel.getAllHistory(req.user.id)
+		res.json([...history])
+	} catch (err) {
+		return res.json({ msg: 'Fatal error', err })
+	}
+}
+
 // Get tags 
 
 const getTags = async (req, res) => {
@@ -181,5 +193,6 @@ module.exports = {
 	getHistory,
 	getTags,
 	getBlocked,
-	getMatches
+	getMatches,
+	getAllHistory
 }

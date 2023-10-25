@@ -5,6 +5,7 @@ const browsing = require('../controllers/browsing')
 
 
 routes.get('/history', authCheck, browsing.getHistory)
+routes.get('/allhistory', authCheck, browsing.getAllHistory)
 routes.get('/tags', authCheck, browsing.getTags)
 
 module.exports = routes
