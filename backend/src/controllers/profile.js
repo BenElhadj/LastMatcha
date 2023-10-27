@@ -259,22 +259,23 @@ const deleteImage = async (req, res) => {
 }
 
 const blacklisted = async (req, res) => {
-	if (!req.user.id)
-		return res.json({ msg: 'not logged in' })
-	const blacklist = JSON.parse(req.body.ids)
-	if (!Array.isArray(blacklist) || !blacklist.length)
-		return res.json({ msg: 'bad query' })
-	const placehoder = `(${blacklist.map(cur => '?').join(', ')})`
-	try {
-		const result = await userModel.blacklist(blacklist, placehoder)
-		res.json({
-			ok: true,
-			list: result
-		})
-	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
+	if (!req.user.id) {
+	  return res.json({ msg: 'not logged in' })
 	}
-
+	const id = req.body.id; 
+	if (!Array.isArray(id) || !id.length) {
+	  return res.json({ msg: 'bad query' })
+	}
+	const placehoder = `(${id.map(cur => '?').join(', ')}`
+	try {
+	  const result = await userModel.blacklist(id, placehoder)
+	  res.json({
+		ok: true,
+		list: result
+	  });
+	} catch (err) {
+	  return res.json({ msg: 'Fatal error', err })
+	}
 }
 
 

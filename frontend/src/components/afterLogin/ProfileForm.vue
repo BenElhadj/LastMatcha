@@ -37,13 +37,20 @@
           
 
 
-          <vue3-tags-input v-model="tags" :max-tags="20" :maxlength="25" disable readonly :autocomplete-items="allTags.value" :add-on-key="tagEsc" :disabled="!isEditing" :tags="tag" @on-tags-changed="newTags => tags = newTags" class="one-input"/>
+          <!-- <vue3-tags-input v-model="tags" :readonly="!isEditing" class="one-input" :disabled="!isEditing" :max-tags="20" :maxlength="25"  :autocomplete-items="allTags" :add-on-key="tagEsc" :tags="tag" @on-tags-changed="newTags => tags = newTags"/> -->
+          <div class="one-input">
+            <span class="text-h8 text-grey-7">Tags</span>
+            <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :tags="tag" @on-tags-changed="newTags => tags = newTags" v-if="isEditing"></vue3-tags-input>
+            <div v-else>
+              <q-input v-model="tags" readonly />
+            </div>
+          </div>
+
+
           
-          <!-- <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :disabled="!isEditing" :tags="tags" v-model="tags" @on-tags-changed="newTags => tags = newTags" class="one-input"/> -->
-          
-          
-          <q-input v-model="user.biography" :readonly="!isEditing" :counter="500" label="Bio" filled type="textarea" class="one-input"/>
-          
+          <!-- <q-input v-model="user.biography" :readonly="!isEditing" :counter="500" label="Bio" filled type="textarea" class="one-input"/> -->
+          <q-input v-model="user.biography" :readonly="!isEditing" label="Bio" filled type="textarea" class="one-input" :counter="true" :max-length="500"/>
+
           <!-- <q-btn v-if="isEditing" class="q-mt-md" color="primary" large dark @click.prevent="updateUser"> Enregistrer</q-btn> -->
           <div v-if="isEditing" >
             <q-btn label="Enregistrer" type="submit" color="primary"/>
@@ -78,7 +85,9 @@ let tag = ref('')
 let tags = ref([])
 const user = computed(() => store.getters.user)
 const allTags = computed(() => store.getters.allTags)
-const initialUser = { ...user.value }
+const initialUser = ref({ ...user.value })
+console.log('************ initialUser in ProfileForm',initialUser.value)
+
 const alert = ref({
   state: false,
   color: '',
@@ -96,16 +105,10 @@ const syncUser = () => {
 
 const resetForm = () => {
   event.preventDefault()
-  user.value = { ...initialUser }; // Restaurez les valeurs initiales
+  user.value = { ...initialUser };
   tags.value = initialUser.tags ? initialUser.tags.split(', ').map(tag => tag.trim()) : [];
   isEditing.value = false;
 }
-
-// const onReset = (event) => {
-//   event.preventDefault(); // Empêchez la réinitialisation par défaut du formulaire
-//   resetForm();
-// }
-
 
 const updateUser = async () => {
   try {
@@ -114,10 +117,12 @@ const updateUser = async () => {
     const headers = { 'x-auth-token': token }
     const res = await axios.post(url, user.value, { headers })
 
+    console.log('res updateUser in frontend/ProfileForm.vue ===> ', res)
+
     if (res && res.data && !res.data.msg) {
       isEditing.value = false
       store.dispatch('updateUser', user.value)
-      store.dispatch('sync-user', user.value)
+
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
     } else {
       alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}

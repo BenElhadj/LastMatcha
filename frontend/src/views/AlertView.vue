@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
+
 const { alert } = defineProps(['alert'])
 
 </script>

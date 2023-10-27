@@ -105,7 +105,7 @@ export default {
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line
-  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'defaut.png'}`,
+  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : '@/assets/default/defaut_profile.png'}`,
   // consoleLog: ('utility.js getFullPath => ', getFullPath),
   formatTime (date) {
     const when = moment(getDate(date))
@@ -176,18 +176,52 @@ export default {
       }))
     }
   },
-  getHistoryAction (type) {
+  getHistoryAction (type, first_name, last_name) {
   
     switch (type) {
       case 'visited':
-        return 'You visited'
+      case 'you_visit':
+        return `You visited the profile of ${first_name} ${last_name}`
       case 'visitor':
-        return 'Visited your profile'
-      case 'follower':
-        return 'Liked you'
+      case 'he_visit':
+        return `${first_name} ${last_name} visited your profile`
       case 'following':
-        return 'You liked'
+      case 'you_like':
+        return `You liked ${first_name} ${last_name}`
+      case 'follower':case 'he_like':
+        return `${first_name} ${last_name}  liked you`
+      case 'you_like_back':
+        return `You accepted the like of ${first_name} ${last_name}`
+      case 'he_like_back':
+        return `${first_name} ${last_name} accepted your like`
+      case 'you_unlike':
+        return `You unliked ${first_name} ${last_name}`
+      case 'he_unlike':
+        return `${first_name} ${last_name} unliked you`
+      case 'you_block':
+        return `You blocked ${first_name} ${last_name}`
+      case 'he_block':
+        return `${first_name} ${last_name} blocked you`
+      case 'talk':
+        return `You talked to ${first_name} ${last_name}`
+      case 'avatar_img' :
+        return 'You changed your avatar'
+      case 'cover_img' :
+        return 'You changed your cover'
     }
+    // "you_visit",
+    // "you_like",
+    // "you_unlike",
+    // "he_visit",
+    // "he_like",
+    // "you_like_back",
+    // "he_like_back",
+    // "he_unlike",
+    // "talk",
+    // "you_block",
+    // "he_block",
+    // "avatar_img",
+    // "cover_img"
   },
   getNotifMsg (notif) {
     switch (notif.type) {
@@ -204,23 +238,53 @@ export default {
   fromNow (date) {
     return moment.utc(date).fromNow()
   },
+
   getNotifIcon (type) {
     switch (type) {
-      case 'visit' || 'you_visit' || 'he_visit':
+      case 'visit':
+      case 'you_visit':
+      case 'he_visit':
         return ['mdi', 'mdi-eye', 'text-blue']
-      case 'like' || 'you_like' || 'he_like':
+      case 'like':
+      case 'you_like':
+      case 'he_like':
         return ['mdi', 'mdi-heart-pulse', 'text-green']
-      case 'like_back' || 'you_like_back' || 'he_like_back':
+      case 'like_back':
+      case 'you_like_back':
+      case 'he_like_back':
         return ['mdi', 'mdi-heart', 'text-red']
-      case 'unlike' || 'you_unlike' || 'he_unlike':
+      case 'unlike':
+      case 'you_unlike':
+      case 'he_unlike':
         return ['mdi', 'mdi-heart-broken', 'text-black']
-      case 'block' || 'you_block' || 'he_block':
-        return ['mdi', 'mdi-block-helper', 'text-black']
+      case 'block':
+      case 'you_block':
+      case 'he_block':
+        return ['mdi', 'mdi-block-helper', 'text-red']
       case 'talk':
-        return ['mdi', 'mdi-wechat', 'text-black']
-      case 'image':
-        return ['mdi', 'mdi-image', 'text-black']
+        return ['mdi', 'mdi-wechat', 'text-grey']
+      case 'avatar_img':
+        return ['mdi', 'mdi-account', 'text-blue']
+      case 'cover_img':
+        return ['mdi', 'mdi-image', 'text-green']
     }
+
+  //   "allType": [
+    // "you_visit",
+    // "you_like",
+    // "you_unlike",
+    // "he_visit",
+    // "he_like",
+    // "you_like_back",
+    // "he_like_back",
+    // "he_unlike",
+    // "talk",
+    // "you_block",
+    // "he_block",
+    // "avatar_img",
+    // "cover_img"
+  // ]
+
   },
   filterBlocked: (state, type) => {
     return state[type].filter(cur => !isBlocked(state, cur[getId(type)]))

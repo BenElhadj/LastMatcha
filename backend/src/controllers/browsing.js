@@ -121,14 +121,16 @@ const getHistory = async (req, res) => {
 
 const getAllHistory = async (req, res) => {
 	if (!req.user.id)
-		return res.json({ msg: 'not logged in' })
+		return res.json({ msg: 'not logged in' });
 	try {
-		let history = await historyModel.getAllHistory(req.user.id)
-		res.json([...history])
+		const history = await historyModel.getAllHistory(req.user.id);
+		
+		res.json(history.allResults);
+		// res.json({ allhistory: history.allResults, allType: history.allType });
 	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
+		return res.json({ msg: 'Fatal error', err });
 	}
-}
+};
 
 // Get tags 
 

@@ -2,56 +2,32 @@
   <q-page>
     <q-page-container>
       <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">History</h1>
-
-<!-- <q-timeline-entry
-        v-for="(entry, i) in notif"
-        :key="i"
-         >
-         <span v-if="entry.type === 'like'">
-          <q-icon :class="getNotifIcon(entry.type)"/>
-          <q-chip color="red" text-color="white" label="Like"> Vous avez aimé le profil de {{ entry.username }}</q-chip>
-
-        </span>
-
-        <span v-else-if="entry.type === 'unlike'">
-          <q-icon :class="getNotifIcon(entry.type)"/>
-          <q-chip
-            color="red"
-            text-color="white"
-            label="Unlike"
-            
-          > Vous n'avez pas aimé le profil de {{ entry.username }}</q-chip>
-        </span> -->
-
-
-
       <q-timeline align="top" dense center class="timeline_container" >
         <q-timeline-entry
           color="primary"
           small
           v-for="(entry, i) in history"
+          style="width: 120px; height: 120px;"
           :key="i"
+          size="7.4em"
           :avatar="getFullPath(entry.avatar)"
-        >
-          <!--  -->
-          <!-- :class="getNotifIcon(entry.type)" -->
+          @click="redirectToUser(entry.his_id)"
+          col-md-4>
           <q-icon small style="font-size:25px !important;" class="mr-2 q-ml-xl">
             <span :class="getNotifIcon(entry.type)"></span>&nbsp;
           </q-icon>
-
           <div class="v-timeline-item__body ">
-            <div class="hidden-xs-only">
+            <div>
               <q-tooltip label="formatTime(entry)" position="left">
-                <strong class="mt-2 d-block">{{ fromNow(getDate(entry)) }}</strong>
+                <strong class="mt-2 d-block">{{ moment(entry.created_at).fromNow() }}</strong>
               </q-tooltip>
             </div>
+              <!-- <q-avatar style="width: 120px; height: 120px;" :avatar="getFullPath(entry.avatar)"/> -->
             <q-chip small class="bubble grey lighten-5 px-2 py-2">
-              <q-avatar :avatar="getFullPath(entry.avatar)">
-                <!-- <img :img="getFullPath(entry.avatar)" :alt="entry.username" /> -->
-              </q-avatar>
-              <router-link :to="`/user/${entry.id}`">
-                <span class="mr-1" v-if="entry.type !== 'follower' && entry.type !== 'visitor'">{{ getHistoryAction(entry.type) }}</span>
-                <span><q-route-link to="`/user/${entry.id}`" class="timeline_link">{{ entry.username }}</q-route-link></span>
+              <router-link :to="`/user/${entry.his_id}`">
+                <span class="mr-1" v-if="entry.type !== 'follower' && entry.type !== 'visitor'">{{ getHistoryAction(entry.type, entry.first_name, entry.last_name) }}</span>
+                <!-- <span><q-route-link to="`/user/${entry.his_id}`" class="timeline_link"></q-route-link></span> -->
+                <span><router-link :to="`/user/${entry.his_id}`" class="timeline_link"></router-link></span>
                 <span v-if="entry.type === 'follower' || entry.type === 'visitor'" class="ml-1">{{ getHistoryAction(entry.type) }}</span>
                 <span v-if="entry.type === 'visited'">'s profile</span>
               </router-link>
@@ -59,15 +35,7 @@
           </div>
         </q-timeline-entry>
       </q-timeline>
-      <q-btn
-        v-if="moreToLoad"
-        label="Afficher plus"
-        color="primary"
-        text
-        rounded
-        class="my-4"
-        @click="increaseLimit"
-      />
+      <q-btn v-if="moreToLoad" label="Show more" color="primary" text rounded class="my-4" @click="increaseLimit"/>
     </q-page-container>
   </q-page>
 </template>
@@ -75,27 +43,32 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import utility from '@/utility.js';
 import axios from 'axios';
 
 const store = useStore()
+const route = useRoute()
 const router = useRouter()
-const limit = ref(15)
+const limit = ref(25)
 const user = computed(() => store.getters.user)
 const getNotifIcon = utility.getNotifIcon
 
 const AllHistory = ref([])
+
+const fromNow = utility.fromNow
+const formatTime = utility.formatTime
+const getFullPath = utility.getFullPath
+const getHistoryAction = utility.getHistoryAction
+
 
 const getHistory = async () => {
   try {
     const token = user.value.token || localStorage.getItem('token')
     const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`
     const headers = { 'x-auth-token': token }
-    console.log('headers : ', headers)
     const result = await axios.get(url, { headers })
     AllHistory.value = result.data
-    console.log('******AllHistory : ', AllHistory.value)
     return result
   } catch (err) {
     console.error('err history in frontend/ProfileHistory.vue ===> ', err)
@@ -104,33 +77,32 @@ const getHistory = async () => {
 
 getHistory();
 
+const redirectToUser = (hisId) => {
+  if (hisId === user.value.id) {
+    router.push('/');
+  } else {
+    router.push(`/user/${hisId}`);
+  }
+}
 
 const history = computed(() => {
-  const blocked = store.getters.blocked;
   return AllHistory.value
-    .filter((cur) => !blocked.includes(cur.id))
-    .sort((a, b) => new Date(getDate(b)) - new Date(getDate(a)))
+    .filter((cur) => !AllHistory.value.includes(cur.id))
     .slice(0, limit.value);
 });
 
 const moreToLoad = computed(() => {
-  return limit.value < history.value.length - 1;
+  return limit.value < AllHistory.value.length - 1;
 });
 
-const fromNow = utility.fromNow;
-const getDate = utility.getDate;
-const formatTime = utility.formatTime;
-const getFullPath = utility.getFullPath;
-const getHistoryAction = utility.getHistoryAction;
 
 const increaseLimit = () => {
-  if (limit.value + 11 < history.value.length) {
-    limit.value += 10;
+  if (limit.value + 24 < AllHistory.value.length) {
+    limit.value += 25;
   } else {
-    limit.value = history.value.length - 1;
+    limit.value = AllHistory.value.length - 1;
   }
 };
-
 
 </script>
 

@@ -6,9 +6,9 @@
         <div class="profile__cover">
           <img :src="coverPhoto" alt="Cover Photo" class="cover__img">
         </div>
-
         <q-btn @click="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:85px;">
           <q-icon name="mdi-image"></q-icon>
+
           <q-tooltip left>
             <span>Changer votre photo de couverture</span>
           </q-tooltip>
@@ -19,6 +19,13 @@
         <q-avatar slot="offset" class="profile__avatar mx-auto" size="250px">
           <img :src="profileImage">
         </q-avatar>
+
+        <!-- <q-file
+            @click="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:470px;left:190px;" accept=".jpg, image/*"
+            v-model="filesImages"
+          >
+          <q-icon name="mdi-image"></q-icon>
+          </q-file> -->
 
         <q-btn @click="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:470px;left:190px;">
           <q-icon name="mdi-image"></q-icon>
@@ -81,10 +88,6 @@ import ProfileSettings from '@/components/afterLogin/ProfileSettings.vue'
 import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue'
 import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue'
 
-import userImg from '@/assets/Settings/user.png'
-import galerieImg from '@/assets/Settings/galerie.png'
-import historyImg from '@/assets/Settings/history.png'
-import settingImg from '@/assets/Settings/setting.png'
 
 import axios from 'axios'
 import { useStore } from 'vuex'
@@ -102,6 +105,47 @@ const alert = ref({
   color: '',
   text: ''
 })
+
+// const ProfileEditor = ref(null)
+const props = defineProps({
+  pickFile: Function,
+  ProfileEditor: Object,
+})
+
+const filesImages = ref([])
+
+const onRejected = (rejectedEntries)  => {
+  // Notify plugin needs to be installed
+  // https://quasar.dev/quasar-plugins/notify#Installation
+  notify({
+    type: 'negative',
+    message: `${rejectedEntries.length} file(s) did not pass validation constraints`
+  })
+}
+
+
+const changeTab = (tab) => {
+  activeTab.value = tab
+}
+
+
+
+const openEditor = () => {
+  console.log('openEditor', ProfileEditor.profile_editor)
+  ProfileEditor.profile_editor.pickFile()
+}
+
+const pickFile = () => {
+  console.log('pickFile', ProfileEditor.image.value)
+  
+  filesImages.value = []
+  ProfileEditor.image.value = null
+  ProfileEditor.image.value.click()
+}
+
+const toggleEdit = () => {
+  isEditing.value = !isEditing.value;
+}
 
 watch(user, (newValue) => {
   if (newValue.id) {
@@ -122,14 +166,14 @@ const updateUser = async () => {
     const headers = { 'x-auth-token': user.token }
     const res = await axios.post(url, user.value, { headers })
 
-    if (res && res.body && !res.body.msg) {
+    if (res && res.data && !res.data.msg) {
       console.log('Alert, green, Your account has been updated successfully')
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
       store.dispatch('updateUser', user.value)
-      profileEditor.form.toggleEdit()
+      ProfileEditor.form.toggleEdit()
     } else {
       console.log('Alert, red, Oops... something went wrong!')
-      alert.value = { state: true, color: 'red', text: res.body.msg ? res.body.msg : 'Oops... something went wrong!'}
+      alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}
     }
   } catch (err) {
     console.error('err updateUser in frontend/SettingsView.vue ===> ', err)
@@ -146,10 +190,10 @@ const updateImage = async (data) => {
       const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
       const headers = { 'x-auth-token': user.token }
       const res = await axios.post(url, fd, { headers })
-      if (res && res.body && !res.body.msg) {
+      if (res && res.data && !res.data.msg) {
         console.log('Alert, green, Your profile image has been updated successfully')
         alert.value = { state: true, color: 'green', text: 'Your profile image has been updated successfully'}
-        store.commit('updateProfileImage', res.body)
+        store.commit('updateProfileImage', res.data)
       } else {
         console.log('Alert, red, Something went wrong!')
         alert.value = { state: true, color: 'red', text: 'Something went wrong!'}
@@ -185,28 +229,6 @@ onMounted(async () => {
 
 const syncUser = (updatedUser) => {
   store.commit('updateUser', updatedUser)
-}
-
-const changeTab = (tab) => {
-  activeTab.value = tab
-}
-
-const profileEditor = ref(null)
-const openEditor = () => {
-  console.log('openEditor', profileEditor.profile_editor)
-  
-  profileEditor.profile_editor.pickFile()
-}
-
-const pickFile = () => {
-  console.log('pickFile', profileEditor.image.value)
-  
-  profileEditor.image.value = null
-  profileEditor.image.value.click()
-}
-
-const toggleEdit = () => {
-  isEditing.value = !isEditing.value;
 }
 
 const onFilePicked = async (e) => {

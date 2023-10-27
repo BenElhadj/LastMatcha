@@ -47,13 +47,13 @@ export const getters = {
       return false
     }),
   profileImage: (state) => {
-    const imageProfil = '/src/assets/default/defaut_profile.png'
+    const imageProfil = '@/assets/default/defaut_profile.png'
     if (!state.user.images) return imageProfil
     const image = state.user.images.find((cur) => cur.profile)
     return utility.getFullPath(image ? image.name : imageProfil)
   },
   coverPhoto: (state) => {
-    const cover = '/src/assets/default/defaut_couverture.jpg'
+    const cover = '@/assets/default/defaut_couverture.jpg'
     if (!state.user.images) return cover
     const image = state.user.images.find((cur) => cur.cover)
     return utility.getFullPath(image ? image.name : cover)

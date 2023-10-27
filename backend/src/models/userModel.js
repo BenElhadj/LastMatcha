@@ -188,7 +188,7 @@ const changePassword = (user, callback) => {
 	})
 }
 
-// Get images 
+// Get images
 
 const getImages = (id, callback) => {
 	let request = `SELECT * FROM images WHERE user_id = ${id} AND cover = 0`
@@ -288,9 +288,21 @@ const setImages = (user_id) => {
 // get Blocked  users 
 
 const getBlocked = (id) => {
-	let request = `SELECT * FROM blocked where blocker = ? OR blocked = ?`
-	return db.query(request, [id, id])
-}
+	let request = `
+	  SELECT
+		blocked.id AS blocked_id,
+		users.username AS username,
+		users.first_name AS first_name,
+		users.last_name AS last_name,
+		images.name AS avatar
+		blocked.created_at AS blocked_at,
+	  FROM blocked
+	  JOIN users ON blocked.blocked = users.id
+	  LEFT JOIN images ON users.id = images.user_id AND images.profile = 1
+	  WHERE blocked.blocker = ${id}
+	`;
+	return db.query(request);
+  }
 
 //  Block user 
 
