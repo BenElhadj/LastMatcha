@@ -7,25 +7,22 @@
           <div class="col-2">
             <q-page-container class="px-5">
               <q-layout class="column">
-
                 <h4 class="title mb-4">Rechechre</h4>
-
-                <q-input
-                  v-model="recherche"
-                  class="location_input mb-5"
-                  color="primary"
-                  hide-details
-                  outlined
-                  solo
-                  text
-                  placeholder="Recherche"
-                >
-                  <template v-slot:append>
-                    <q-icon name="mdi-magnify"></q-icon>
-                  </template>
-                </q-input>
-
-
+                 <q-input
+                    v-model="recherche"
+                    class="location_input mb-5"
+                    color="primary"
+                    hide-details
+                    outlined
+                    solo
+                    text
+                    placeholder="Recherche"
+                    @blur="displaySearchText()"
+                  >
+                    <template v-slot:append>
+                      <q-icon name="mdi-magnify"></q-icon>
+                    </template>
+                  </q-input>
                 <h4 class="title mb-4">Afficher</h4>
                 <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/>
                 
@@ -134,7 +131,7 @@ const distance = ref({min: 0, max: 0})
 const maxDis = ref(null)
 const sortTypes = ['age', 'distance', 'rating', 'interests']
 const nats = ref(countries)
-const recherche = ref('')
+const recherche = ref('');
 
 const filters = {
   self: val => val.user_id !== user.id,
@@ -180,31 +177,25 @@ const filtered = computed(() => {
     .filter(filters.interest)
 })
 
-  // const displaySearchText = () => {
-  //   if(recherche.value != '')
-  //     { 
-  //       users.value = users.value.filter(user => user.username.includes(recherche.value));
-  //     }
-  // };
-  
-const displaySearchText = () => {
-  // Convert the search input to lowercase for case-insensitive matching
-  const searchTerm = recherche.value.toLowerCase();
 
-  const allUsers = users.value; 
-  // If the search input is empty, reset the user list to include all users
+
+// const allUsers = ref([])
+
+const displaySearchText = () => {
+  const searchTerm = recherche.value.toLowerCase();
+  const allUsers = users.value;
+
   if (!searchTerm) {
-    users.value = allUsers; // Replace `allUsers` with your original user list
-    return;
+    created()
+    // users.value = [...users.value]; // Reset to the original user list
+    return; 
   }
 
-  // Filter the users based on username, first name, and last name
   users.value = allUsers.filter((user) => {
     const usernameMatch = user.username.toLowerCase().includes(searchTerm);
     const firstNameMatch = user.first_name.toLowerCase().includes(searchTerm);
     const lastNameMatch = user.last_name.toLowerCase().includes(searchTerm);
     
-    // Include the user if any of the fields match the search term
     return usernameMatch || firstNameMatch || lastNameMatch;
   });
 };
@@ -212,9 +203,18 @@ const displaySearchText = () => {
 
 
 
-const search = () => {
-    displaySearchText();
-};
+  // const displaySearchText = () => {
+  //   if(recherche.value != '')
+  //     { 
+  //       users.value = users.value.filter(user => user.username.includes(recherche.value));
+  //     }
+  // };
+  
+  const search = () => {
+     displaySearchText();
+  };
+
+
 
 
 

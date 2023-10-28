@@ -24,12 +24,12 @@
       <q-space></q-space>
       
       <div v-if="connected" justify-end class="search-notif-msg">
-        
-        <q-input v-model="searchText" margin-right="37px" class="search-field q-ml-xl" dense outlined hide-details placeholder="Recherche">
-          <template #prepend>
+      
+        <!-- <q-input v-model="recherche" class="location_input mb-5" color="primary" hide-details outlined solo text placeholder="Recherche" @blur="displaySearchText()">
+          <template v-slot:append>
             <q-icon name="mdi-magnify"></q-icon>
           </template>
-        </q-input> 
+        </q-input> -->
 
         <div>
           <q-btn ripple flat round dense class="icon-size">
