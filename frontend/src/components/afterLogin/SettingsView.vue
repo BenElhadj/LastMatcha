@@ -2,15 +2,17 @@
   <q-page class="page-container">
     <q-page-container v-if="loaded">
 
+
       <div>
         <div class="profile__cover">
           <img :src="coverPhoto" alt="Cover Photo" class="cover__img">
         </div>
-        <input type="file" ref="fileInput" style="display: none" @change="uploadImage">
+        <input accept=".jpg, image/*" type="file" ref="fileInputCover" id="fileInputCover" style="display: none" @change="uploadImage('cover', $event)">
         
-        <q-btn @click="openImageUploadDialog" fab small outlined flat round lighten-3 class="update__img" style="top:85px;" :tpcover="newcover">
-          <q-icon name="mdi-image" ></q-icon>
 
+
+        <q-btn @click="openImageUploadDialog('cover')" fab small outlined flat round lighten-3 class="update__img" style="top:85px;">
+          <q-icon name="mdi-image" ></q-icon>
           <q-tooltip left>
             <span>Changer votre photo de couverture</span>
           </q-tooltip>
@@ -21,22 +23,20 @@
         <q-avatar slot="offset" class="profile__avatar mx-auto" size="250px">
           <img :src="profileImage">
         </q-avatar>
+        <input accept=".jpg, image/*" type="file" ref="fileInputProfile" id="fileInputProfile" style="display: none" @change="uploadImage('profile', $event)">
 
-        <!-- <q-file
-            @click="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:470px;left:190px;" accept=".jpg, image/*"
-            v-model="filesImages"
-          >
-          <q-icon name="mdi-image"></q-icon>
-          </q-file> -->
-        <q-btn @click="openImageUploadDialog" fab small outlined flat round lighten-3 class="update__img"  style="top:470px;left:190px;" :tpprofile="newprofile">
+
+
+        <q-btn @click="openImageUploadDialog('profile')" fab small outlined flat round lighten-3 class="update__img"  style="top:470px;left:190px;">
           <q-icon name="mdi-image"></q-icon>
 
           <q-tooltip left>
-            <span>Changer votre photo de couverture</span>
+            <span>Changer votre photo de profile</span>
           </q-tooltip>
         </q-btn>
-       
       </div>
+
+
 
       <q-separator spacing class="separator-margin"></q-separator>
       <div class=" centered-tabs" style="max-width: 800px;">  
@@ -73,7 +73,6 @@
       </div>
 
       <AlertView :alert="alert"></AlertView>
-      <!-- <profile-editor @file_error="error = true" @file_succes="error = false" @update-image="updateImage" ref="profile_editor"></profile-editor> -->
     </q-page-container>
     <LoaderView v-else />
   </q-page>
@@ -109,90 +108,57 @@ const alert = ref({
   text: ''
 })
 
+const fileInputProfile = ref('');
+const fileInputCover = ref('');
+const urlProfile = ref('');
+const urlCover = ref('');
 
-
-
-
-
-const fileInput = ref('');
-const newprofile = ref('');
-const newcover = ref('');
-const url = ref('')
-
-const openImageUploadDialog = () => {
-  fileInput.value.click();
-  const tpValueCover = event.currentTarget.getAttribute('tpcover');
-  const tpValueProfile = event.currentTarget.getAttribute('tpprofile');
-  console.log("Cover ",tpValueCover);
-  console.log("Profile ",tpValueProfile);
-  if(tpValueCover !=null){
-    url.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
+const openImageUploadDialog = (type) => {
+  if (type === 'cover') {
+    fileInputCover.value.click();
+    urlCover.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`;
+  } else if (type === 'profile') {
+    fileInputProfile.value.click(); 
+    urlProfile.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image`;
   }
-  if(tpValueProfile !=null){
-      url.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
-  }
-}
+};
 
-const uploadImage = async () => {
+const uploadImage = async (type, event) => {
   try {
-    console.log(url.value);
-    const selectedFile = fileInput.value.files[0]; 
+    const selectedFile = event.target.files[0];
     if (!selectedFile) {
       console.error("Aucun fichier sélectionné");
       return;
     }
-    console.log('++++selectedFile+++++',selectedFile, '+++++++++'); 
+
     const headers = { 'x-auth-token': user.value.token };
-    console.log('====headers====',headers, '========');
-    const formData = new FormData();
-    formData.append('image', selectedFile);
-    console.log('-----formData-----',formData, '----------');
-    
-    const result = await axios.post(url.value, formData, { headers });
-    console.log('.....result.data.msg.....',result.data.msg, '..........');
-    return result;
+
+    if (type === 'cover') {
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+      
+      const result = await axios.post(urlCover.value, formData, { headers })
+      console.log('Result:', result.data)
+      
+    } else if (type === 'profile') {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Image = e.target.result;
+        const imageObject = {
+          image: base64Image,
+        };
+        const result = await axios.post(urlProfile.value, imageObject, { headers });
+        console.log('Result:', result.data);
+      };
+
+      reader.readAsDataURL(selectedFile);
+    }
+
   } catch (err) {
-    console.error('Error in uploadImage: ', err);
-    return err;
+    console.error('Error in uploadImage:', err);
   }
-}
+};
 
-
-
-
-
-
-
-// const uploadImage = () => {
-//   const selectedFile = fileInput.value.files[0];
-
-//   if (selectedFile) {
-//     // Vous pouvez maintenant envoyer le fichier au serveur ou effectuer d'autres opérations.
-//     // Par exemple, utilisez une requête HTTP POST pour envoyer l'image au serveur.
-//     const formData = new FormData();
-//     formData.append('profileImage', selectedFile);
-
-//     // Exemple de requête POST à l'aide de l'API Fetch :
-//     fetch('/votre-point-d-api', {
-//       method: 'POST',
-//       body: formData,
-//     })
-//       .then((response) => {
-//         if (response.ok) {
-//           // Gérer la réussite du téléchargement ici
-//           console.log('Image téléchargée avec succès !');
-//         } else {
-//           // Gérer les erreurs ici
-//           console.error('Échec du téléchargement de l\'image.');
-//         }
-//       })
-//       .catch((error) => {
-//         console.error('Erreur lors de la requête :', error);
-//       });
-//   }
-// };  
-
-// const ProfileEditor = ref(null)
 const props = defineProps({
   pickFile: Function,
   ProfileEditor: Object,
@@ -201,44 +167,40 @@ const props = defineProps({
 const filesImages = ref([])
 
 const onRejected = (rejectedEntries)  => {
-  // Notify plugin needs to be installed
-  // https://quasar.dev/quasar-plugins/notify#Installation
   notify({
     type: 'negative',
     message: `${rejectedEntries.length} file(s) did not pass validation constraints`
   })
 }
 
-
 const changeTab = (tab) => {
   activeTab.value = tab
 }
 
 
+// const openEditor = () => {
+//   console.log('openEditor', ProfileEditor.profile_editor)
+//   ProfileEditor.profile_editor.pickFile()
+// }
 
-const openEditor = () => {
-  console.log('openEditor', ProfileEditor.profile_editor)
-  ProfileEditor.profile_editor.pickFile()
-}
-
-const pickFile = () => {
-  console.log('pickFile', ProfileEditor.image.value)
+// const pickFile = () => {
+//   console.log('pickFile', ProfileEditor.image.value)
   
-  filesImages.value = []
-  ProfileEditor.image.value = null
-  ProfileEditor.image.value.click()
-}
+//   filesImages.value = []
+//   ProfileEditor.image.value = null
+//   ProfileEditor.image.value.click()
+// }
 
-const toggleEdit = () => {
-  isEditing.value = !isEditing.value;
-}
+// const toggleEdit = () => {
+//   isEditing.value = !isEditing.value;
+// }
 
-watch(user, (newValue) => {
-  if (newValue.id) {
-    syncHistory(newValue.id)
-    syncMatches(newValue.id)
-  }
-})
+// watch(user, (newValue) => {
+//   if (newValue.id) {
+//     syncHistory(newValue.id)
+//     syncMatches(newValue.id)
+//   }
+// })
 
 const filteredImages = computed(() => {
   if (!user.value.images) return []
@@ -256,7 +218,7 @@ const updateUser = async () => {
       console.log('Alert, green, Your account has been updated successfully')
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
       store.dispatch('updateUser', user.value)
-      ProfileEditor.form.toggleEdit()
+      // ProfileEditor.form.toggleEdit()
     } else {
       console.log('Alert, red, Oops... something went wrong!')
       alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}
@@ -266,38 +228,11 @@ const updateUser = async () => {
   }
 }
 
-
-
-// const updateImage = async (data) => {
-//   if (!error.value) {
-//     try {
-//       const fd = new FormData()
-//       fd.append('image', data)
-//       const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
-//       const headers = { 'x-auth-token': user.token }
-//       const res = await axios.post(url, fd, { headers })
-//       if (res && res.data && !res.data.msg) {
-//         console.log('Alert, green, Your profile image has been updated successfully')
-//         alert.value = { state: true, color: 'green', text: 'Your profile image has been updated successfully'}
-//         store.commit('updateProfileImage', res.data)
-//       } else {
-//         console.log('Alert, red, Something went wrong!')
-//         alert.value = { state: true, color: 'red', text: 'Something went wrong!'}
-//       }
-//     } catch (err) {
-//       console.error('err updateImage in frontend/SettingsView.vue ===> ', err)
-//     }
-//   }
-// }
-
 onMounted(async () => {
   const token = user.token || localStorage.getItem('token')
   if (token) {
     try {
-      
-     // store.dispatch('syncHistory', user.id)
-      //store.commit('syncMatches', user.id)
-      // syncMatches(user.id)
+
       const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
       const headers = { 'x-auth-token': token }
       const res = await axios.get(url, { headers })
@@ -309,43 +244,13 @@ onMounted(async () => {
       console.log('Got error here --> ', err)
     }
   }
-  // logout(user.value.id) // Remplacez cette ligne par votre propre logique de déconnexion
- // router.push('/login')
+
 })
 
 const syncUser = (updatedUser) => {
   store.commit('updateUser', updatedUser)
 }
 
-// const onFilePicked = async (e) => {
-//   const files = e.target.files
-//   if (files[0]) {
-//     const imageFile = files[0]
-//     const imageName = imageFile.name
-//     if (imageName.lastIndexOf('.') <= 0) {
-//       alert.value = { state: true, color: 'red', text: 'The selected file is not an image!' }
-//     } else if (imageFile.size > 1024 * 1024) {
-//       alert.value = { state: true, color: 'red', text: 'Image is too large..' }
-//     } else {
-//       try {
-//         let msg
-//         const fd = new FormData()
-//         fd.append('image', imageFile)
-//         const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
-//         const headers = { 'x-auth-token': user.token }
-//         const res = await axios.post(url, fd, { headers })
-//         if (res && !res.data.msg && !res.data.msg) {
-//           alert.value = { state: true, color: 'green', text: 'Your cover image has been updated successfully' }
-//           store.commit('updateCoverImage', res.data)
-//         } else {
-//           alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops, something went wrong!' }
-//         }
-//       } catch (err) {
-//         console.error('err onFilePicked in frontend/SettingsView.vue ===> ', err)
-//       }
-//     }
-//   }
-// }
 </script>
 
 <style scoped>
