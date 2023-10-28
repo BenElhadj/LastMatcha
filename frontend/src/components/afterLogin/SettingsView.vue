@@ -6,8 +6,10 @@
         <div class="profile__cover">
           <img :src="coverPhoto" alt="Cover Photo" class="cover__img">
         </div>
-        <q-btn @click="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:85px;">
-          <q-icon name="mdi-image"></q-icon>
+        <input type="file" ref="fileInput" style="display: none" @change="uploadImage">
+        
+        <q-btn @click="openImageUploadDialog" fab small outlined flat round lighten-3 class="update__img" style="top:85px;" :tpcover="newcover">
+          <q-icon name="mdi-image" ></q-icon>
 
           <q-tooltip left>
             <span>Changer votre photo de couverture</span>
@@ -26,13 +28,14 @@
           >
           <q-icon name="mdi-image"></q-icon>
           </q-file> -->
-
-        <q-btn @click="openEditor" fab small outlined flat round lighten-3 class="update__img" style="top:470px;left:190px;">
+        <q-btn @click="openImageUploadDialog" fab small outlined flat round lighten-3 class="update__img"  style="top:470px;left:190px;" :tpprofile="newprofile">
           <q-icon name="mdi-image"></q-icon>
+
           <q-tooltip left>
-            <span>Changer votre photo de profil</span>
+            <span>Changer votre photo de couverture</span>
           </q-tooltip>
         </q-btn>
+       
       </div>
 
       <q-separator spacing class="separator-margin"></q-separator>
@@ -105,6 +108,89 @@ const alert = ref({
   color: '',
   text: ''
 })
+
+
+
+
+
+
+const fileInput = ref('');
+const newprofile = ref('');
+const newcover = ref('');
+const url = ref('')
+
+const openImageUploadDialog = () => {
+  fileInput.value.click();
+  const tpValueCover = event.currentTarget.getAttribute('tpcover');
+  const tpValueProfile = event.currentTarget.getAttribute('tpprofile');
+  console.log("Cover ",tpValueCover);
+  console.log("Profile ",tpValueProfile);
+  if(tpValueCover !=null){
+    url.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
+  }
+  if(tpValueProfile !=null){
+      url.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
+  }
+}
+
+const uploadImage = async () => {
+  try {
+    console.log(url.value);
+    const selectedFile = fileInput.value.files[0]; 
+    if (!selectedFile) {
+      console.error("Aucun fichier sélectionné");
+      return;
+    }
+    console.log('++++selectedFile+++++',selectedFile, '+++++++++'); 
+    const headers = { 'x-auth-token': user.value.token };
+    console.log('====headers====',headers, '========');
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+    console.log('-----formData-----',formData, '----------');
+    
+    const result = await axios.post(url.value, formData, { headers });
+    console.log('.....result.data.msg.....',result.data.msg, '..........');
+    return result;
+  } catch (err) {
+    console.error('Error in uploadImage: ', err);
+    return err;
+  }
+}
+
+
+
+
+
+
+
+// const uploadImage = () => {
+//   const selectedFile = fileInput.value.files[0];
+
+//   if (selectedFile) {
+//     // Vous pouvez maintenant envoyer le fichier au serveur ou effectuer d'autres opérations.
+//     // Par exemple, utilisez une requête HTTP POST pour envoyer l'image au serveur.
+//     const formData = new FormData();
+//     formData.append('profileImage', selectedFile);
+
+//     // Exemple de requête POST à l'aide de l'API Fetch :
+//     fetch('/votre-point-d-api', {
+//       method: 'POST',
+//       body: formData,
+//     })
+//       .then((response) => {
+//         if (response.ok) {
+//           // Gérer la réussite du téléchargement ici
+//           console.log('Image téléchargée avec succès !');
+//         } else {
+//           // Gérer les erreurs ici
+//           console.error('Échec du téléchargement de l\'image.');
+//         }
+//       })
+//       .catch((error) => {
+//         console.error('Erreur lors de la requête :', error);
+//       });
+//   }
+// };  
 
 // const ProfileEditor = ref(null)
 const props = defineProps({
@@ -182,27 +268,27 @@ const updateUser = async () => {
 
 
 
-const updateImage = async (data) => {
-  if (!error.value) {
-    try {
-      const fd = new FormData()
-      fd.append('image', data)
-      const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
-      const headers = { 'x-auth-token': user.token }
-      const res = await axios.post(url, fd, { headers })
-      if (res && res.data && !res.data.msg) {
-        console.log('Alert, green, Your profile image has been updated successfully')
-        alert.value = { state: true, color: 'green', text: 'Your profile image has been updated successfully'}
-        store.commit('updateProfileImage', res.data)
-      } else {
-        console.log('Alert, red, Something went wrong!')
-        alert.value = { state: true, color: 'red', text: 'Something went wrong!'}
-      }
-    } catch (err) {
-      console.error('err updateImage in frontend/SettingsView.vue ===> ', err)
-    }
-  }
-}
+// const updateImage = async (data) => {
+//   if (!error.value) {
+//     try {
+//       const fd = new FormData()
+//       fd.append('image', data)
+//       const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
+//       const headers = { 'x-auth-token': user.token }
+//       const res = await axios.post(url, fd, { headers })
+//       if (res && res.data && !res.data.msg) {
+//         console.log('Alert, green, Your profile image has been updated successfully')
+//         alert.value = { state: true, color: 'green', text: 'Your profile image has been updated successfully'}
+//         store.commit('updateProfileImage', res.data)
+//       } else {
+//         console.log('Alert, red, Something went wrong!')
+//         alert.value = { state: true, color: 'red', text: 'Something went wrong!'}
+//       }
+//     } catch (err) {
+//       console.error('err updateImage in frontend/SettingsView.vue ===> ', err)
+//     }
+//   }
+// }
 
 onMounted(async () => {
   const token = user.token || localStorage.getItem('token')
@@ -231,35 +317,35 @@ const syncUser = (updatedUser) => {
   store.commit('updateUser', updatedUser)
 }
 
-const onFilePicked = async (e) => {
-  const files = e.target.files
-  if (files[0]) {
-    const imageFile = files[0]
-    const imageName = imageFile.name
-    if (imageName.lastIndexOf('.') <= 0) {
-      alert.value = { state: true, color: 'red', text: 'The selected file is not an image!' }
-    } else if (imageFile.size > 1024 * 1024) {
-      alert.value = { state: true, color: 'red', text: 'Image is too large..' }
-    } else {
-      try {
-        let msg
-        const fd = new FormData()
-        fd.append('image', imageFile)
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
-        const headers = { 'x-auth-token': user.token }
-        const res = await axios.post(url, fd, { headers })
-        if (res && !res.data.msg && !res.data.msg) {
-          alert.value = { state: true, color: 'green', text: 'Your cover image has been updated successfully' }
-          store.commit('updateCoverImage', res.data)
-        } else {
-          alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops, something went wrong!' }
-        }
-      } catch (err) {
-        console.error('err onFilePicked in frontend/SettingsView.vue ===> ', err)
-      }
-    }
-  }
-}
+// const onFilePicked = async (e) => {
+//   const files = e.target.files
+//   if (files[0]) {
+//     const imageFile = files[0]
+//     const imageName = imageFile.name
+//     if (imageName.lastIndexOf('.') <= 0) {
+//       alert.value = { state: true, color: 'red', text: 'The selected file is not an image!' }
+//     } else if (imageFile.size > 1024 * 1024) {
+//       alert.value = { state: true, color: 'red', text: 'Image is too large..' }
+//     } else {
+//       try {
+//         let msg
+//         const fd = new FormData()
+//         fd.append('image', imageFile)
+//         const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
+//         const headers = { 'x-auth-token': user.token }
+//         const res = await axios.post(url, fd, { headers })
+//         if (res && !res.data.msg && !res.data.msg) {
+//           alert.value = { state: true, color: 'green', text: 'Your cover image has been updated successfully' }
+//           store.commit('updateCoverImage', res.data)
+//         } else {
+//           alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops, something went wrong!' }
+//         }
+//       } catch (err) {
+//         console.error('err onFilePicked in frontend/SettingsView.vue ===> ', err)
+//       }
+//     }
+//   }
+// }
 </script>
 
 <style scoped>

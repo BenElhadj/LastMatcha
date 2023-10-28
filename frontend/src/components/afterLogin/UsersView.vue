@@ -8,29 +8,18 @@
             <h1 class="display-3 hidden-xs-only text-xs-center mb-5">
               Si vous n'aimez pas vos imperfections, <br />quelqu'un les aimera pour vous
             </h1>
-            <div class="row justify-center">
-              <div class="col-8">
-                <div class="column">
-                  <h4 class="mb-4 custom-title">
-                    Afficher
-                  </h4>
-                  <q-btn-toggle v-model="model" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Hommes', value: 'man', icon: 'mdi-gender-male'}, {label: 'Femmes', value: 'women', icon: 'mdi-gender-female'} ]"></q-btn-toggle>
-                  <h4 class="mb-4 custom-title">
-                    Localisation
-                  </h4>
-                  <q-input v-model="location" class="home_location_input mb-4" color="primary" outlined solo icon="map_marker"/>
-                  <h4 class="custom-age">
-                    Age
-                  </h4>
-                  <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" class="custom-slider mx-3 mb-4 pt-3"></q-range>
-                  <!-- <q-range v-model="age" class="custom-slider mx-3 mb-4 pt-3" :min="18" :max="85" :step="1" :thumb-size="25" label-always thumb-label="always"/> -->
-                  <div class="row justify-center">
-                    <q-btn outlined color="primary" class="home_clear_btn" @click="mainSearch">
-                      <q-icon name="mdi-heart" /><span>Allons y</span>
-                    </q-btn>
-                  </div>
-                </div>
-              </div>
+              <q-btn
+                to="/discover"  
+                rounded
+                
+                class="q-btn-primary q-btn-lg"  
+                role="button"
+                style="     margin-top: -100px;   margin-left: -26px;    margin-bottom: -306px;"
+              >
+                Rechercher votre bonheur
+              </q-btn>         
+              <div class="row justify-center align-center" >
+             <img :src="img" alt="homepage" style="width: 100%; height: 100%; object-fit: contain;"/>
             </div>
           </div>
         </div>
@@ -43,6 +32,7 @@
 import { reactive, toRefs, ref} from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import img from '@/assets/homepage.png'
 
 export default {
   name: 'UsersView',
@@ -57,7 +47,7 @@ export default {
       tags: store.getters.tags      
     })
     const mainSearch = () => {
-      router.push(`/search?gender=${state.gender}&location=${state.location}&min=${state.age[0]}&max=${state.age[1]}`)
+      router.push(`/discover?gender=${state.gender}&location=${state.location}&min=${state.age[0]}&max=${state.age[1]}`)
     }
     return {
       ...toRefs(state),
@@ -67,7 +57,7 @@ export default {
       age: ref({
         min: 18,
         max: 85
-      })
+      }), img
     }
   }
 }
@@ -129,6 +119,12 @@ export default {
   /* background: transparent !important; */
   display: flex;
   justify-content: center;
+}
+.justify-center, .align-center {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+
 }
 
 .home_toggle_btn {

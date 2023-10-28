@@ -18,6 +18,12 @@
       </q-avatar>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
+       <span justify-center class="name headline text-capitalize mt-2 ">
+        <q-icon :name="user.gender === 'male' ? 'mdi-gender-male' : 'mdi-gender-female'"></q-icon>
+      </span>
+        
+      
+
       <div class="note">
         <p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
           <!-- <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :value="user.rating" half-increments class="rating"/> -->
@@ -33,6 +39,7 @@
 
         <span v-if="user.city && user.country" class="text-truncate">{{ `${user.city},  ${user.country}` }}</span>
         <span v-else class="text-truncate">Earth</span>
+
       </div>
     </div>
   </q-card>

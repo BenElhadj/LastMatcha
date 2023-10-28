@@ -93,7 +93,7 @@ const io = socketIo(server, {
 });
 
 let users = {}
-io.setMaxListeners(50)
+io.setMaxListeners(5000)
 io.on('connection', socket => {
     
     io.on('chat', data => {

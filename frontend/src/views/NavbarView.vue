@@ -186,12 +186,7 @@ export default {
         public: false,
         image: decouvrirImage
       },
-      {
-        text: 'Recherche',
-        route: '/search',
-        public: false,
-        image: rechercheImage
-      },
+      
       {
         text: 'Chat',
         route: '/chat',

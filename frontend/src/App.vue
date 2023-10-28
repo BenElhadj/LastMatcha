@@ -30,11 +30,11 @@ onMounted(() => {
       <NavbarView/>
     </q-header>
 
-    <q-page-container>
+    <q-page-container >
       <router-view />
     </q-page-container>
 
-    <q-footer>
+    <q-footer >
       <FooterView />
     </q-footer>
 
@@ -86,10 +86,12 @@ footer {
   background-color: transparent;
 }
 
+
 .q-page-container {
-  padding-bottom: 30vh;
+  padding-bottom: 50vh;
   margin-top: calc(var(--header-height) + var(--footer-height) + 20px);
   margin-bottom: calc(var(--header-height) + var(--footer-height) + 20px);
+  
 }
 
 
@@ -162,6 +164,9 @@ footer {
 .q-btn--floating:not(.q-btn--depressed):not(.q-btn--flat),
 .q-btn--floating:not(.q-btn--depressed):not(.q-btn--flat):focus {
   box-shadow: 0 0 3px rgba(0, 0, 0, .2) inset;
+}
+.q-layout {
+ padding-bottom: 70px !important;
 }
 
 .avatar__img {

@@ -7,6 +7,25 @@
           <div class="col-2">
             <q-page-container class="px-5">
               <q-layout class="column">
+
+                <h4 class="title mb-4">Rechechre</h4>
+
+                <q-input
+                  v-model="recherche"
+                  class="location_input mb-5"
+                  color="primary"
+                  hide-details
+                  outlined
+                  solo
+                  text
+                  placeholder="Recherche"
+                >
+                  <template v-slot:append>
+                    <q-icon name="mdi-magnify"></q-icon>
+                  </template>
+                </q-input>
+
+
                 <h4 class="title mb-4">Afficher</h4>
                 <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/>
                 
@@ -28,7 +47,9 @@
 
                 <h4 class="title mb-4">Interêts</h4>
                 <q-select v-model="interests" :options="allTags" multiple hide-dropdown-icon label="Select tag" style="width: 250px" outlined/>
-  
+
+
+
                 <div class="row justify-between mb-4">
                   <h4 class="title">Sort by</h4>
                   <q-btn @click="changeSort" flat round style="width: 10px" color="primary" icon="mdi-sort" :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`" class="clear_btn"/>
@@ -113,6 +134,7 @@ const distance = ref({min: 0, max: 0})
 const maxDis = ref(null)
 const sortTypes = ['age', 'distance', 'rating', 'interests']
 const nats = ref(countries)
+const recherche = ref('')
 
 const filters = {
   self: val => val.user_id !== user.id,
@@ -139,8 +161,11 @@ const filters = {
     if (!interests.value.length) return true
     for (const interest of interests.value) if (val.tags.split(',').includes(interest)) return true
     return false
-  }
+  },
+  search : val => !search.value || val.username.includes(search.value)
 }
+
+
 
 const filtered = computed(() => {
   return users.value
@@ -154,6 +179,47 @@ const filtered = computed(() => {
     .filter(filters.distance)
     .filter(filters.interest)
 })
+
+  // const displaySearchText = () => {
+  //   if(recherche.value != '')
+  //     { 
+  //       users.value = users.value.filter(user => user.username.includes(recherche.value));
+  //     }
+  // };
+  
+const displaySearchText = () => {
+  // Convert the search input to lowercase for case-insensitive matching
+  const searchTerm = recherche.value.toLowerCase();
+
+  const allUsers = users.value; 
+  // If the search input is empty, reset the user list to include all users
+  if (!searchTerm) {
+    users.value = allUsers; // Replace `allUsers` with your original user list
+    return;
+  }
+
+  // Filter the users based on username, first name, and last name
+  users.value = allUsers.filter((user) => {
+    const usernameMatch = user.username.toLowerCase().includes(searchTerm);
+    const firstNameMatch = user.first_name.toLowerCase().includes(searchTerm);
+    const lastNameMatch = user.last_name.toLowerCase().includes(searchTerm);
+    
+    // Include the user if any of the fields match the search term
+    return usernameMatch || firstNameMatch || lastNameMatch;
+  });
+};
+
+
+
+
+const search = () => {
+    displaySearchText();
+};
+
+
+
+
+
 
 const sorted = computed(() => {
   const onlineUsers = [...filtered.value].filter((user) => user.isConnected)

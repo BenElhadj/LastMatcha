@@ -17,7 +17,7 @@
           </div>
 
           <q-input v-model="user.birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
-          <q-input v-model="user.phone" mask="## ## ## ## ##" fill-mask :readonly="!isEditing" label="Phone Number" class="one-input"/>
+          <q-input v-model="user.phone"  :readonly="!isEditing" label="Phone Number" class="one-input"/>
           
           <div class="q-gutter-md row">
             <q-select v-model="user.gender" :readonly="!isEditing" label="Gender" :options="genders" dropdown-icon="mdi-chevron-down" class="tow-input"/>
@@ -65,16 +65,34 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, toRefs } from 'vue'
 import { useStore, mapActions } from 'vuex'
 import utility from '@/utility.js'
 import { createTags } from '@johmun/vue-tags-input'
 import axios from 'axios'
 import AlertView from '@/views/AlertView.vue'
+import { defineProps } from 'vue';
+
+const props = defineProps({
+  user: Object, // Make sure 'user' matches your prop name
+});
+
+
+// Access 'user' prop
+// console.log("----*** new user",props.user);
+
 
 
 const store = useStore()
 
+// const { username } = defineProps(['username']);
+
+
+// // const userNew = defineProps(['user'])
+
+// console.log('************ userNew in ProfileForm', username)
+
+//   console.log('************ thisUser in ProfileForm',thisUser)
 const isEditing = ref(false)
 const menu = ref(false)
 const date = ref('')
@@ -83,10 +101,13 @@ const looking = ['male', 'female', 'both']
 const tagEsc = [13, ':', ',', ';']
 let tag = ref('')
 let tags = ref([])
-const user = computed(() => store.getters.user)
+const user =  computed(() => store.getters.user)
+// if(thisUser != user) {
+//   user = thisUser.value
+// }
 const allTags = computed(() => store.getters.allTags)
 const initialUser = ref({ ...user.value })
-console.log('************ initialUser in ProfileForm',initialUser.value)
+// console.log('************ initialUser in ProfileForm',initialUser.value)
 
 const alert = ref({
   state: false,
@@ -100,7 +121,8 @@ onMounted(() => {
 
 const syncUser = () => {
   tags.value = user.value.tags ? user.value.tags.split(', ').map(tag => tag.trim()) : []
-  tag = tags.value[0].split(',').map(tag => tag.trim())
+  if(tags.length >0) {tag = tags.value[0].split(',').map(tag => tag.trim())}
+  else {tag = ''}
 }
 
 const resetForm = () => {
