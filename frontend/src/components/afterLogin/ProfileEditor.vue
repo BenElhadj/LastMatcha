@@ -55,13 +55,13 @@ const closeEditor = () => {
   $refs.vueavatar.init();
 };
 
-// const pickFile = () => {
-//   if (user.images.length < 5) {
-//     dialog.value = true;
-//   } else {
-//     alert.value = { state: true, color: 'red', text: 'The maximum number of photos is five, you must delete one to be able to add another' }
-//   }
-// };
+const pickFile = () => {
+  if (user.images.length < 5) {
+    dialog.value = true;
+  } else {
+    alert.value = { state: true, color: 'red', text: 'The maximum number of photos is five, you must delete one to be able to add another' }
+  }
+};
 
 const onChangeScale = (scale) => {
   $refs.vueavatar.changeScale(scale);

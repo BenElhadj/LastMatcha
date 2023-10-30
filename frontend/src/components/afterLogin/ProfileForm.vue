@@ -3,10 +3,14 @@
     <q-page-container>
       <h1 class="q-pb-md" style="margin-top: -10px; text-align: center;">Profile</h1>
       
-      <q-btn v-if="isEditing" class="edit" color="grey-5" fab icon="mdi-close-circle" @click="isEditing = false" />
-      <q-btn v-else class="edit" color="grey-5" fab icon="mdi-pencil" @click="isEditing = true" />
+      <!-- <q-btn v-if="isEditing" class="edit icon-edit stack" flat square fab @click="isEditing = false" />
+      <q-btn v-else class="edit icon-toEdit stack" flat square fab @click="isEditing = true"> -->
+      <q-btn v-if="isEditing" class="edit icon-edit stack" flat square fab @click="isEditing = false" />
+      <q-btn v-else class="edit icon-toEdit stack" flat square fab @click="isEditing = true">
+        <!-- <img src="@/assets/block/banir.png"/> -->
+      </q-btn>
 
-      <q-form @submit.prevent="updateUser" class="q-gutter-md">
+      <q-form @submit.prevent="updateUser" class="q-gutter-md" v-if="user">
 
           <q-input v-model="user.username" :readonly="!isEditing" label="Username" class="one-input"/>
 
@@ -16,6 +20,7 @@
             <q-input v-model="user.last_name" :readonly="!isEditing" label="Last Name" class="tow-input"/>
           </div>
 
+          <!-- <q-input v-model="user.birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/> -->
           <q-input v-model="user.birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
           <q-input v-model="user.phone"  :readonly="!isEditing" label="Phone Number" class="one-input"/>
           
@@ -30,24 +35,31 @@
           <div class="q-gutter-md row">
             <q-input v-model="user.city" :readonly="!isEditing" label="City" class="tow-input"/>
             <q-separator vertical spacing ></q-separator>
-            <q-input v-model="user.postal_code" :readonly="!isEditing" label="Postal Code" type="number" class="tow-input"/>
+            <q-input v-model="user.postal_code" :readonly="!isEditing" type="number" class="tow-input"/>
           </div>
 
           <q-input v-model="user.country" :readonly="!isEditing" label="Country" class="one-input"/>
           
-
-
           <!-- <vue3-tags-input v-model="tags" :readonly="!isEditing" class="one-input" :disabled="!isEditing" :max-tags="20" :maxlength="25"  :autocomplete-items="allTags" :add-on-key="tagEsc" :tags="tag" @on-tags-changed="newTags => tags = newTags"/> -->
           <div class="one-input">
             <span class="text-h8 text-grey-7">Tags</span>
-            <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :tags="tag" @on-tags-changed="newTags => tags = newTags" v-if="isEditing"></vue3-tags-input>
+            <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :tags="tagsString" @on-tags-changed="newTags => tags = newTags" v-if="isEditing"></vue3-tags-input>
+            <!-- <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :tags="tag" @on-tags-changed="newTags => tags = newTags" v-if="isEditing"></vue3-tags-input> -->
             <div v-else>
               <q-input v-model="tags" readonly />
             </div>
           </div>
+<!-- 
+          <div class="one-input">
+            <span class="text-h8 text-grey-7">Tags</span>
+            <vue3-tags-input :max-tags="20" :maxlength="25" :autocomplete-items="allTags" :add-on-key="tagEsc" :tags="tags === "" ? [] : tags" @on-tags-changed="newTags => tags = newTags" v-if="isEditing"></vue3-tags-input>
+            <div v-else>
+              <q-input v-model="tags" readonly />
+            </div>
+          </div> -->
 
 
-          
+
           <!-- <q-input v-model="user.biography" :readonly="!isEditing" :counter="500" label="Bio" filled type="textarea" class="one-input"/> -->
           <q-input v-model="user.biography" :readonly="!isEditing" label="Bio" filled type="textarea" class="one-input" :counter="true" :max-length="500"/>
 
@@ -72,42 +84,29 @@ import { createTags } from '@johmun/vue-tags-input'
 import axios from 'axios'
 import AlertView from '@/views/AlertView.vue'
 import { defineProps } from 'vue';
-
-const props = defineProps({
-  user: Object, // Make sure 'user' matches your prop name
-});
-
-
-// Access 'user' prop
-// console.log("----*** new user",props.user);
-
+import moment from 'moment'
 
 
 const store = useStore()
-
-// const { username } = defineProps(['username']);
-
-
-// // const userNew = defineProps(['user'])
-
-// console.log('************ userNew in ProfileForm', username)
-
-//   console.log('************ thisUser in ProfileForm',thisUser)
 const isEditing = ref(false)
 const menu = ref(false)
 const date = ref('')
 const genders = ['male', 'female']
 const looking = ['male', 'female', 'both']
 const tagEsc = [13, ':', ',', ';']
+const tagsString = ref('')
 let tag = ref('')
 let tags = ref([])
-const user =  computed(() => store.getters.user)
-// if(thisUser != user) {
-//   user = thisUser.value
-// }
+
+const connectedUserId = computed(() => store.getters.user.id)
+
+const { user } = defineProps(['user']);
+
+// console.log(" ----------- stateId", connectedUserId.value)
+// console.log(" ----------- userId", user.id)
+
 const allTags = computed(() => store.getters.allTags)
 const initialUser = ref({ ...user.value })
-// console.log('************ initialUser in ProfileForm',initialUser.value)
 
 const alert = ref({
   state: false,
@@ -115,24 +114,31 @@ const alert = ref({
   text: ''
 });
 
-onMounted(() => {
-  syncUser()
-})
 
-const syncUser = () => {
+const syncTags = () => {
+  console.log('=== syncTags in frontend/ProfileForm.vue ===> ')
   tags.value = user.value.tags ? user.value.tags.split(', ').map(tag => tag.trim()) : []
-  if(tags.length >0) {tag = tags.value[0].split(',').map(tag => tag.trim())}
-  else {tag = ''}
+  tag = tags.value[0].split(',').map(tag => tag.trim())
+  console.log('syncTags in frontend/ProfileForm.vue ===> ', tags.value) 
 }
 
+const formattedBirthdate = computed(() => {
+  console.log('=== formattedBirthdate in frontend/ProfileForm.vue === ')
+  if (user.birthdate) {
+    const birthdate = moment(user.birthdate);
+    return birthdate.format('YYYY-MM-DD');
+  }
+  return '';
+});
+
 const resetForm = () => {
-  event.preventDefault()
-  user.value = { ...initialUser };
-  tags.value = initialUser.tags ? initialUser.tags.split(', ').map(tag => tag.trim()) : [];
-  isEditing.value = false;
+  console.log('=== resetForm in frontend/ProfileForm.vue === ')
+  user.value = { ...initialUser.value }
+  syncTags()
 }
 
 const updateUser = async () => {
+  console.log('=== updateUser in frontend/ProfileForm.vue === ')
   try {
     const token = localStorage.getItem('token')
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
@@ -155,10 +161,30 @@ const updateUser = async () => {
   }
 }
 
+onMounted(async () => {
+  if (user.value) {
+    await syncTags()
+  }
+})
 
 </script>
 
 <style scoped>
+.icon-toEdit {
+  background-image: url('@/assets/edit/clicToEdit.png');
+  background-repeat: no-repeat;
+}
+.icon-edit {
+  background-image: url('@/assets/edit/writing.png');
+  background-repeat: no-repeat;
+}
+.edit {
+  right: 0;
+  transform: translate(-150%, -170%);
+  position: absolute !important;
+  background-size: 100%;
+  size: "xl";
+}
 .one-input {
   min-width: 40px;
   margin-left: 30px;
@@ -177,12 +203,6 @@ const updateUser = async () => {
 
 .edit, .edit:hover, .edit:focus {
   position: absolute;
-}
-
-.edit {
-  right: 0;
-  transform: translate(-150%, -170%);
-  position: absolute !important;
 }
 
 .vue-tags-input {

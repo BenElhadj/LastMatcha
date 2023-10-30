@@ -3,7 +3,7 @@
     <q-page-container v-if="loading">
 
       <div>
-        <div class="profile__cover" parallax>
+        <div class="profile__cover">
           <img :src="coverPhoto" alt="Cover Photo" class="cover__img">
         </div>
       </div>
@@ -21,7 +21,7 @@
               <q-tooltip bottom class="status_container">
                 <span>{{ lastSeen }}</span>
               </q-tooltip>
-              <q-badge small rounded :color="`${user.isConnected ? 'green' : 'grey-9'}`" style="border: 2px solid white !important; border-radius:100%;"></q-badge>
+              <q-badge small rounded :color="`${lastSeen == 'online' ? 'green' : 'grey-9'}`" style="border: 2px solid white !important; border-radius:100%;"></q-badge>
             </q-item-section>
           </div>
 
@@ -30,48 +30,63 @@
       </div>
 
       <q-separator spacing class="separator-margin"></q-separator>
+
       <div class=" centered-tabs" style="max-width: 800px;">  
         <q-card>
-
           <q-tabs v-model="activeTab" class="bg-grey-2 text-grey q-tabs__content" active-color="primary" indicator-color="bg-grey-2">
-            <q-tab name="tab-profile" label="Profile"></q-tab>
-            <q-tab  name="tab-photo" label="Photos"></q-tab>
-            
-            <q-separator style="margin: 10px;" ></q-separator>
 
-            
-            <!-- <q-separator style="margin: 3px;"></q-separator> -->
-
-            <q-avatar :disabled="!userCanChat" @click="goToChat">
-              <img :src="userCanChat ? chatFalse : chatTrue">
-            </q-avatar>
-
-            <q-separator style="margin: 15px;"></q-separator>
-
-            <div float class="q-ml-md">
-              <q-tooltip top class="status_container">
-                <span>You can block or report</span>
-              </q-tooltip>
-              <q-fab 
-                vertical-actions-align="right"
-                text-color="black"
-                icon="mdi-chevron-right"
-                direction="right"
-              >
-                <q-fab-action text-color="black" external-label color="warning" @click="confirmAlert('Report')" icon="mdi-account-alert">
-                  <q-tooltip bottom class="status_container">
-                    <span>Report</span>
-                  </q-tooltip>
-                </q-fab-action>
-                <q-fab-action text-color="black" external-label color="red" @click="confirmAlert('Block')" icon="mdi-account-off">
-                  <q-tooltip bottom class="status_container">
-                    <span>Block</span>
-                  </q-tooltip>
-                </q-fab-action>
-              </q-fab>
+            <div class="row q-flex q-mb-md" style="flex: 1; justify-content: flex-end; width: 100%;">
+              <q-tab name="tab-profile" label="Profile"></q-tab>
+              <q-tab  name="tab-photo" label="Photos"></q-tab>
             </div>
 
+            <div class="row q-mb-md" style="flex: 1; width: 100%;">
+              <q-separator style="margin-left: 50px;" ></q-separator>
+              
+              
+              
+              <q-btn flat @click="match" :disabled="userCantLike">
+                <img class="icon-size"   :src="getLikeIcon('you_like_back')">
+              </q-btn>
 
+
+
+
+              <q-btn flat>
+                <img class="icon-size" :disabled="!userCanChat" @click="goToChat" :src="(userCanChat ? chatFalse : chatTrue)">
+              </q-btn>
+
+              <div class="flex" style="center center">
+                <q-tooltip top class="status_container">
+                  <span>You can block or report</span>
+                </q-tooltip>
+                <q-fab 
+                  vertical-actions-align="right"
+                  text-color="black"
+                  direction="right"
+                  icon='mdi-chevron-double-right'
+                  active-icon='mdi-window-close'
+                  flat
+                  square
+                  padding="md sm md lg"
+                  label-position="left"
+                  label="."
+                  bg-color="red"
+                  class="icon-banir"
+                >
+                  <q-fab-action flat square external-label color="warning" @click="confirmAlert('Report')" class="icon-report">
+                    <q-tooltip bottom class="status_container">
+                      <span>Report</span>
+                    </q-tooltip>
+                  </q-fab-action>
+                  <q-fab-action flat square external-label color="red" @click="confirmAlert('Block')" class="icon-block">
+                    <q-tooltip bottom class="status_container">
+                      <span>Block</span>
+                    </q-tooltip>
+                  </q-fab-action>
+                </q-fab>
+              </div>
+            </div>
           </q-tabs>
 
           <q-separator spacing class="separator-margin"></q-separator>
@@ -79,7 +94,7 @@
           <q-tab-panels v-model="activeTab" animated class="bg-grey-2 text-black">
             
             <q-tab-panel name="tab-profile">
-              <profile-form :username="user.username" :name="user.username" :user="user" />
+              <profile-form :user="user" />
             </q-tab-panel>
 
             <q-tab-panel  name="tab-photo">
@@ -129,10 +144,9 @@ import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue'
 import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue'
 import chatTrue from '@/assets/chat/chatUnavailable.png'
 import chatFalse from '@/assets/chat/chat.png'
-import coverDefault from '@/assets/default/defaut_couverture.jpg'
-import profileDefault from '@/assets/default/defaut_profile.png'
-
-
+import banir from '@/assets/blocked.png'
+// import coverDefault from 'default/defaut_couverture.jpg'
+// import profileDefault from '@/assets/default/defaut_profile.png'
 
 import { ref, onMounted, computed, watch, toRefs, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
@@ -149,9 +163,17 @@ const router = useRouter();
 const loading = ref(true);
 const fab = ref(false);
 const updateTimer = ref(null)
-const blockDialog = ref(false);
 const reportDialog = ref(false);
 const dialogVisible = ref(false)
+const user = ref({});
+const data = ref(null)
+const AllHistory = ref([])
+const lastSeen = ref('Unavailable')
+
+const calculateDistance = utility.calculateDistance
+const getLikeIcon = utility.getLikeIcon
+const getFullPath = utility.getFullPath
+
 
 const activeTab = ref("tab-profile");
 const confirmDialog = ref({
@@ -193,11 +215,33 @@ const confirmAlert = (action) => {
   }
 };
 
-const user = ref({});
 
-const calculateDistance = utility.calculateDistance
-const getFullPath = utility.getFullPath
-const data = ref(null)
+const getHistory = async () => {
+  try {
+    const token = user.value.token || localStorage.getItem('token');
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`;
+    const headers = { 'x-auth-token': token };
+    const result = await axios.get(url, { headers });
+    const allHistory = result.data;
+
+    const filteredHistory = allHistory.filter(item => item.his_id === user.value.id);
+    const historyTypes = new Set(['he_like', 'you_like', 'he_like_back', 'you_like_back', 'he_unlike', 'you_unlike']);
+    const filteredHistoryFinal = filteredHistory.reduce((acc, item) => {
+      if (historyTypes.has(item.type)) {
+        acc[item.type] = acc[item.type] || item;
+      }
+      return acc;
+    }, {});
+
+    const finalHistoryArray = Object.values(filteredHistoryFinal);
+    finalHistoryArray.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    AllHistory.value = finalHistoryArray;
+    return finalHistoryArray;
+  } catch (err) {
+    console.error('err history in frontend/ProfileHistory.vue ===> ', err);
+  }
+}
+
 
 watch(user, async (newUser) => {
   const token = newUser.token || localStorage.getItem('token')
@@ -226,7 +270,6 @@ const userCantLike = computed(() => {
 });
 
 const userCanChat = computed(() => {
-  console.log('store.getters ===> ', store.state.user)
   for (const match of store.getters.matches) {
     if (match.id === user.value.id) return true;
   }
@@ -253,7 +296,7 @@ const likedBy = computed(() => {
 });
 
 const profileImage = computed(() => {
-  return getFullPath(getProfileImage()) ? getFullPath(getProfileImage()) : profileDefault;
+  return getFullPath(getProfileImage()) ? getFullPath(getProfileImage()) : 'default/defaut_profile.png';
 });
 
 const distance = computed(() => {
@@ -271,7 +314,7 @@ const isOnline = computed(() => {
 });
 
 const coverPhoto = computed(() => {
-  const cover = coverDefault;
+  const cover = 'default/defaut_couverture.jpg';
   if (!user.value || !user.value.images) return getFullPath(cover);
   const image = user.value.images.find((cur) => cur.cover);
   return getFullPath(image ? image.name : cover);
@@ -303,22 +346,9 @@ const informations = computed(() => {
   ];
 });
 
-const lastSeen = computed(() => {
-  if (user.lastSeen == 'online')
-  {
-    return 'online'
-  } else {
-    return user.lastSeen = moment(user.status).utc().fromNow()
-  }
-})
-
-onMounted(() => {
-  if (isNaN(route.params.id) || !route.params.id) router.push("/404");
-  fetchUser(route.params.id);
-});
 
 const getProfileImage = () => {
-  if (!user.value || !user.value.images) return profileDefault;
+  if (!user.value || !user.value.images) return 'default/defaut_profile.png';
   const image = user.value.images.find((cur) => cur.profile === 1);
   return image ? image.name : "defaut_profile.png";
 };
@@ -341,7 +371,7 @@ const match = async () => {
       date: new Date(),
       id_from: store.state.loggedIn.id,
       username: store.state.loggedIn.username,
-      profile_image: profileImg ? profileImg.name : profileDefault,
+      profile_image: profileImg ? profileImg.name : 'default/defaut_profile.png',
       id_to: route.params.id,
     };
     if (!liked.value) {
@@ -423,12 +453,12 @@ const fetchUser = async (id) => {
         if (isOnline.value) {
           user.value.status = true;
         }
-        console.log('store.state ===> ', store.state.user.id)
+
         const data = {
           date: new Date(),
           id_from: store.state.user.id,
           username: store.state.user.username,
-          profile_image: profileImg ? profileImg.name : profileDefault,
+          profile_image: profileImg ? profileImg.name : 'default/defaut_profile.png',
           id_to: id,
           type: "visit",
         };
@@ -441,29 +471,59 @@ const fetchUser = async (id) => {
   }
 };
 
-function updateConnectedUsers() {
-  utility.getConnectedUsers()
-    .then(data => {
-      const connectedUserIds = data
-      const userId = user.user_id
 
-      if (connectedUserIds.includes(userId)) {
-        user.lastSeen = 'online'
-        user.isConnected = true
-      } else {
-        user.lastSeen = moment(user.status, 'YYYY-MM-DD HH:mm:ss').fromNow()
-        user.isConnected = false
-      }
-    })
-    .catch(error => {
-      console.error('Erreur lors de la récupération des données :', error)
-    });
+function updateConnectedUsers() {
+  if (user.value !== null) {
+    utility.getConnectedUsers()
+      .then(data => {
+        const connectedUserIds = data;
+        const userId = user.value.id.toString();
+
+        if (connectedUserIds.includes(userId)) {
+          lastSeen.value = 'online';
+        } else {
+          lastSeen.value = moment(user.value.status).utc().fromNow(); 
+        }
+      })
+      .catch(error => {
+        console.error('Erreur lors de la récupération des données :', error);
+      });
+  }
 }
 
-onMounted(async () => {
+
+
+onMounted(() => {
+  const fetchUserPromise = new Promise((resolve) => {
+    fetchUser(route.params.id)
+      .then(() => {
+        resolve();
+      });
+  });
+
+  fetchUserPromise.then(() => {
+    updateConnectedUsers();
+    updateTimer.value = setInterval(updateConnectedUsers, 2000);
+  });
+
+  if (isNaN(route.params.id) || !route.params.id) router.push("/404");
+});
+
+onBeforeUnmount(() => {
+  clearInterval(updateTimer.value);
+});
+
+
+
+
+
+onMounted(() => {
+  fetchUser(route.params.id);
   updateConnectedUsers()
+  if (isNaN(route.params.id) || !route.params.id) router.push("/404");
   updateTimer.value = setInterval(updateConnectedUsers, 2000)
 });
+
 
 onBeforeUnmount(() => {
   clearInterval(updateTimer.value)
@@ -474,10 +534,31 @@ localStorage.setItem('user', JSON.stringify(user));
 </script>
 
 <style scoped>
+.icon-banir {
+  background-image: url('@/assets/block/banir.png');
+  background-size: 40px !important;
+  align: "justify";
+  align-items: "justify-center" !important;
+  justify-content: "bottom" !important;
+  background-repeat: no-repeat;
+}
+.icon-block {
+  background-image: url('@/assets/block/block.png');
+  background-size: 25px;
+  background-repeat: no-repeat;
+}
+.icon-report {
+  background-image: url('@/assets/block/report.png');
+  background-size: 25px;
+  background-repeat: no-repeat;
+}
+.icon-size {
+  width: 42px;
+}
 .q-tabs__content {
   align: "justify";
   align-items: "justify-center";
-  justify-content: "justify-center";
+  justify-content: "space-evenly";
   padding: 0;
 }
 .separator-margin {

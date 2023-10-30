@@ -1,39 +1,42 @@
 <template>
-  <q-page>
+  <q-page class="q-pa-lg">
     <q-page-container>
-      <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">History</h1>
-      <q-timeline align="top" dense center class="timeline_container" >
-        <q-timeline-entry
-          color="primary"
-          small
-          v-for="(entry, i) in history"
-          style="width: 120px; height: 120px;"
-          :key="i"
-          size="7.4em"
-          :avatar="getFullPath(entry.avatar)"
-          @click="redirectToUser(entry.his_id)"
-          col-md-4>
-          <q-icon small style="font-size:25px !important;" class="mr-2 q-ml-xl">
-            <span :class="getNotifIcon(entry.type)"></span>&nbsp;
-          </q-icon>
-          <div class="v-timeline-item__body ">
-            <div>
-              <q-tooltip label="formatTime(entry)" position="left">
-                <strong class="mt-2 d-block">{{ moment(entry.created_at).fromNow() }}</strong>
-              </q-tooltip>
-            </div>
-              <!-- <q-avatar style="width: 120px; height: 120px;" :avatar="getFullPath(entry.avatar)"/> -->
-            <q-chip small class="bubble grey lighten-5 px-2 py-2">
-              <router-link :to="`/user/${entry.his_id}`">
-                <span class="mr-1" v-if="entry.type !== 'follower' && entry.type !== 'visitor'">{{ getHistoryAction(entry.type, entry.first_name, entry.last_name) }}</span>
-                <!-- <span><q-route-link to="`/user/${entry.his_id}`" class="timeline_link"></q-route-link></span> -->
-                <span><router-link :to="`/user/${entry.his_id}`" class="timeline_link"></router-link></span>
-                <span v-if="entry.type === 'follower' || entry.type === 'visitor'" class="ml-1">{{ getHistoryAction(entry.type) }}</span>
-                <span v-if="entry.type === 'visited'">'s profile</span>
-              </router-link>
-            </q-chip>
-          </div>
-        </q-timeline-entry>
+      <h1   style="margin-top: -10px; text-align: center;">History</h1>
+      <q-timeline align="top" label="Loose" center class="timeline_container q-gutter-md " >
+
+        <q-timeline  color="secondary">
+          <q-timeline-entry heading style="margin: 10px; text-align: center;">
+            Her you can see all your history of actions on the website
+            <br>
+          </q-timeline-entry>
+
+          <q-timeline-entry
+            v-for="(entry, i) in history"
+            :title="getHistoryAction(entry.type, entry.first_name, entry.last_name)"
+            :subtitle="moment(entry.created_at).format('D MMMM, YYYY, h:mm A')"
+            :right="true"
+            :color="getNotifIcon(entry.type)[2]"
+            :class="getNotifIcon(entry.type)[2]"
+            :icon="getNotifIcon(entry.type)[1]"
+          >
+
+            <q-avatar clickable v-ripple avatar @click="redirectToUser(entry.his_id)">
+              <img :src="getFullPath(entry.avatar)">
+            </q-avatar>
+
+            <q-item-section right>
+              {{ moment(entry.created_at).fromNow() }}
+            </q-item-section>
+            
+          </q-timeline-entry>
+
+          <q-timeline-entry
+            :subtitle="!moreToLoad ? 'you can\'t see more history' : null"
+            :title="moreToLoad ? 'You can show more history' : 'you created your profile on ' + moment(user.created_at).format('D MMMM, YYYY, h:mm A')"
+            side="left"
+          ></q-timeline-entry>
+
+        </q-timeline>
       </q-timeline>
       <q-btn v-if="moreToLoad" label="Show more" color="primary" text rounded class="my-4" @click="increaseLimit"/>
     </q-page-container>
@@ -45,6 +48,7 @@ import { ref, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import utility from '@/utility.js';
+import moment from 'moment';
 import axios from 'axios';
 
 const store = useStore()
@@ -61,6 +65,9 @@ const formatTime = utility.formatTime
 const getFullPath = utility.getFullPath
 const getHistoryAction = utility.getHistoryAction
 
+// const layout = computed(() => {
+//   return screen.lt.sm ? 'dense' : (screen.lt.md ? 'comfortable' : 'loose')
+// })
 
 const getHistory = async () => {
   try {
@@ -69,7 +76,6 @@ const getHistory = async () => {
     const headers = { 'x-auth-token': token }
     const result = await axios.get(url, { headers })
     AllHistory.value = result.data
-    return result
   } catch (err) {
     console.error('err history in frontend/ProfileHistory.vue ===> ', err)
   }
@@ -79,8 +85,10 @@ getHistory();
 
 const redirectToUser = (hisId) => {
   if (hisId === user.value.id) {
+    console.log('hisId === user.value.id hisId =>', hisId, 'user.value.id =>', user.value.id);
     router.push('/');
   } else {
+    console.log('hisId !== user.value.id hisId =>', hisId, 'user.value.id =>', user.value.id);
     router.push(`/user/${hisId}`);
   }
 }

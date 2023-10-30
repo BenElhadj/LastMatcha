@@ -133,3 +133,4 @@ dist
 
 # others
 en.subject.pdf
+.package-lock.json

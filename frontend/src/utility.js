@@ -96,6 +96,14 @@ const getConnectedUsers = async () => {
   }
 }
 
+import dislike from '@/assets/match/dislike.png'
+import match from '@/assets/match/match-ok.png'
+import confirm from '@/assets/match/match-to-confirm.png'
+import receive from '@/assets/match/receive-match.png'
+import defaultIcon from '@/assets/match/heart-default.png'
+
+
+
 export default {
   getDate,
   isBlocked,
@@ -105,7 +113,7 @@ export default {
   syncLocation,
   getLocationFromIp,
   // eslint-disable-next-line
-  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : '@/assets/default/defaut_profile.png'}`,
+  getFullPath: (file) => isExternal(file) ? file : `${import.meta.env.VITE_APP_API_URL}/uploads/${file ? file : 'default/defaut_profile.png'}`,
   // consoleLog: ('utility.js getFullPath => ', getFullPath),
   formatTime (date) {
     const when = moment(getDate(date))
@@ -176,7 +184,34 @@ export default {
       }))
     }
   },
+
+  getLikeIcon(liked) {
+
+    switch (liked) {
+      case 'he_like':
+        return `${receive}`
+      case 'you_like':
+        return `${confirm}`
+      case 'you_like_back':
+      case 'he_like_back':
+        return `${match}`
+      case 'he_unlike':
+      case 'you_unlike':
+        return `${dislike}`
+      default:
+        return `${defaultIcon}`
+    }
+  },
+
   getHistoryAction (type, first_name, last_name) {
+
+    if (first_name === null) {
+      first_name = 'Anonymous';
+    }
+
+    if (last_name === null) {
+      last_name = 'User';
+    }
   
     switch (type) {
       case 'visited':
@@ -188,7 +223,8 @@ export default {
       case 'following':
       case 'you_like':
         return `You liked ${first_name} ${last_name}`
-      case 'follower':case 'he_like':
+      case 'follower':
+      case 'he_like':
         return `${first_name} ${last_name}  liked you`
       case 'you_like_back':
         return `You accepted the like of ${first_name} ${last_name}`
@@ -260,7 +296,7 @@ export default {
       case 'block':
       case 'you_block':
       case 'he_block':
-        return ['mdi', 'mdi-block-helper', 'text-red']
+        return ['mdi', 'mdi-block-helper', 'text-warning']
       case 'talk':
         return ['mdi', 'mdi-wechat', 'text-grey']
       case 'avatar_img':

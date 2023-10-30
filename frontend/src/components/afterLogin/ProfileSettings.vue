@@ -3,41 +3,43 @@
     <q-page-container>
       <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">Settings</h1>
 
-      <div class="q-pa-md row justify-center">
+      <div class="q-pa-md row flex flex-center justify-between" style="margin: 7%;">
 
-        <div class="col-xs-12 col-sm-6 q-pa-md">
+        <div style="margin-" class="col-xs-12 col-sm-6 q-pa-md">
           <div class="row items-center">
-            <q-input v-model="user.email" class="col" disabled label="Email" color="primary"></q-input>
-            <q-icon class="col-auto q-ml-md" color="primary" name="edit" @click="emailDialog = true"></q-icon>
+            <!-- <q-input v-model="user.email" class="col" disabled label="Email" color="primary"></q-input> -->
+            <img style="width: 130px; margin-left:7px" class="col-auto q-ml-md" src="@/assets/Settings/resetEmail.png" @click="passDialog = true"/>
+            <q-input v-model="user.email" readonly label="Email"/>
           </div>
         </div>
 
-        <div class="col-xs-12 col-sm-6 q-pa-md">
-          <div class="row items-center">
-            <q-input class="col" disabled color="primary" value="**********" label="Password" type="password"></q-input>
-            <q-icon class="col-auto q-ml-md" color="primary" name="edit" @click="passDialog = true"></q-icon>
+        <div class="q-flex column items-center justify-center">
+          <div class="align-center">
+            <!-- <q-input class="col" disabled color="primary" value="test" label="Password" type="password"></q-input> -->
+            <img style="width: 130px; margin-left:7px" class="col-auto q-ml-md" src="@/assets/Settings/resetPasswd.png" @click="passDialog = true"/>
+            <q-input v-model="user.passe" readonly value="***********" label="Password" type="password"/>
           </div>
         </div>
 
-        <div class="col-xs-12 col-sm-6 q-pa-md d-flex justify-between align-center">
-          <div class="align-center" style="margin: 30px;">
-            <img src="@/assets/geolocalisation.png" @click="openLoc" alt="Location Icon">
-          </div>
-          <span style="margin: 0;">Click here to update your location</span>
-        </div>
       </div>
 
+      <div class="q-pa-md row flex flex-center justify-between" style="margin: 7%;">
 
-
-
-
-      <div class="col-xs-12 col-sm-6 q-pa-md d-flex justify-between align-center">
-        <div class="align-center" style="margin: 30px;">
-          <img src="@/assets/blocked.png" @click="basic = true"/>
+        <div class="q-flex column items-center justify-center">
+          <div class="align-center">
+            <img style="width: 150px; margin-left:7px" src="@/assets/Settings/geolocalisation.png" @click="openLoc" alt="Location Icon">
+          </div>
+          <span>Click here to update your location</span>
         </div>
-        <span style="margin: 0;">Click here to view blocked users</span>
-      </div>
 
+        <div class="q-flex column items-center justify-center">
+          <div class="align-center">
+            <img style="width: 150px;" src="@/assets/Settings/blocked.png" @click="basic = true"/>
+          </div>
+          <span>Click here to view blocked users</span>
+        </div>
+
+      </div>
 
 
       <q-dialog v-if="reRender" v-model="emailDialog" max-width="500" persistent transition-show="rotate" transition-hide="rotate">
@@ -64,7 +66,6 @@
         </q-card>
       </q-dialog>
 
-      
       <q-dialog v-if="reRender" v-model="passDialog" max-width="500px" persistent transition-show="rotate" transition-hide="rotate">
         <q-card class="q-pa-md q-ma-md">
           <h5 class="display-1 text-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">
@@ -91,21 +92,32 @@
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="locDialog" fullscreen transition-show="fade" transition-hide="fade">
+      <q-dialog v-model="locDialog" persistent maximized-toggle transition-show="rotate" transition-hide="rotate">
         <q-card style="position:initial; display:block;">
           <q-header>
-            <q-card-actions :align="right">
-              <q-btn flat color="info"  @click="changeLoc">
-                Enregistrer
+            <q-bar>
+              <span>{{ 'Longitude : ' +  longitude  }}</span>
+              <span>{{ 'Latitude : ' +  latitude  }}</span>
+              <q-space></q-space>
+              <q-btn dense icon="mdi-google-maps" color="info" @click="changeLoc">
+                <q-tooltip class="bg-white text-primary">Update your location</q-tooltip>
               </q-btn>
-              <q-btn flat color="info" @click="locDialog = false">
-                Annuler
+              <q-space></q-space>
+
+              <q-space></q-space>
+              <q-btn dense icon="mdi-window-close" flat color="white" @click="locDialog = false">
+                <q-tooltip class="bg-white text-primary">Close</q-tooltip>
               </q-btn>
-            </q-card-actions>
+
+            </q-bar>
           </q-header>
-          <map-location-selector :latitude="latitude" :longitude="longitude" @location-updated="locationUpdated"></map-location-selector>
+          <q-page-container>
+            <map-location-selector style="margin: 700px 0px 0px important;" :latitude="latitude" :longitude="longitude" @location-updated="locationUpdated"></map-location-selector>
+          </q-page-container>
         </q-card>
       </q-dialog>
+
+
 
       <q-dialog v-if="basic" v-model="basic" transition-show="rotate" transition-hide="rotate">
         <q-list class="blacklist_list">
@@ -212,7 +224,6 @@ const alert = ref({
   text: ''
 })
 
-
 const closePanel = () => {
   if (!blacklist.value.length) {
     console.log('------------ blacklist vide')
@@ -221,8 +232,6 @@ const closePanel = () => {
   }
   return false
 }
-
-
 
 const swapLocation = ref({
   lat: location.value.lat,
@@ -238,10 +247,14 @@ const fetchBlacklist = async () => {
   }
 }
 
+
+
+
 const googleLoaded = () => {
   return (typeof window.google === 'object' && typeof window.google.maps === 'object')
 }
 
+const flag = ref(googleLoaded())
 const openLoc = () => {
   locDialog.value = true
   flag.value = googleLoaded()
