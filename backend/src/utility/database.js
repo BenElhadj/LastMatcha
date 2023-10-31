@@ -230,22 +230,22 @@ const createTagsTable = async () => {
 	try {
 	  const createTableQuery = `
       CREATE TABLE IF NOT EXISTS tags (
-        id int(11) NOT NULL,
+        id INT AUTO_INCREMENT PRIMARY KEY,
         value varchar(100) UNIQUE
       ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 	  `;
     const insertTableQuery = `
       INSERT INTO tags (id, value) VALUES
-      (1, '42'),
-      (2, '125'),
-      (3, 'RNCP-5'),
-      (4, 'RNCP-7'),
-      (5, 'Web'),
-      (6, 'Front-end'),
-      (7, 'Back-end'),
-      (8, 'sports'),
-      (9, 'cinema'),
-      (10, 'music');
+      ('42'),
+      ('125'),
+      ('RNCP-5'),
+      ('RNCP-7'),
+      ('Web'),
+      ('Front-end'),
+      ('Back-end'),
+      ('sports'),
+      ('cinema'),
+      ('music');
     `;
 	  await pool.query(createTableQuery);
     console.log('Tags table created successfully!');

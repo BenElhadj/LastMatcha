@@ -1,8 +1,8 @@
 const db = require('../utility/database')
 
-// GET TAGS
+// GET ALL TAGS
 
-const getTags = (callback) => {
+const getAllTags = (callback) => {
 	let request = `SELECT value FROM tags`
 	db.query(request, (error, results) => {
 		if (error) throw error
@@ -10,9 +10,9 @@ const getTags = (callback) => {
 	})
 }
 
-// GET ALL TAGS
+// GET TAGS
 
-const getAllTags = (callback) => {
+const getTags = (callback) => {
 	let request = `SELECT value FROM tags`
 	db.query(request, (error, results) => {
 		if (error) throw error
@@ -24,10 +24,11 @@ const getAllTags = (callback) => {
 
 const insertTags = (tag) => {
 	let request = `INSERT INTO tags (value) VALUES (?)`
-	db.query(request, [tag], (error) => {
+	db.query(request, tag, (error) => {
 		if (error) throw error
 	})
 }
+
 
 module.exports = {
 	getTags,

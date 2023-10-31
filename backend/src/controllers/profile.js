@@ -75,7 +75,7 @@ const updateProfile = async (req, res) => {
 					await tagsModel.getTags((result) => {
 						const tags = result.map(cur => cur.value)
 						if (user.tags) {
-							user.tags.split(',').forEach(async element => {
+							user.tags.split(', ').forEach(async element => {
 								if (!tags.includes(element)) {
 									try {
 										await tagsModel.insertTags([element])

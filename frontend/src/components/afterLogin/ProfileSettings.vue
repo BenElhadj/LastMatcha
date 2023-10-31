@@ -353,6 +353,8 @@ const unBlock = async (banned) => {
   const { id, username } = banned
   const url = `${import.meta.env.VITE_APP_API_URL}/api/users/unblock`
   const headers = { 'x-auth-token': user.value.token }
+  console.log('id =============> ', id)
+  console.log('user.value.token =============> ', user.value.token)
   const result = await axios.post(url, { id }, { headers })
   if (result.ok) {
     const blacklist = {
@@ -370,7 +372,7 @@ const unBlock = async (banned) => {
 onMounted(() => {
   fetchBlacklist()
   
-  // const { blacklist } = defineProps(['blacklist'])
+  const { blacklist } = defineProps(['blacklist'])
   // console.log('blacklist.value =============> ', blacklist)
 
   console.log('getBlacklist.value =============> ', getBlacklist.value)

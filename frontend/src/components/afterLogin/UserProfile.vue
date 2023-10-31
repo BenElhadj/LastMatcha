@@ -11,7 +11,7 @@
       <div class="avatar">
         <q-avatar slot="offset" class="profile__avatar mx-auto" size="250px">
           <img :src="profileImage">
-        
+
           <div class="avatar-content">
 
             <q-chip outline small text-color="black" style="background:white !important;">{{ distance }}</q-chip>
@@ -26,12 +26,12 @@
           </div>
 
         </q-avatar>
-        
+
       </div>
 
       <q-separator spacing class="separator-margin"></q-separator>
 
-      <div class=" centered-tabs" style="max-width: 800px;">  
+      <div class=" centered-tabs" style="max-width: 800px;">
         <q-card>
           <q-tabs v-model="activeTab" class="bg-grey-2 text-grey q-tabs__content" active-color="primary" indicator-color="bg-grey-2">
 
@@ -42,9 +42,9 @@
 
             <div class="row q-mb-md" style="flex: 1; width: 100%;">
               <q-separator style="margin-left: 50px;" ></q-separator>
-              
-              
-              
+
+
+
               <q-btn flat @click="match" :disabled="userCantLike">
                 <img class="icon-size"   :src="getLikeIcon('you_like_back')">
               </q-btn>
@@ -60,7 +60,7 @@
                 <q-tooltip top class="status_container">
                   <span>You can block or report</span>
                 </q-tooltip>
-                <q-fab 
+                <q-fab
                   vertical-actions-align="right"
                   text-color="black"
                   direction="right"
@@ -92,7 +92,7 @@
           <q-separator spacing class="separator-margin"></q-separator>
 
           <q-tab-panels v-model="activeTab" animated class="bg-grey-2 text-black">
-            
+
             <q-tab-panel name="tab-profile">
               <profile-form :user="user" />
             </q-tab-panel>
@@ -140,7 +140,7 @@ import ProfileBadge from '@/components/afterLogin/ProfileBadge.vue'
 import ProfileTabs from '@/components/afterLogin/ProfileTabs.vue'
 import ProfileForm from '@/components/afterLogin/ProfileForm.vue'
 import ProfileSettings from '@/components/afterLogin/ProfileSettings.vue'
-import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue' 
+import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue'
 import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue'
 import chatTrue from '@/assets/chat/chatUnavailable.png'
 import chatFalse from '@/assets/chat/chat.png'
@@ -252,7 +252,6 @@ watch(user, async (newUser) => {
       const res = await axios.get(url, { headers })
       data.value = res.data
       if (!res.data.msg) {
-
         loading.value = true
         return
       } else {
@@ -309,9 +308,9 @@ const distance = computed(() => {
   return `${Math.round(dist)} kms away`;
 });
 
-const isOnline = computed(() => {
-  return store.state.online.includes(user.value.id);
-});
+// const isOnline = computed(() => {
+//   return store.state.online.includes(user.value.id);
+// });
 
 const coverPhoto = computed(() => {
   const cover = 'default/defaut_couverture.jpg';
@@ -330,21 +329,24 @@ const userTags = computed(() => {
   return tags.split(",");
 });
 
-const informations = computed(() => {
-  return [
-    { label: "Nom d'utilisateur", content: user.value.username },
-    { label: "Nom", content: user.value.first_name },
-    { label: "Prénom", content: user.value.last_name },
-    { label: "Age", content: user.value.birthdate ? moment().year() - moment(user.value.birthdate).year() : "" },
-    { label: "Genre", content: user.value.gender },
-    { label: "Interressé(e) par", content: user.value.looking },
-    { label: "Téléphone", content: user.value.phone },
-    { label: "Ville", content: user.value.city },
-    { label: "Pays", content: user.value.country },
-    { label: "Code postal", content: user.value.postal_code },
-    { label: "Addresse", content: user.value.address },
-  ];
-});
+// const informations = computed(() => {
+//   return [
+//     { label: "Nom d'utilisateur", content: user.value.username },
+//     { label: "Nom", content: user.value.first_name },
+//     { label: "Prénom", content: user.value.last_name },
+//     { label: "Age", content: user.value.birthdate },
+//     { label: "Genre", content: user.value.gender },
+//     { label: "Interressé(e) par", content: user.value.looking },
+//     { label: "Téléphone", content: user.value.phone },
+//     { label: "Ville", content: user.value.city },
+//     { label: "Pays", content: user.value.country },
+//     { label: "Code postal", content: user.value.postal_code },
+//     { label: "Addresse", content: user.value.address },
+//     { label: "Bio", content: user.value.bio },
+//     { label: "Tags", content: user.value.tags },
+//   ];
+// });
+// console.log('user.value in frontend/ProfileView.vue ===> ', informations.value);
 
 
 const getProfileImage = () => {
@@ -449,10 +451,10 @@ const fetchUser = async (id) => {
         loading.value = false;
         user.value = { ...res.data, rating: Number(res.data.rating) };
         const profileImg = res.data.images.find((cur) => cur.profile === 1);
-        
-        if (isOnline.value) {
-          user.value.status = true;
-        }
+
+        // if (isOnline.value) {
+        //   user.value.status = true;
+        // }
 
         const data = {
           date: new Date(),
@@ -473,7 +475,7 @@ const fetchUser = async (id) => {
 
 
 function updateConnectedUsers() {
-  if (user.value !== null) {
+  if (user.value && user.value.id) {
     utility.getConnectedUsers()
       .then(data => {
         const connectedUserIds = data;
@@ -482,7 +484,7 @@ function updateConnectedUsers() {
         if (connectedUserIds.includes(userId)) {
           lastSeen.value = 'online';
         } else {
-          lastSeen.value = moment(user.value.status).utc().fromNow(); 
+          lastSeen.value = moment(user.value.status).utc().fromNow();
         }
       })
       .catch(error => {
@@ -509,27 +511,29 @@ onMounted(() => {
   if (isNaN(route.params.id) || !route.params.id) router.push("/404");
 });
 
-onBeforeUnmount(() => {
-  clearInterval(updateTimer.value);
-});
+if (user.value && user.value.id) {
+  fetchUser(route.params.id)
+  updateConnectedUsers();
+  updateTimer.value = setInterval(updateConnectedUsers, 2000);
+}
 
+// onBeforeUnmount(() => {
+//   clearInterval(updateTimer.value);
+// });
 
-
-
-
-onMounted(() => {
-  fetchUser(route.params.id);
-  updateConnectedUsers()
-  if (isNaN(route.params.id) || !route.params.id) router.push("/404");
-  updateTimer.value = setInterval(updateConnectedUsers, 2000)
-});
+// onMounted(() => {
+//   fetchUser(route.params.id);
+//   updateConnectedUsers()
+//   if (isNaN(route.params.id) || !route.params.id) router.push("/404");
+//   updateTimer.value = setInterval(updateConnectedUsers, 2000)
+// });
 
 
 onBeforeUnmount(() => {
   clearInterval(updateTimer.value)
 });
 
-localStorage.setItem('user', JSON.stringify(user));
+// localStorage.setItem('user', JSON.stringify(user));
 
 </script>
 
@@ -607,7 +611,7 @@ localStorage.setItem('user', JSON.stringify(user));
   color: black;
   position: absolute;
   transform: translate(50%, 50%) scale(1);
-  background: rgba(211, 211, 211, 0.3); 
+  background: rgba(211, 211, 211, 0.3);
 }
 .centered-tabs {
   max-width: 800px;
