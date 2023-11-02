@@ -177,31 +177,6 @@ const changeTab = (tab) => {
   activeTab.value = tab
 }
 
-
-// const openEditor = () => {
-//   console.log('openEditor', ProfileEditor.profile_editor)
-//   ProfileEditor.profile_editor.pickFile()
-// }
-
-// const pickFile = () => {
-//   console.log('pickFile', ProfileEditor.image.value)
-  
-//   filesImages.value = []
-//   ProfileEditor.image.value = null
-//   ProfileEditor.image.value.click()
-// }
-
-// const toggleEdit = () => {
-//   isEditing.value = !isEditing.value;
-// }
-
-// watch(user, (newValue) => {
-//   if (newValue.id) {
-//     syncHistory(newValue.id)
-//     syncMatches(newValue.id)
-//   }
-// })
-
 const filteredImages = computed(() => {
   if (!user.value.images) return []
   return user.value.images.filter(cur => !cur.cover)
@@ -218,7 +193,6 @@ const updateUser = async () => {
       console.log('Alert, green, Your account has been updated successfully')
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
       store.dispatch('updateUser', user.value)
-      // ProfileEditor.form.toggleEdit()
     } else {
       console.log('Alert, red, Oops... something went wrong!')
       alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}

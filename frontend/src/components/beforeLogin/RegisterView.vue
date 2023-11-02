@@ -8,7 +8,7 @@
           <q-input v-model="lastname" color="primary" class="my-3" :rules="rules.name" label="Last name" required></q-input>
           <q-input v-model="username" color="primary" class="my-3" :rules="rules.username" label="Username" required></q-input>
           <q-input v-model="email" color="primary" class="my-3" :rules="rules.email" label="E-mail" required></q-input>
-          <q-input v-model="password" color="primary" class="my-3" :rules="rules.password" label="Password" hint="Password with toggle" filled :type="showPass ? 'text' : 'password'" @keyup.enter="registerUser">
+          <q-input v-model="password" color="primary" class="my-3" :rules="rules.password" label="Password" hint="Choose your new password" filled :type="showPass ? 'text' : 'password'" @keyup.enter="registerUser">
             <template v-slot:append>
               <q-icon
                 :name="showPass ? 'mdi-eye' : 'mdi-eye-off'"
@@ -17,7 +17,7 @@
               ></q-icon>
             </template>
           </q-input>
-          <q-input v-model="passwordConfirm" color="primary" class="my-3" :rules="rules.passwordConfirm" label="Confirm Password" hint="Password with toggle" filled :type="showConfPass ? 'text' : 'password'" @keyup.enter="registerUser" :error-messages="passwordMatch">
+          <q-input v-model="passwordConfirm" color="primary" class="my-3" :rules="rules.passwordConfirm" label="Confirm Password" hint="Confirm your password" filled :type="showConfPass ? 'text' : 'password'" @keyup.enter="registerUser" :error-messages="passwordMatch">
             <template v-slot:append>
               <q-icon
                 :name="showConfPass ? 'mdi-eye' : 'mdi-eye-off'"
@@ -64,22 +64,22 @@ const rules = {
   name: [
     v => !!v || 'Firstname and Lastname field is required',
     // eslint-disable-next-line
-    v => !(/[^a-zA-Z\- ]+/.test(v)) || 'Le nom doit contenir des lettres uniquement',
-    v => (v.length >= 3 && v.length <= 255) || 'Le nom doit contenir entre 3 et 255 caractères'
+    v => !(/[^a-zA-Z\- ]+/.test(v)) || 'Name must contain letters only',
+    v => (v.length >= 3 && v.length <= 255) || 'The name must contain between 3 and 255 characters'
   ],
   username: [
     v => !!v || 'Username field is required',
-    v => (v.length >= 7 && v.length <= 25) || 'Le nom d\'utilisateur doit contenir entre 8 et 25 caractères',
-    v => !(/[^a-zA-Z0-9]+/.test(v)) || 'Le nom d\'utilisateur doit contenir des lettres et des chiffres uniquement'
+    v => (v.length >= 7 && v.length <= 25) || 'Username must be between 8 and 25 characters',
+    v => !(/[^a-zA-Z0-9]+/.test(v)) || 'Username must contain letters and numbers only'
   ],
   email: [
     v => !!v || 'Email field is required',
-    v => /.+@.+/.test(v) || 'E-mail invalide'
+    v => /.+@.+/.test(v) || 'Invalid email'
   ],
   password: [
     v => !!v || 'Password field is required',
-    v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v) || 'Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial',
-    v => v.length >= 8 || 'Le mot de passe doit contenir au moins 8 caractères'
+    v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v) || 'The password must contain at least one uppercase letter, one lowercase letter, one number and one special character',
+    v => v.length >= 8 || 'Password must contain at least 8 characters'
   ],
   passwordConfirm: [
     v => !!v || 'Confirm Password field is required',

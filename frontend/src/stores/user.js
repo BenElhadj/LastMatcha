@@ -52,7 +52,7 @@ export const user = {
       state.blockedBy = blacklist.blockedBy
       const arr = ['visitor', 'visited', 'notif', 'convos', 'followers', 'following']
       arr.forEach(cur => {
-        state[cur] = state[cur] ? utility.filterBlocked(state, cur) : [] // pass cur instead of state[cur]
+        state[cur] = state[cur] ? utility.filterBlocked(state, cur) : []
       })
     },
     getNotif: (state, notif) => {
@@ -137,14 +137,17 @@ export const user = {
         console.error('err syncMatches in frontend/user.js ===> ', err)
       }
     },
-    syncBlocked: async ({ commit, dispatch }, id) => {
+    syncBlocked: async ({ commit, dispatch , state}) => {
       try {
         let blocked = []
         let blockedBy = []
         const res = await utility.sync('users/getblocked')
         if (Array.isArray(res.data)) {
-          blocked = res.data.filter(cur => cur.blocker === id).map(cur => cur.blocked)
-          blockedBy = res.data.filter(cur => cur.blocked === id).map(cur => cur.blocker)
+          console.log('res.data', res.data)
+          blocked = res.data.filter(cur => cur.blocker === state.user.id).map(cur => cur.blocked)
+          blockedBy = res.data.filter(cur => cur.blocked === state.user.id).map(cur => cur.blocker)
+          console.log('blocked', blocked)
+          console.log('blockedBy', blockedBy)
         }
         commit('syncBlocked', { blocked, blockedBy })
         if (blocked.length) dispatch('syncBlacklist', blocked)

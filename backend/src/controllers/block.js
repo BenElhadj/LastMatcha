@@ -31,10 +31,10 @@ const blockUser = async (req, res) => {
 // Unblock user
 
 const unblockUser = async (req, res) => {
-	if (!req.user.id)
-		return res.json({ msg: 'Not logged in' })
-	if (!req.body.id || isNaN(req.body.id))
-		return res.json({ msg: 'Invalid request' })
+	if (!req.user.id) {
+		return res.json({ msg: 'Not logged in' })}
+	if (!req.body.id || isNaN(req.body.id)){
+		return res.json({ msg: 'Invalid request' })}
 	try {
 		const result = await userModel.unblockUser(req.user.id, req.body.id)
 		if (!result.affectedRows)

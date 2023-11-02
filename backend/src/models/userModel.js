@@ -289,17 +289,19 @@ const setImages = (user_id) => {
 
 const getBlocked = (id) => {
 	let request = `
-	  SELECT
-		blocked.id AS blocked_id,
+	SELECT
+		blocked.blocked AS blocked_id,
 		users.username AS username,
 		users.first_name AS first_name,
 		users.last_name AS last_name,
-		images.name AS avatar
-		blocked.created_at AS blocked_at,
-	  FROM blocked
-	  JOIN users ON blocked.blocked = users.id
-	  LEFT JOIN images ON users.id = images.user_id AND images.profile = 1
-	  WHERE blocked.blocker = ${id}
+		users.gender AS gender,
+		users.birthdate AS birthdate,
+		images.name AS avatar,
+		blocked.created_at AS blocked_at
+	FROM blocked
+	JOIN users ON blocked.blocked = users.id
+	LEFT JOIN images ON users.id = images.user_id AND images.profile = 1
+	WHERE blocked.blocker = ${id}
 	`;
 	return db.query(request);
   }

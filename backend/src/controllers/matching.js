@@ -8,17 +8,23 @@ const pool = require('../utility/database')
 // Match action 
 
 const match = async (req, res) => {
+	console.log(req.user.id+" ,  "+req.body.id+" ,  "+req.body.liked)
+
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	if (typeof req.body.liked !== 'boolean' || !req.body.id || isNaN(req.body.id))
 		return res.json({ msg: 'Invalid request' })
 	try {
+
 		let result
 		if (req.body.liked) {
+			console.log(req.user.id+" UNLIKED  "+req.body.id)
 			await matchModel.delMatche(req.user.id, req.body.id)
 			await chatModel.disallowConv(req.user.id, req.body.id)
 			await notifModel.insertNotif('unlike', req.user.id, req.body.id)
 			res.json({ ok: true })
 		} else {
+			console.log(req.user.id+" LIKED  "+req.body.id)
+
 			result = await matchModel.getMatche(req.user.id, req.body.id)
 			if (!result.length) {
 				await matchModel.insertMatche(req.user.id, req.body.id)

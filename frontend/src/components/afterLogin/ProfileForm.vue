@@ -2,10 +2,29 @@
   <q-page>
     <q-page-container>
       <h1 class="q-pb-md" style="margin-top: -10px; text-align: center;">Profile</h1>
+      <h3 style="margin-top: -70px; margin-bottom:100px; text-align: center;">{{user.username}}</h3>
+      
 
       <div v-if="owner" class="q-flex column items-center justify-center">
         <q-btn v-if="isEditing" class="edit icon-edit stack" flat square fab @click="isEditing = false" />
         <q-btn v-else class="edit icon-toEdit stack" flat square fab @click="isEditing = true"/>
+      </div>
+
+      <div v-else class="note">
+        <p class="caption text-capitalize rating_value">{{ user.rating ? user.rating.toFixed(1) : 'N/A' }}</p>
+        <q-rating
+          :color="user.gender === 'male' ? 'blue-3' : 'pink-2'"
+          :color-selected="user.gender === 'male' ? 'blue-9' : 'pink-8'"
+          :modelValue="user.rating && !isNaN(user.rating) ? user.rating : 0"
+          icon="mdi-heart-outline"
+          icon-selected="mdi-heart"
+          icon-half="mdi-heart-half-full"
+          max="7"
+          readonly
+          dense
+          size="4em"
+          half-increments
+          class="rating"/>
       </div>
 
       <q-form @submit.prevent="updateUser" class="q-gutter-md" style="margin-top: 70px" v-if="user">
@@ -126,12 +145,10 @@ const updateUser = async () => {
     const token = localStorage.getItem('token')
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
     const headers = { 'x-auth-token': token }
-    console.log('user.value ===> ', user)
     const res = await axios.post(url, user, { headers })
 
     if (res && res.data && !res.data.msg) {
       isEditing.value = false
-      // store.dispatch('updateTags', tags.value)
       store.dispatch('updateUser', user)
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
     } else {
@@ -153,6 +170,16 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.rating_value {
+  margin-left: 7px;
+  margin-right: -3px;
+}
+.note {
+  display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: center;
+}
 .icon-toEdit {
   background-image: url('@/assets/edit/clicToEdit.png');
   background-repeat: no-repeat;

@@ -2,6 +2,8 @@
   <q-page>
     <q-page-container>
       <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">Gallery</h1>
+      <h3 style="margin-top: -70px; margin-bottom:100px; text-align: center;">{{user.username}}</h3>
+
       <div class="row q-gutter-md mt-4">
         <div v-for="image in images" :key="image.id" class="col-xs-12 col-sm-6 col-md-4 img_container">
           <q-btn v-if="user.id == image.user_id" icon="mdi-delete-forever" size="lg" color="negative" round flat class="del_img" @click="deleteImg(image)">

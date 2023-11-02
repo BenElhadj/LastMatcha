@@ -18,6 +18,7 @@
                     text
                     placeholder="Recherche"
                     @blur="displaySearchText()"
+                    @keyup="displaySearchText()"
                   >
                     <template v-slot:append>
                       <q-icon name="mdi-magnify"></q-icon>
@@ -113,6 +114,8 @@ const connectedUsers = computed(() => store.state.connectedUsers)
 
 const store = useStore()
 const { user, allTags, status, online, blocked, blockedBy } = store.getters
+// console.log('-------------- blocked', blocked)
+// console.log('++++++++++++ blockedBy', blockedBy)
 const userLocation = store.state.location
 const model = ref(null)
 const max = ref(0)
@@ -177,42 +180,27 @@ const filtered = computed(() => {
     .filter(filters.interest)
 })
 
-
-
-// const allUsers = ref([])
-
 const displaySearchText = () => {
-  const searchTerm = recherche.value.toLowerCase();
-  const allUsers = users.value;
+  const searchTerm = recherche.value.toLowerCase()
+  const allUsers = users.value
 
   if (!searchTerm) {
     created()
-    // users.value = [...users.value]; // Reset to the original user list
-    return; 
+    return
   }
 
   users.value = allUsers.filter((user) => {
-    const usernameMatch = user.username.toLowerCase().includes(searchTerm);
-    const firstNameMatch = user.first_name.toLowerCase().includes(searchTerm);
-    const lastNameMatch = user.last_name.toLowerCase().includes(searchTerm);
+    const usernameMatch = user.username.toLowerCase().includes(searchTerm)
+    const firstNameMatch = user.first_name.toLowerCase().includes(searchTerm)
+    const lastNameMatch = user.last_name.toLowerCase().includes(searchTerm)
     
-    return usernameMatch || firstNameMatch || lastNameMatch;
+    return usernameMatch || firstNameMatch || lastNameMatch
   });
-};
-
-
-
-
-  // const displaySearchText = () => {
-  //   if(recherche.value != '')
-  //     { 
-  //       users.value = users.value.filter(user => user.username.includes(recherche.value));
-  //     }
-  // };
+}
   
-  const search = () => {
-     displaySearchText();
-  };
+const search = () => {
+    displaySearchText()
+}
 
 
 

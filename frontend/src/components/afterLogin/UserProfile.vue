@@ -42,19 +42,17 @@
 
             <div class="row q-mb-md" style="flex: 1; width: 100%;">
               <q-separator style="margin-left: 50px;" ></q-separator>
+              
+              <q-btn flat @click="matchFunction" >
 
-
-
-              <q-btn flat @click="match" :disabled="userCantLike">
-                <img class="icon-size"   :src="getLikeIcon('you_like_back')">
+                <img class="icon-size" :src="likeIcon">
               </q-btn>
-
-
-
 
               <q-btn flat>
-                <img class="icon-size" :disabled="!userCanChat" @click="goToChat" :src="(userCanChat ? chatFalse : chatTrue)">
+                <img class="icon-size"  @click="goToChat" :src="(userCanChat ? chatFalse : chatTrue)">
               </q-btn>
+
+              {{ userCanChat }}
 
               <div class="flex" style="center center">
                 <q-tooltip top class="status_container">
@@ -125,7 +123,6 @@
       </q-dialog>
 
       <AlertView :alert="alert"></AlertView>
-      <!-- <profile-editor @file_error="error = true" @file_succes="error = false" @update-image="updateImage" ref="profile_editor"></profile-editor> -->
     </q-page-container>
     <LoaderView v-else />
   </q-page>
@@ -145,37 +142,49 @@ import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue'
 import chatTrue from '@/assets/chat/chatUnavailable.png'
 import chatFalse from '@/assets/chat/chat.png'
 import banir from '@/assets/blocked.png'
-// import coverDefault from 'default/defaut_couverture.jpg'
-// import profileDefault from '@/assets/default/defaut_profile.png'
 
-import { ref, onMounted, computed, watch, toRefs, onBeforeUnmount } from "vue";
-import { useStore } from "vuex";
-import { useRoute, useRouter } from "vue-router";
+import { ref, onMounted, computed, watch, toRefs, onBeforeUnmount } from "vue"
+import { useStore } from "vuex"
+import { useRoute, useRouter } from "vue-router"
 import axios from 'axios'
-import moment from "moment";
+import moment from "moment"
 
 import io from 'socket.io-client'
 const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
-
-const store = useStore();
-const route = useRoute();
-const router = useRouter();
-const loading = ref(true);
-const fab = ref(false);
-const updateTimer = ref(null)
-const reportDialog = ref(false);
-const dialogVisible = ref(false)
-const user = ref({});
-const data = ref(null)
-const AllHistory = ref([])
-const lastSeen = ref('Unavailable')
-
 const calculateDistance = utility.calculateDistance
 const getLikeIcon = utility.getLikeIcon
 const getFullPath = utility.getFullPath
+const getLikeValue = utility.getLikeValue
 
+const store = useStore()
+const route = useRoute()
+const router = useRouter()
+const loading = ref(true)
+const fab = ref(false)
+const updateTimer = ref(null)
+const reportDialog = ref(false)
+const dialogVisible = ref(false)
+const user = ref({})
+const data = ref(null)
+const lastSeen = ref('Unavailable')
+const activeTab = ref("tab-profile")
+const userCanChat = ref(false)
 
-const activeTab = ref("tab-profile");
+const loggedIn = store.state.loggedIn
+const followers = store.state.followers
+const convos = store.state.convos
+const blockDialog = ref(false)
+
+let likeIcon = ref('')
+let likedAlert = ref('')
+let lastHistory = ref('')
+let allHistory = ref([])
+let liked = ref(false)
+
+const profileImage = computed(() => {
+  return getFullPath(getProfileImage()) ? getFullPath(getProfileImage()) : 'default/defaut_profile.png'
+})
+
 const confirmDialog = ref({
   state: false,
   color: "",
@@ -183,17 +192,17 @@ const confirmDialog = ref({
   yes: "",
   no: "",
   block: false,
-});
+})
 
 const alert = ref({
   state: false,
   color: "",
   text: "",
-});
+})
 
 const confirmAlert = (action) => {
   if (action === 'Block') {
-    dialogVisible.value = true;
+    dialogVisible.value = true
     confirmDialog.value = {
       state: true,
       color: 'red',
@@ -201,7 +210,7 @@ const confirmAlert = (action) => {
       yes: "Block it",
       no: "Don't block",
       block: true,
-    };
+    }
   } else {
     dialogVisible.value = true
     confirmDialog.value = {
@@ -211,37 +220,42 @@ const confirmAlert = (action) => {
       yes: "Report it",
       no: "Don't report",
       block: false,
-    };
-  }
-};
-
-
-const getHistory = async () => {
-  try {
-    const token = user.value.token || localStorage.getItem('token');
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`;
-    const headers = { 'x-auth-token': token };
-    const result = await axios.get(url, { headers });
-    const allHistory = result.data;
-
-    const filteredHistory = allHistory.filter(item => item.his_id === user.value.id);
-    const historyTypes = new Set(['he_like', 'you_like', 'he_like_back', 'you_like_back', 'he_unlike', 'you_unlike']);
-    const filteredHistoryFinal = filteredHistory.reduce((acc, item) => {
-      if (historyTypes.has(item.type)) {
-        acc[item.type] = acc[item.type] || item;
-      }
-      return acc;
-    }, {});
-
-    const finalHistoryArray = Object.values(filteredHistoryFinal);
-    finalHistoryArray.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    AllHistory.value = finalHistoryArray;
-    return finalHistoryArray;
-  } catch (err) {
-    console.error('err history in frontend/ProfileHistory.vue ===> ', err);
+    }
   }
 }
 
+const getHistory = async () => {
+  try {
+    const token = user.value.token || localStorage.getItem('token')
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`
+    const headers = { 'x-auth-token': token }
+    const result = await axios.get(url, { headers })
+    const allHistoryData = ref([])
+    const userId = route.params.id
+// console.log('result.data -----------> ', result.data)
+    const typesToFilter = ['he_like', 'you_like', 'he_like_back', 'you_like_back', 'he_unlike', 'you_unlike']
+
+    const filteredByType = result.data.filter((item) => typesToFilter.includes(item.type))
+    const filteredByHisId = filteredByType.filter((item) => userId.includes(item.his_id))
+    filteredByHisId.sort((a, b) => new Date(a.match_date) - new Date(b.match_date))
+// console.log('filteredByHisId -----------> ', filteredByType)
+    const likeIconComputed = computed(() => {
+      return getLikeIcon(filteredByHisId[0].type)
+    })
+
+    likeIcon.value = likeIconComputed.value
+    userCanChat.value = true ? (filteredByHisId[0].type === 'he_like_back' 
+          || filteredByHisId[0].type === 'you_like_back') : false
+    
+    likedAlert.value = filteredByHisId[0].type.toString()
+
+    // console.log('filteredByHisId[0].type ===> ', filteredByHisId[0]?.type)
+
+    return filteredByHisId[0].type
+  } catch (err) {
+    console.error('err history in frontend/ProfileHistory.vue ===> ', err)
+  }
+}
 
 watch(user, async (newUser) => {
   const token = newUser.token || localStorage.getItem('token')
@@ -263,198 +277,154 @@ watch(user, async (newUser) => {
   }
 }, { immediate: true })
 
-const userCantLike = computed(() => {
-  const imgs = user.value.images;
-  return imgs ? !imgs.length : true;
-});
-
-const userCanChat = computed(() => {
-  for (const match of store.getters.matches) {
-    if (match.id === user.value.id) return true;
-  }
-  return false;
-});
-
-const liked = computed({
-  get: () => {
-    for (const match of store.state.following) {
-      if (match.id === user.value.id) return true;
-    }
-    return false;
-  },
-  set: () => {
-    syncMatches(store.state.loggedIn.id);
-  },
-});
-
-const likedBy = computed(() => {
-  for (const match of store.state.followers) {
-    if (match.id === user.value.id) return true;
-  }
-  return false;
-});
-
-const profileImage = computed(() => {
-  return getFullPath(getProfileImage()) ? getFullPath(getProfileImage()) : 'default/defaut_profile.png';
-});
 
 const distance = computed(() => {
-  const from = store.state.location;
+  const from = store.state.location
   const to = {
     lat: user.value.lat,
     lng: user.value.lng,
   };
-  const dist = calculateDistance(from, to);
-  return `${Math.round(dist)} kms away`;
-});
-
-// const isOnline = computed(() => {
-//   return store.state.online.includes(user.value.id);
-// });
+  const dist = calculateDistance(from, to)
+  return `${Math.round(dist)} kms away`
+})
 
 const coverPhoto = computed(() => {
-  const cover = 'default/defaut_couverture.jpg';
-  if (!user.value || !user.value.images) return getFullPath(cover);
-  const image = user.value.images.find((cur) => cur.cover);
-  return getFullPath(image ? image.name : cover);
-});
+  const cover = 'default/defaut_couverture.jpg'
+  if (!user.value || !user.value.images) return getFullPath(cover)
+  const image = user.value.images.find((cur) => cur.cover)
+  return getFullPath(image ? image.name : cover)
+})
 
 const filteredImages = computed(() => {
-  return user.value.images.filter((cur) => !cur.cover);
-});
+  return user.value.images.filter((cur) => !cur.cover)
+})
 
 const userTags = computed(() => {
-  const tags = user.value.tags;
-  if (!tags) return [];
-  return tags.split(",");
-});
-
-// const informations = computed(() => {
-//   return [
-//     { label: "Nom d'utilisateur", content: user.value.username },
-//     { label: "Nom", content: user.value.first_name },
-//     { label: "Prénom", content: user.value.last_name },
-//     { label: "Age", content: user.value.birthdate },
-//     { label: "Genre", content: user.value.gender },
-//     { label: "Interressé(e) par", content: user.value.looking },
-//     { label: "Téléphone", content: user.value.phone },
-//     { label: "Ville", content: user.value.city },
-//     { label: "Pays", content: user.value.country },
-//     { label: "Code postal", content: user.value.postal_code },
-//     { label: "Addresse", content: user.value.address },
-//     { label: "Bio", content: user.value.bio },
-//     { label: "Tags", content: user.value.tags },
-//   ];
-// });
-// console.log('user.value in frontend/ProfileView.vue ===> ', informations.value);
-
+  const tags = user.value.tags
+  if (!tags) return []
+  return tags.split(",")
+})
 
 const getProfileImage = () => {
-  if (!user.value || !user.value.images) return 'default/defaut_profile.png';
-  const image = user.value.images.find((cur) => cur.profile === 1);
-  return image ? image.name : "defaut_profile.png";
+  if (!user.value || !user.value.images) return 'default/defaut_profile.png'
+  const image = user.value.images.find((cur) => cur.profile === 1)
+  return image ? image.name : "defaut_profile.png"
 };
 
-const match = async () => {
-  const url = `${import.meta.env.VITE_APP_API_URL}/api/matching/match`;
+const matchFunction = async () => {
+
+  const url = `${import.meta.env.VITE_APP_API_URL}/api/matching/match`
   const data = {
     id: route.params.id,
-    liked: liked.value,
-  };
-  const headers = { "x-auth-token": store.state.loggedIn.token };
-  const res = await axios.post(url, data, { headers });
-  if (res.data.ok) {
-    liked.value = !liked.value;
-    const profileImg = store.state.loggedIn.images.find((cur) =>
-      cur.profile === true
-    );
-    console.log('store.state.loggedIn.id ===> ', store.state.loggedIn.id)
-    const data = {
-      date: new Date(),
-      id_from: store.state.loggedIn.id,
-      username: store.state.loggedIn.username,
-      profile_image: profileImg ? profileImg.name : 'default/defaut_profile.png',
-      id_to: route.params.id,
-    };
-    if (!liked.value) {
-      if (store.state.followers.some((cur) => cur.id === route.params.id)) {
-        data.type = "like_back";
-      } else {
-        data.type = "like";
+    liked: liked,
+  }
+  const token = store.state.user.token || localStorage.getItem('token')
+  const headers = { 'x-auth-token': token }
+
+  try {
+    liked = !liked
+    const res = await axios.post(url, data, { headers })
+    if (!res.data.msg) {
+      switch (likedAlert.value) {
+        case 'he_unlike':
+        case 'you_unlike':
+          alert.value = { state: true, color: 'green', text: `Your friendship request has been sent to ${user.value.first_name} ${user.value.last_name} successfully` }
+          break;
+        case 'he_like':
+          alert.value = { state: true, color: 'green', text: `You just added ${user.value.first_name} ${user.value.last_name} to your friends list` }
+          break;
+        case 'he_like':
+          alert.value = { state: true, color: 'green', text: `You have just accepted the friend request from ${user.value.first_name} ${user.value.last_name}` }
+          break;
+        case 'you_like':
+          alert.value = { state: true, color: 'red', text: `You have just canceled your friend request to ${user.value.first_name} ${user.value.last_name}` }
+          break;
+        case 'he_like_back':
+        case 'you_like_back':
+          alert.value = { state: true, color: 'red', text: `You just removed ${user.value.first_name} ${user.value.last_name} from your friend list` }
+          break;
       }
-    } else {
-      data.type = "unlike";
+      
+      socket.emit("match", data)
     }
-    syncConvoAll();
-    socket.emit("match", data);
-  }
-};
-
-const block = async () => {
-  const url = `${import.meta.env.VITE_APP_API_URL}/api/users/block`;
-  let data = { id: route.params.id };
-  const headers = { "x-auth-token": store.state.loggedIn.token };
-  const res = await axios.post(url, data, { headers });
-  if (!res.data.msg) {
-    syncBlocked(store.state.loggedIn.id);
-    data = {
-      id_from: store.state.loggedIn.id,
-      id_to: route.params.id,
-    };
-    socket.emit("block", data);
-    router.push("/");
-  }
-};
-
-const reportUser = async () => {
-  const url = `${import.meta.env.VITE_APP_API_URL}/api/users/report`
-  const data = { id: this.$route.params.id }
-  const headers = { 'x-auth-token': this.loggedIn.token }
-  const res = await axios.post(url, data, { headers })
-  if (!res.data.msg) {
-    this.reportDialog = false
-    this.alert.state = true
-    this.alert.color = 'green'
-    this.alert.text = 'User reported successfuly'
-  } else {
-    this.alert.state = true
-    this.alert.color = 'red'
-    this.alert.text = res.data.msg
+    
+  } catch (error) {
+    console.error('Une erreur s\'est produite :', error)
   }
 }
 
-const goToChat = () => {
-  const convo = store.state.convos.find((cur) => cur.user_id === user.value.id);
+const block = async () => {
+  const url = `${import.meta.env.VITE_APP_API_URL}/api/users/block`
+  let data = { id: route.params.id }
+  const token = user.value.token || localStorage.getItem('token')
+  const headers = { 'x-auth-token': token }
+  const res = await axios.post(url, data, { headers })
+  if (!res.data.msg) {
+    alert.value = { state: true, color: 'green', text: `you have blocked ${user.username}, you can no longer access his profile, you will be redirected to the home page`}
+    data = {
+      id_from: store.getters.user.id,
+      id_to: route.params.id,
+    }
+    socket.emit("block", data)
+    await new Promise(resolve => {
+      const interval = setInterval(() => {
+        if (!alert.value.state) {
+          clearInterval(interval)
+          resolve()
+        }
+      }, 500)
+    })
+    router.push("/")
+  } else {
+    alert.value = { state: true, color: 'red', text: res.data.msg}
+  }
+}
+
+const reportUser = async () => {
+  const url = `${import.meta.env.VITE_APP_API_URL}/api/users/report`
+  const data = { id: route.params.id }
+  const token = user.value.token || localStorage.getItem('token')
+  const headers = { 'x-auth-token': token }
+  const res = await axios.post(url, data, { headers })
+  if (!res.data.msg) {
+    alert.value = { state: true, color: 'green', text: 'User reported successfuly'}
+  } else {
+    alert.value = { state: true, color: 'red', text: res.data.msg}
+  }
+}
+
+const goToChat = async () => {
+  console.log('go to chat')
+  if (!userCanChat.value)
+    alert.value = { state: true, color: 'red', text: `You will need to add ${user.value.first_name} ${user.value.last_name} to your friends list to be able to chat with him`}
+  const convo = store.state.convos.find((cur) => cur.user_id === route.params.id)
+  console.log('convo',convo)
   if (convo) {
     syncConvo({
       username: convo.username,
       id_conversation: convo.id_conversation,
       profile_image: convo.profile_image,
-    });
-    router.push("/chat");
+    })
+    router.push("/chat")
   }
-};
+}
 
 const fetchUser = async (id) => {
   if (id && loading.value) {
     if (user.id === id) {
-      router.push("/settings");
+      router.push("/settings")
     } else {
       try {
         const token = user.token || localStorage.getItem('token')
-        const headers = { "x-auth-token": token };
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show/${id}`;
-        const res = await axios.get(url, { headers });
+        const headers = { "x-auth-token": token }
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show/${id}`
+        const res = await axios.get(url, { headers })
         if (res.data.msg) {
-          router.push("/404");
+          router.push("/404")
         }
-        loading.value = false;
-        user.value = { ...res.data, rating: Number(res.data.rating) };
-        const profileImg = res.data.images.find((cur) => cur.profile === 1);
-
-        // if (isOnline.value) {
-        //   user.value.status = true;
-        // }
+        loading.value = false
+        user.value = { ...res.data, rating: Number(res.data.rating) }
+        const profileImg = res.data.images.find((cur) => cur.profile === 1)
 
         const data = {
           date: new Date(),
@@ -463,77 +433,59 @@ const fetchUser = async (id) => {
           profile_image: profileImg ? profileImg.name : 'default/defaut_profile.png',
           id_to: id,
           type: "visit",
-        };
-        socket.emit("visit", data);
-        loading.value = false;
+        }
+        socket.emit("visit", data)
+        loading.value = false
       } catch (err) {
-        console.error(err);
+        console.error(err)
       }
     }
   }
-};
-
+}
 
 function updateConnectedUsers() {
-  if (user.value && user.value.id) {
+  if (user.value && route.params.id) {
+
     utility.getConnectedUsers()
       .then(data => {
-        const connectedUserIds = data;
-        const userId = user.value.id.toString();
-
+        const connectedUserIds = data
+        const userId = route.params.id.toString()
         if (connectedUserIds.includes(userId)) {
-          lastSeen.value = 'online';
+          lastSeen.value = 'online'
         } else {
-          lastSeen.value = moment(user.value.status).utc().fromNow();
+          lastSeen.value = moment(user.value.status).utc().fromNow()
         }
       })
       .catch(error => {
-        console.error('Erreur lors de la récupération des données :', error);
-      });
+        console.error('Erreur lors de la récupération des données :', error)
+      })
+
+      getHistory()
   }
 }
-
-
 
 onMounted(() => {
   const fetchUserPromise = new Promise((resolve) => {
     fetchUser(route.params.id)
       .then(() => {
-        resolve();
-      });
-  });
+        resolve()
+      })
+  })
 
-  fetchUserPromise.then(() => {
-    updateConnectedUsers();
-    updateTimer.value = setInterval(updateConnectedUsers, 2000);
-  });
-
-  if (isNaN(route.params.id) || !route.params.id) router.push("/404");
-});
-
-if (user.value && user.value.id) {
-  fetchUser(route.params.id)
-  updateConnectedUsers();
-  updateTimer.value = setInterval(updateConnectedUsers, 2000);
-}
-
-// onBeforeUnmount(() => {
-//   clearInterval(updateTimer.value);
-// });
-
-// onMounted(() => {
-//   fetchUser(route.params.id);
-//   updateConnectedUsers()
-//   if (isNaN(route.params.id) || !route.params.id) router.push("/404");
-//   updateTimer.value = setInterval(updateConnectedUsers, 2000)
-// });
-
+  liked.value = getLikeValue(lastHistory) ? true : false
+  if (isNaN(route.params.id) || !route.params.id) 
+    router.push("/404")
+  
+  if (user.value && route.params.id) {
+    fetchUser(route.params.id)
+    updateConnectedUsers()
+  }
+  updateTimer.value = setInterval(updateConnectedUsers, 500)
+})
 
 onBeforeUnmount(() => {
   clearInterval(updateTimer.value)
-});
-
-// localStorage.setItem('user', JSON.stringify(user));
+})
 
 </script>
 

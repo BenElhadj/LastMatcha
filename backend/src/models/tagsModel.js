@@ -22,12 +22,18 @@ const getTags = (callback) => {
 
 // INSERT TAGS 
 
-const insertTags = (tag) => {
-	let request = `INSERT INTO tags (value) VALUES (?)`
-	db.query(request, tag, (error) => {
-		if (error) throw error
-	})
-}
+
+const insertTags = (tag, callback) => {
+	let request = `INSERT IGNORE INTO tags (value) VALUES (?)`
+	db.query(request, [tag], (error, results) => {
+	  if (error) throw error;
+	  if (results.affectedRows > 0) {
+		callback(true);
+	  } else {
+		callback(false);
+	  }
+	});
+  };
 
 
 module.exports = {

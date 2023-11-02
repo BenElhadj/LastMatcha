@@ -78,7 +78,11 @@ const updateProfile = async (req, res) => {
 							user.tags.split(', ').forEach(async element => {
 								if (!tags.includes(element)) {
 									try {
-										await tagsModel.insertTags([element])
+										await tagsModel.insertTags(element, (isInserted) => {
+											if (!isInserted) {
+											  // La valeur existe déjà dans la table
+											}
+										  })
 									} catch (err) {
 										return res.json({ msg: 'Fatal error', err })
 									}

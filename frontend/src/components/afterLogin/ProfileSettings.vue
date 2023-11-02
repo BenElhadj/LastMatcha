@@ -2,93 +2,102 @@
   <q-page>
     <q-page-container>
       <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">Settings</h1>
-
+      <h3 style="margin-top: -70px; margin-bottom:70px; text-align: center;">{{user.username}}</h3>
       <div class="q-pa-md row flex flex-center justify-between" style="margin: 7%;">
-
-        <div style="margin-" class="col-xs-12 col-sm-6 q-pa-md">
+        <div class="col-xs-12 col-sm-6 q-pa-md">
           <div class="row items-center">
-            <!-- <q-input v-model="user.email" class="col" disabled label="Email" color="primary"></q-input> -->
-            <img style="width: 130px; margin-left:7px" class="col-auto q-ml-md" src="@/assets/Settings/resetEmail.png" @click="passDialog = true"/>
+            <img style="width: 130px; margin-left:7px" class="col-auto q-ml-md" src="@/assets/Settings/resetEmail.png" @click="emailDialog = true"/>
             <q-input v-model="user.email" readonly label="Email"/>
           </div>
         </div>
-
         <div class="q-flex column items-center justify-center">
           <div class="align-center">
-            <!-- <q-input class="col" disabled color="primary" value="test" label="Password" type="password"></q-input> -->
             <img style="width: 130px; margin-left:7px" class="col-auto q-ml-md" src="@/assets/Settings/resetPasswd.png" @click="passDialog = true"/>
             <q-input v-model="user.passe" readonly value="***********" label="Password" type="password"/>
           </div>
         </div>
-
       </div>
 
       <div class="q-pa-md row flex flex-center justify-between" style="margin: 7%;">
-
         <div class="q-flex column items-center justify-center">
           <div class="align-center">
             <img style="width: 150px; margin-left:7px" src="@/assets/Settings/geolocalisation.png" @click="openLoc" alt="Location Icon">
           </div>
           <span>Click here to update your location</span>
         </div>
-
         <div class="q-flex column items-center justify-center">
           <div class="align-center">
-            <img style="width: 150px;" src="@/assets/Settings/blocked.png" @click="basic = true"/>
+            <img style="width: 150px;" src="@/assets/Settings/blocked.png" @click="blacklist.length === 0 ? noBlacklist() : blackListDialog = true"/>
           </div>
           <span>Click here to view blocked users</span>
         </div>
-
       </div>
 
-
-      <q-dialog v-if="reRender" v-model="emailDialog" max-width="500" persistent transition-show="rotate" transition-hide="rotate">
+      <q-dialog v-model="emailDialog" max-width="500" persistent transition-show="rotate" transition-hide="rotate">
         <q-card class="q-pa-md q-ma-md">
-          <h5 class="display-1 text-xs-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">
-            Change your email
-          </h5>
+          <h5 class="display-1 text-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">Change your email</h5>
           <div class="my-4">
-            <q-input v-model="password" color="primary" label="Current password" :rules="passRules" required :type="showPass ? 'text' : 'password'">
+            <q-input v-model="oldEmail" color="primary" label="Current email" :rules="rules.email" required >
               <template #append>
-                <q-icon :name="showPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPass = !showPass"></q-icon>
+                <q-icon class="cursor-pointer"></q-icon>
               </template>
             </q-input>
-            <q-input v-model="email" color="primary" class="my-3" :rules="emailRules" label="Email" required></q-input>
+            <q-input v-model="newEmail" color="primary" label="New email" :rules="rules.email" required>
+              <template #append>
+                <q-icon class="cursor-pointer"></q-icon>
+              </template>
+            </q-input>
+            <q-input v-model="pwd" color="primary" class="mb-3" :rules="rules.passRules" label="Current password" hint="Start with your old password" autocomplete="off" filled :type="showPwd ? 'text' : 'password'">
+              <template #append>
+                <q-icon
+                  :name="showPwd ? 'mdi-eye' : 'mdi-eye-off'" 
+                  class="cursor-pointer" 
+                  @click="showPwd = !showPwd"></q-icon>
+              </template>
+            </q-input>
           </div>
-          <q-card-actions :align="right">
-            <q-btn flat color="primary" :disable="!valid" @click="saveEmail">
-              Save
-            </q-btn>
-            <q-btn flat color="primary" @click="closeEmail">
-              Cancel
-            </q-btn>
+          <q-card-actions align="right">
+            <q-btn flat color="primary" :disable="!validEmail" @click="saveEmail">Save</q-btn>
+            <q-btn flat color="primary" @click="closeEmail">Cancel</q-btn>
           </q-card-actions>
         </q-card>
       </q-dialog>
 
-      <q-dialog v-if="reRender" v-model="passDialog" max-width="500px" persistent transition-show="rotate" transition-hide="rotate">
+      <q-dialog v-model="passDialog" max-width="500px" persistent transition-show="rotate" transition-hide="rotate">
         <q-card class="q-pa-md q-ma-md">
-          <h5 class="display-1 text-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">
-            Change your password
-          </h5>
+          <h5 class="display-1 text-center text-md-left pt-3 pb-3 mb-4 hidden-sm-and-down">Change your password</h5>
           <div class="my-4">
-            <q-input v-model="password" color="primary" class="mb-4" :rules="passRules" label="Current password" autocomplete="off" required :type="showPass ? 'text' : 'password'">
+            <q-input v-model="oldPwd" color="primary" :rules="rules.passRules" label="Current password" hint="Start with your old password" autocomplete="off" filled :type="showPwd ? 'text' : 'password'">
               <template #append>
-                <q-icon :name="showPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPass = !showPass"></q-icon>
+                <q-icon
+                  :name="showPwd ? 'mdi-eye' : 'mdi-eye-off'" 
+                  class="cursor-pointer" 
+                  @click="showPwd = !showPwd"></q-icon>
               </template>
             </q-input>
-            <q-input v-model="newPassword" color="primary" class="mb-4" :rules="passRules" label="New password" autocomplete="off" required :type="showNewPass ? 'text' : 'password'">
-              <template #append>
-                <q-icon :name="showNewPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showNewPass = !showNewPass"></q-icon>
+            <q-input v-model="newPwd" color="primary" :rules="rules.newPwd" label="New password" hint="Choose your new password" filled :type="showNewPwd ? 'text' : 'password'">
+              <template v-slot:append>
+                <q-icon
+                  :name="showNewPwd ? 'mdi-eye' : 'mdi-eye-off'"
+                  class="cursor-pointer"
+                  @click="showNewPwd = !showNewPwd"
+                ></q-icon>
               </template>
             </q-input>
-            <q-input v-model="confNewPassword" color="primary" class="mb-4" label="Confirm new password" autocomplete="off" required :type="showConfNewPass ? 'text' : 'password'" :error="!passwordMatch()">
-              <template #append>
-                <q-icon :name="showConfNewPass ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showConfNewPass = !showConfNewPass"></q-icon>
+            <q-input v-model="confNewPwd" color="primary" :rules="rules.confNewPwd" label="Confirm Password" hint="Confirm your password" filled :type="showConfPwd ? 'text' : 'password'" @keyup.enter="savePass" :error-messages="passwordMatch">
+              <template v-slot:append>
+                <q-icon
+                  :name="showConfPwd ? 'mdi-eye' : 'mdi-eye-off'"
+                  class="cursor-pointer"
+                  @click="showConfPwd = !showConfPwd"
+                ></q-icon>
               </template>
             </q-input>
           </div>
-         
+          <q-card-actions align="right">
+            <q-btn flat color="primary" :disable="!validPwd" @click="savePass">Save</q-btn>
+            <q-btn flat color="primary" @click="closePass">Cancel</q-btn>
+          </q-card-actions>
         </q-card>
       </q-dialog>
 
@@ -103,12 +112,10 @@
                 <q-tooltip class="bg-white text-primary">Update your location</q-tooltip>
               </q-btn>
               <q-space></q-space>
-
               <q-space></q-space>
               <q-btn dense icon="mdi-window-close" flat color="white" @click="locDialog = false">
                 <q-tooltip class="bg-white text-primary">Close</q-tooltip>
               </q-btn>
-
             </q-bar>
           </q-header>
           <q-page-container>
@@ -117,62 +124,58 @@
         </q-card>
       </q-dialog>
 
+      <q-dialog v-model="blackListDialog" class="q-pa-md" transition-show="rotate" transition-hide="rotate">
+        <div v-if="blacklist.length > 0" class="q-pa-md" style="background-color: white;">
+          <q-item v-for="banned in blacklist" :key="banned.id"   class="blacklist_item mx-2" style="width: 340px">
+            <q-expansion-item  class="bg-grey-3" dropdown-icon="mdi-chevron-down !important" icon='mdi-chevron-double-right' >
+              <template v-slot:header>
+                <q-item-section avatar >
+                  <q-avatar>
+                    <img :src="getFullPath(banned.avatar)">
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  {{banned.username}}
+                </q-item-section>
 
-
-      <q-dialog v-if="basic" v-model="basic" transition-show="rotate" transition-hide="rotate">
-        <q-list class="blacklist_list">
-          <q-item v-for="banned in getBlacklist" :key="banned.id" class="blacklist_item mx-2">
-            <div class="q-gutter-xs row" style="max-width: 300px" :class="{ 'truncate-chip-labels': truncate }">
-              <q-chip removable v-model="blacklistPanel" color="red" text-color="white" max-width="30px">
-                <q-avatar>
-                  <img :src="getFullPath(banned.avatar)">
-                </q-avatar>
-
-
-<!-- <div class="q-pa-md q-gutter-md">
-    <q-list bordered class="rounded-borders" style="max-width: 350px">
-
-      <q-item clickable v-ripple>
-        <q-item-section avatar>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/img/avatar2.jpg">
-          </q-avatar>
-        </q-item-section>
-
-        <q-item-section>
-          <q-item-label lines="1">Brunch this weekend?</q-item-label>
-          <q-item-label caption lines="2">
-            <span class="text-weight-bold">Janet</span>
-            -- I'll be in your neighborhood doing errands this
-            weekend. Do you want to grab brunch?
-          </q-item-label>
-        </q-item-section>
-
-        <q-item-section side top>
-          1 min ago
-        </q-item-section>
-      </q-item>
-
-      <q-separator inset="item"></q-separator>
-
-    </q-list>
-
-  </div> -->
-
-                <div class="ellipsis">
-                  <span class="q-ml-sm">{{ banned.first_name }} {{ banned.last_name }}</span>
-                  <q-icon mdi='mdi-rotate-3d' @click="unBlock(banned)"></q-icon>
-                  <q-tooltip>
-                    <span>you blocked {{banned.username}} on {{moment(banned.blocked_at).format('D MMMM, YYYY, h:mm A')}}</span>
-                  </q-tooltip>
+                <div class="note">
+                  <p class="caption text-capitalize rating_value">{{ banned.rating ? banned.rating.toFixed(1) : 'N/A' }}</p>
+                  <q-rating
+                    :color="banned.gender === 'male' ? 'blue-3' : 'pink-2'"
+                    :color-selected="banned.gender === 'male' ? 'blue-9' : 'pink-8'"
+                    :modelValue="banned.rating && !isNaN(banned.rating) ? banned.rating : 0"
+                    icon="mdi-heart-outline"
+                    icon-selected="mdi-heart"
+                    icon-half="mdi-heart-half-full"
+                    max="7"
+                    readonly
+                    dense
+                    size="1.3em"
+                    half-increments
+                    class="rating"/>
                 </div>
-              </q-chip>
-            </div>
+
+              </template>
+              <q-card>
+                <q-card-section>
+                  <span>
+                    {{ banned.first_name }} {{ banned.last_name }} is {{ new Date().getFullYear() - new Date(banned.birthdate).getFullYear() }} years old.
+                  </span>
+                  <br>
+                  <span>
+                    You blocked him on {{moment(banned.blocked_at).format('D MMMM, YYYY')}}
+                  </span>
+                </q-card-section>
+                <q-card-actions align="right">
+                  <q-btn color="green" flat  @click="unBlock(banned)">unblocked</q-btn>
+                </q-card-actions>
+              </q-card>
+            </q-expansion-item>
           </q-item>
-        </q-list>
+        </div>
       </q-dialog>
 
-      <AlertView :alert="alert"></AlertView>
+      <AlertView :alert="alert"/>
     </q-page-container>
   </q-page>
 </template>
@@ -193,24 +196,25 @@ const user = computed(() => store.getters.user)
 const emailDialog = ref(false)
 const passDialog = ref(false)
 const locDialog = ref(false)
-const showPass = ref(false)
-const showNewPass = ref(false)
-const showConfNewPass = ref(false)
-const password = ref('')
-const newPassword = ref('')
-const confNewPassword = ref('')
-const email = ref('')
-const valid = ref(false)
-const reRender = ref(true)
-const blacklistPanel = ref(true)
-const getBlacklist = ref(null)
+const showPwd = ref(false)
+const showNewPwd = ref(false)
+const showConfPwd = ref(false)
+const pwd = ref('')
+const oldPwd = ref('')
+const newPwd = ref('')
+const confNewPwd = ref('')
+const oldEmail = ref('')
+const newEmail = ref('')
+const blacklist = ref(null)
 
-const basic = ref(false)
+const blackListDialog = ref(false)
 
 const latitude = computed(() => location.value ? Number(location.value.lat) : 0)
 const longitude = computed(() => location.value ? Number(location.value.lng) : 0)
 const location = computed(() => store.getters.location)
-const passwordMatch = computed(() => confNewPassword.value === newPassword.value || 'Passwords do not match!')
+const passwordMatch = () => {
+  return confNewPwd.value === newPwd.value || 'Passwords do not match!';
+}
 
 const getFullPath = utility.getFullPath
 
@@ -224,15 +228,6 @@ const alert = ref({
   text: ''
 })
 
-const closePanel = () => {
-  if (!blacklist.value.length) {
-    console.log('------------ blacklist vide')
-    // this.blacklistPanel = false
-    return true
-  }
-  return false
-}
-
 const swapLocation = ref({
   lat: location.value.lat,
   lng: location.value.lng
@@ -240,15 +235,112 @@ const swapLocation = ref({
 
 const fetchBlacklist = async () => {
   try {
-    getBlacklist.value = await utility.sync('users/getblocked')
-    console.log('Résultat de la requête getblocked :', getBlacklist.value)
+    blacklist.value = await utility.sync('users/getblocked')
   } catch (error) {
     console.error('Une erreur s\'est produite :', error)
   }
 }
+const noBlacklist = async () => {
+  alert.value = { state: true, color: 'green', text: "you haven't blocked anyone" }
+}
+
+const rules = {
+  email: [
+    v => !!v || 'Email field is required',
+    v => /.+@.+/.test(v) || 'Invalid email'
+  ],
+  passRules: [
+    v => !!v || 'Password field is required',
+  ],
+  newPwd: [
+    v => !!v || 'Password field is required',
+    v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v) || 'The password must contain at least one uppercase letter, one lowercase letter, one number and one special character',
+    v => v.length >= 8 || 'Password must contain at least 8 characters'
+  ],
+  confNewPwd: [
+    v => !!v || 'Confirm Password field is required',
+    v => v === newPwd.value || 'Passwords do not match',
+  ]
+}
 
 
 
+const validPwd = computed(() => {
+  return rules.newPwd.every(rule => rule(newPwd.value) === true)
+})
+
+const savePass = async () => {
+  if (validPwd) {
+    if (newPwd.value !== confNewPwd.value) {
+      alert.value = { state: true, color: 'red', text: 'enter your current email first' }
+      return
+    }
+    try {
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/users/changepassword`
+      const headers = { 'x-auth-token': user.value.token }
+      const data = {
+        password: oldPwd.value,
+        newPassword: newPwd.value,
+        confNewPassword: confNewPwd.value
+      }
+      const res = await axios.post(url, data, { headers })
+      if (res.data.ok) {
+        alert.value = { state: true, color: 'green', text: 'Your password has been updated' }
+        closePass()
+      } else {
+        alert.value = { state: true, color: 'red', text: res.data.msg }
+      }
+    } catch (err) {
+      console.error('err savePass in frontend/ProfileSettings.vue ===> ', err)
+    }
+  } else {
+    alert.value = { state: true, color: 'red', text: 'Please fill all fields!' }
+  }
+}
+
+const closePass = () => {
+  passDialog.value = false
+  oldPwd.value = ''
+  newPwd.value = ''
+  confNewPwd.value = ''
+}
+
+const validEmail = computed(() => {
+  return rules.email.every(rule => rule(newEmail.value) === true)
+})
+
+const saveEmail = async () => {
+  if (validEmail) {
+    try {
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/users/changeemail`
+      const headers = { 'x-auth-token': user.value.token }
+      const data = {
+        email: newEmail.value,
+        password: pwd.value
+      }
+      const res = await axios.post(url, data, { headers })
+
+      pwd.value = ''
+      if (res.data.ok) {
+        alert.value = { state: true, color: 'green', text: 'Your email has been updated' }
+        closeEmail()
+      } else {
+        alert.value = { state: true, color: 'red', text: res.data.msg }
+      }
+    } catch (err) {
+      console.error('err saveEmail in frontend/ProfileSettings.vue ===> ', err)
+    }
+  } else {
+    alert.value = { state: true, color: 'red', text: 'Please fill all fields!' };
+  }
+}
+
+const closeEmail = () => {
+  emailDialog.value = false
+  oldEmail.value = ''
+  newEmail.value = ''
+  pwd.value = ''
+}
 
 const googleLoaded = () => {
   return (typeof window.google === 'object' && typeof window.google.maps === 'object')
@@ -258,78 +350,6 @@ const flag = ref(googleLoaded())
 const openLoc = () => {
   locDialog.value = true
   flag.value = googleLoaded()
-  console.log('flag', flag.value)
-}
-
-const saveEmail = async () => {
-  try {
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/users/changeemail`
-    const headers = { 'x-auth-token': user.value.token }
-    const data = {
-      email: email.value,
-      password: password.value
-    }
-    const res = await axios.post(url, data, headers)
-    password.value = ''
-    valid.value = false
-    if (res.ok) {
-      alert.value = { state: true, color: 'green', text: 'Your email has been updated' }
-      emailDialog.value = false
-      updateUserEmail(email.value)
-      email.value = ''
-      reRenderComp()
-    } else {
-      alert.value = { state: true, color: 'red', text: res.msg }
-    }
-  } catch (err) {
-    console.error('err saveEmail in frontend/ProfileSettings.vue ===> ', err)
-  }
-}
-
-const savePass = async () => {
-  try {
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/users/changepassword`
-    const headers = { 'x-auth-token': user.value.token }
-    const data = {
-      password: password.value,
-      newPassword: newPassword.value,
-      confNewPassword: confNewPassword.value
-    }
-    const res = await axios.post(url, data, headers)
-    password.value = ''
-    newPassword.value = ''
-    confNewPassword.value = ''
-    valid.value = false
-    reRenderComp()
-    if (res.ok) {
-      alert.value = { state: true, color: 'green', text: 'Your password has been updated' }
-      passDialog.value = false
-    } else {
-      alert.value = { state: true, color: 'red', text: res.msg }
-    }
-  } catch (err) {
-    console.error('err savePass in frontend/ProfileSettings.vue ===> ', err)
-  }
-}
-
-const closeEmail = () => {
-  emailDialog.value = false
-  password.value = ''
-  email.value = ''
-  reRenderComp()
-}
-
-const closePass = () => {
-  passDialog.value = false
-  password.value = ''
-  newPassword.value = ''
-  confNewPassword.value = ''
-  reRenderComp()
-}
-
-const reRenderComp = () => {
-  reRender.value = false
-  nextTick(() => (reRender.value = true))
 }
 
 const locationUpdated = (newLocation) => {
@@ -350,32 +370,20 @@ const changeLoc = async () => {
 }
 
 const unBlock = async (banned) => {
-  const { id, username } = banned
+  const { blocked_id, username } = banned
   const url = `${import.meta.env.VITE_APP_API_URL}/api/users/unblock`
   const headers = { 'x-auth-token': user.value.token }
-  console.log('id =============> ', id)
-  console.log('user.value.token =============> ', user.value.token)
-  const result = await axios.post(url, { id }, { headers })
-  if (result.ok) {
-    const blacklist = {
-      blocked: blacklist.value.filter(cur => cur !== id) || [],
-      blockedBy: blockedBy.value
-    }
-    store.commit('syncBlocked', blacklist)
-    syncBlacklist(blacklist.blocked)
+  const result = await axios.post(url, { id: blocked_id }, { headers })
+  if (result.data.ok) {
+    fetchBlacklist()
     alert.value = { state: true, color: 'green', text: `${username} has been unblocked` }
   } else {
-    alert.value = { state: true, color: 'red', text: result.msg }
+    alert.value = { state: true, color: 'red', text: result.data.msg }
   }
 }
 
 onMounted(() => {
   fetchBlacklist()
-  
-  const { blacklist } = defineProps(['blacklist'])
-  // console.log('blacklist.value =============> ', blacklist)
-
-  console.log('getBlacklist.value =============> ', getBlacklist.value)
 })
 
 </script>
@@ -387,18 +395,6 @@ onMounted(() => {
 
 .map-container {
   position: initial !important;
-}
-
-.blacklist {
-  box-shadow: none;
-  border: 1px solid var(--color-primary);
-  border-radius: 3px;
-}
-
-.blacklist > li,
-.blacklist_list,
-.blacklist_item {
-  background-color: #fafafa !important;
 }
 
 .expansion_list {

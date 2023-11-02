@@ -185,24 +185,6 @@ export default {
     }
   },
 
-  getLikeIcon(liked) {
-
-    switch (liked) {
-      case 'he_like':
-        return `${receive}`
-      case 'you_like':
-        return `${confirm}`
-      case 'you_like_back':
-      case 'he_like_back':
-        return `${match}`
-      case 'he_unlike':
-      case 'you_unlike':
-        return `${dislike}`
-      default:
-        return `${defaultIcon}`
-    }
-  },
-
   getHistoryAction (type, first_name, last_name) {
 
     if (first_name === null) {
@@ -304,24 +286,39 @@ export default {
       case 'cover_img':
         return ['mdi', 'mdi-image', 'text-green']
     }
-
-  //   "allType": [
-    // "you_visit",
-    // "you_like",
-    // "you_unlike",
-    // "he_visit",
-    // "he_like",
-    // "you_like_back",
-    // "he_like_back",
-    // "he_unlike",
-    // "talk",
-    // "you_block",
-    // "he_block",
-    // "avatar_img",
-    // "cover_img"
-  // ]
-
   },
+  getLikeValue (type) {
+    switch(type) {
+      case 'you_like_back':
+      case 'he_like_back':
+      case 'you_like':
+      case 'he_like':
+        return true
+      case 'you_unlike':
+      case 'he_unlike':
+        return false
+    }
+  },
+
+
+  getLikeIcon(liked) {
+    switch (liked) {
+      case 'he_like':
+        return `${receive}`
+      case 'you_like':
+        return `${confirm}`
+      case 'you_like_back':
+      case 'he_like_back':
+        return `${match}`
+      case 'he_unlike':
+      case 'you_unlike':
+        return `${dislike}`
+      default:
+        return `${defaultIcon}`
+    }
+  },
+
+
   filterBlocked: (state, type) => {
     return state[type].filter(cur => !isBlocked(state, cur[getId(type)]))
   },

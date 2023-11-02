@@ -8,35 +8,50 @@
           <q-tooltip bottom class="status_container">
             <span>{{ lastSeen }}</span>
           </q-tooltip>
-          <q-badge small rounded :color="`${user.isConnected ? 'green' : 'grey'}`"></q-badge>
+          <q-badge small rounded :color="`${user.isConnected ? 'green' : 'grey'}`"/>
         </q-item-section>
       </div>
 
-<!-- {{ user.user_id }} -->
-      <q-avatar class="justify-center" size="120px">
-        <img :src="profileImage(user.name)" aspect-ratio="1"/>
+      <q-avatar class="justify-center" size="150px">
+        <img :src="profileImage(user.name)"/>
       </q-avatar>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
-       <span justify-center class="name headline text-capitalize mt-2 ">
-        <q-icon :name="user.gender === 'male' ? 'mdi-gender-male' : 'mdi-gender-female'"></q-icon>
+      <span justify-center class="name headline text-capitalize mt-2 ">
+        <q-icon class="mr-2" size="25px" :name="user.gender === 'male' ? 'icon-male' : 'icon-femel'"/>
+        <span v-if="user.birthdate">
+          <q-icon size="30px" name="icon-age"/>
+          {{ age }}
+        </span>
       </span>
-        
-      
 
-      <div class="note">
+      <!-- <div class="note">
         <p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
-          <!-- <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :value="user.rating" half-increments class="rating"/> -->
-          <q-rating icon="mdi-heart" color="primary" readonly dense size="2em" :modelValue="user.rating" half-increments class="rating"/>
-
-        <!-- Quasar does not have a rating component, you need to use a third party library or build your own -->
+          <q-rating icon="mdi-heart" :color="user.gender === 'male' ? 'blue' : 'pink'" readonly dense size="2em" :modelValue="user.rating" half-increments class="rating"/>
+      </div> -->
+      <div class="note">
+        <p class="caption text-capitalize rating_value">{{ user.rating ? user.rating.toFixed(1) : 'N/A' }}</p>
+        <q-rating
+          :color="user.gender === 'male' ? 'blue-3' : 'pink-2'"
+          :color-selected="user.gender === 'male' ? 'blue-9' : 'pink-8'"
+          :modelValue="user.rating && !isNaN(user.rating) ? user.rating : 0"
+          icon="mdi-heart-outline"
+          icon-selected="mdi-heart"
+          icon-half="mdi-heart-half-full"
+          max="7"
+          readonly
+          dense
+          size="1.7em"
+          half-increments
+          class="rating"/>
       </div>
+
       <div class="row justify-center align-center bottom mb-0 mt-auto py-2 px-4 grey-2">
-        <q-icon v-if="user.birthdate" color="primary" size="xs" name="mdi-cake"></q-icon>
+      <div>
 
-        <span v-if="user.birthdate" class="pr-1">{{ age }}</span>
-        <q-icon color="primary" size="xs" name="mdi-map-marker"></q-icon>
-
+      </div>
+        
+        <q-icon color="primary" size="40px" name="icon-map"></q-icon>
         <span v-if="user.city && user.country" class="text-truncate">{{ `${user.city},  ${user.country}` }}</span>
         <span v-else class="text-truncate">Earth</span>
 
@@ -123,6 +138,26 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
+.icon-male {
+  background-image: url('@/assets/userCard/male.png');
+  background-size: 90%;
+  background-repeat: no-repeat;
+}
+.icon-femel {
+  background-image: url('@/assets/userCard/femel.png');
+  background-size: 90%;
+  background-repeat: no-repeat;
+}
+.icon-age {
+  background-image: url('@/assets/userCard/age.png');
+  background-size: 90%;
+  background-repeat: no-repeat;
+}
+.icon-map {
+  background-image: url('@/assets/userCard/map.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
 .note {
   display: flex;
     align-items: flex-start;

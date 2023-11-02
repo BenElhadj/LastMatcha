@@ -1,13 +1,15 @@
 <template>
   <q-page class="q-pa-lg">
     <q-page-container>
-      <h1   style="margin-top: -10px; text-align: center;">History</h1>
+      <h1   style="margin-top: -40px; text-align: center;">History</h1>
+      <h3 style="margin-top: -50px; margin-bottom:20px; text-align: center;">{{user.username}}</h3>
+
       <q-timeline align="top" label="Loose" center class="timeline_container q-gutter-md " >
 
         <q-timeline  color="secondary">
           <q-timeline-entry heading style="margin: 10px; text-align: center;">
             Her you can see all your history of actions on the website
-            <br>
+            <br><br>
           </q-timeline-entry>
 
           <q-timeline-entry
@@ -44,12 +46,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { useStore } from 'vuex';
-import { useRoute, useRouter } from 'vue-router';
-import utility from '@/utility.js';
-import moment from 'moment';
-import axios from 'axios';
+import { ref, computed, watch } from 'vue'
+import { useStore } from 'vuex'
+import { useRoute, useRouter } from 'vue-router'
+import utility from '@/utility.js'
+import moment from 'moment'
+import axios from 'axios'
 
 const store = useStore()
 const route = useRoute()
@@ -58,16 +60,12 @@ const limit = ref(25)
 const user = computed(() => store.getters.user)
 const getNotifIcon = utility.getNotifIcon
 
-const AllHistory = ref([])
+const allHistory = ref([])
 
 const fromNow = utility.fromNow
 const formatTime = utility.formatTime
 const getFullPath = utility.getFullPath
 const getHistoryAction = utility.getHistoryAction
-
-// const layout = computed(() => {
-//   return screen.lt.sm ? 'dense' : (screen.lt.md ? 'comfortable' : 'loose')
-// })
 
 const getHistory = async () => {
   try {
@@ -75,7 +73,7 @@ const getHistory = async () => {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`
     const headers = { 'x-auth-token': token }
     const result = await axios.get(url, { headers })
-    AllHistory.value = result.data
+    allHistory.value = result.data
   } catch (err) {
     console.error('err history in frontend/ProfileHistory.vue ===> ', err)
   }
@@ -84,33 +82,33 @@ const getHistory = async () => {
 getHistory();
 
 const redirectToUser = (hisId) => {
-  if (hisId === user.value.id) {
-    console.log('hisId === user.value.id hisId =>', hisId, 'user.value.id =>', user.value.id);
-    router.push('/');
+  if (hisId === user.value.id || hisId === user.value._id) {
+    console.log('hisId === user.value.id hisId =>', hisId, 'user.value.id =>', user.value.id)
+    router.push('/')
   } else {
-    console.log('hisId !== user.value.id hisId =>', hisId, 'user.value.id =>', user.value.id);
-    router.push(`/user/${hisId}`);
+    console.log('hisId !== user.value.id hisId =>', hisId, 'user.value.id =>', user.value.id)
+    router.push(`/user/${hisId}`)
   }
 }
 
 const history = computed(() => {
-  return AllHistory.value
-    .filter((cur) => !AllHistory.value.includes(cur.id))
-    .slice(0, limit.value);
-});
+  return allHistory.value
+    .filter((cur) => !allHistory.value.includes(cur.id))
+    .slice(0, limit.value)
+})
 
 const moreToLoad = computed(() => {
-  return limit.value < AllHistory.value.length - 1;
-});
+  return limit.value < allHistory.value.length - 1
+})
 
 
 const increaseLimit = () => {
-  if (limit.value + 24 < AllHistory.value.length) {
-    limit.value += 25;
+  if (limit.value + 24 < allHistory.value.length) {
+    limit.value += 25
   } else {
-    limit.value = AllHistory.value.length - 1;
+    limit.value = allHistory.value.length - 1
   }
-};
+}
 
 </script>
 
