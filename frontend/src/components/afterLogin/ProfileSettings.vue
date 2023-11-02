@@ -7,12 +7,14 @@
         <div class="col-xs-12 col-sm-6 q-pa-md">
           <div class="row items-center">
             <img style="width: 130px; margin-left:7px" class="col-auto q-ml-md" src="@/assets/Settings/resetEmail.png" @click="emailDialog = true"/>
+            <br>
             <q-input v-model="user.email" readonly label="Email"/>
           </div>
         </div>
         <div class="q-flex column items-center justify-center">
           <div class="align-center">
             <img style="width: 130px; margin-left:7px" class="col-auto q-ml-md" src="@/assets/Settings/resetPasswd.png" @click="passDialog = true"/>
+            <br>
             <q-input v-model="user.passe" readonly value="***********" label="Password" type="password"/>
           </div>
         </div>

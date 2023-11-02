@@ -52,8 +52,6 @@
                 <img class="icon-size"  @click="goToChat" :src="(userCanChat ? chatFalse : chatTrue)">
               </q-btn>
 
-              {{ userCanChat }}
-
               <div class="flex" style="center center">
                 <q-tooltip top class="status_container">
                   <span>You can block or report</span>
@@ -229,29 +227,22 @@ const getHistory = async () => {
     const token = user.value.token || localStorage.getItem('token')
     const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`
     const headers = { 'x-auth-token': token }
-    const result = await axios.get(url, { headers })
-    const allHistoryData = ref([])
     const userId = route.params.id
-// console.log('result.data -----------> ', result.data)
     const typesToFilter = ['he_like', 'you_like', 'he_like_back', 'you_like_back', 'he_unlike', 'you_unlike']
-
+    const result = await axios.get(url, { headers })
+    
     const filteredByType = result.data.filter((item) => typesToFilter.includes(item.type))
     const filteredByHisId = filteredByType.filter((item) => userId.includes(item.his_id))
     filteredByHisId.sort((a, b) => new Date(a.match_date) - new Date(b.match_date))
-// console.log('filteredByHisId -----------> ', filteredByType)
-    const likeIconComputed = computed(() => {
-      return getLikeIcon(filteredByHisId[0].type)
-    })
 
-    likeIcon.value = likeIconComputed.value
-    userCanChat.value = true ? (filteredByHisId[0].type === 'he_like_back' 
-          || filteredByHisId[0].type === 'you_like_back') : false
+    likeIcon.value = getLikeIcon( filteredByHisId[0] ? filteredByHisId[0].type : 'default')
+
+    userCanChat.value = true ? filteredByHisId[0] ? ((filteredByHisId[0].type === 'he_like_back' 
+          || filteredByHisId[0].type === 'you_like_back')) : false : false
     
-    likedAlert.value = filteredByHisId[0].type.toString()
+    likedAlert.value = filteredByHisId[0] ? filteredByHisId[0].type.toString() : 'default'
 
-    // console.log('filteredByHisId[0].type ===> ', filteredByHisId[0]?.type)
-
-    return filteredByHisId[0].type
+    return filteredByHisId[0] ? filteredByHisId[0].type : 'default'
   } catch (err) {
     console.error('err history in frontend/ProfileHistory.vue ===> ', err)
   }
@@ -326,6 +317,7 @@ const matchFunction = async () => {
     const res = await axios.post(url, data, { headers })
     if (!res.data.msg) {
       switch (likedAlert.value) {
+        case 'default':
         case 'he_unlike':
         case 'you_unlike':
           alert.value = { state: true, color: 'green', text: `Your friendship request has been sent to ${user.value.first_name} ${user.value.last_name} successfully` }
@@ -344,10 +336,8 @@ const matchFunction = async () => {
           alert.value = { state: true, color: 'red', text: `You just removed ${user.value.first_name} ${user.value.last_name} from your friend list` }
           break;
       }
-      
       socket.emit("match", data)
     }
-    
   } catch (error) {
     console.error('Une erreur s\'est produite :', error)
   }
@@ -393,12 +383,21 @@ const reportUser = async () => {
   }
 }
 
+
+
+
+
+
+
+
+
+
 const goToChat = async () => {
   console.log('go to chat')
   if (!userCanChat.value)
     alert.value = { state: true, color: 'red', text: `You will need to add ${user.value.first_name} ${user.value.last_name} to your friends list to be able to chat with him`}
   const convo = store.state.convos.find((cur) => cur.user_id === route.params.id)
-  console.log('convo',convo)
+  console.log('convo', convo)
   if (convo) {
     syncConvo({
       username: convo.username,
@@ -408,6 +407,14 @@ const goToChat = async () => {
     router.push("/chat")
   }
 }
+
+
+
+
+
+
+
+
 
 const fetchUser = async (id) => {
   if (id && loading.value) {

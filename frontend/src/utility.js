@@ -96,13 +96,11 @@ const getConnectedUsers = async () => {
   }
 }
 
-import dislike from '@/assets/match/dislike.png'
 import match from '@/assets/match/match-ok.png'
 import confirm from '@/assets/match/match-to-confirm.png'
 import receive from '@/assets/match/receive-match.png'
+import dislike from '@/assets/match/dislike.png'
 import defaultIcon from '@/assets/match/heart-default.png'
-
-
 
 export default {
   getDate,
@@ -297,9 +295,11 @@ export default {
       case 'you_unlike':
       case 'he_unlike':
         return false
+      case null:
+      default:
+        return 'default'
     }
   },
-
 
   getLikeIcon(liked) {
     switch (liked) {
@@ -313,11 +313,12 @@ export default {
       case 'he_unlike':
       case 'you_unlike':
         return `${dislike}`
+      case 'default':
+      case null:
       default:
         return `${defaultIcon}`
     }
   },
-
 
   filterBlocked: (state, type) => {
     return state[type].filter(cur => !isBlocked(state, cur[getId(type)]))
