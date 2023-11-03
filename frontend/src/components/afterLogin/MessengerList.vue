@@ -107,9 +107,17 @@ function updateConnectedUsers() {
 }
 
 onMounted(async () => {
+  updateTimer.value = setInterval(updateConnectedUsers, 1000)
   updateConnectedUsers()
-  updateTimer.value = setInterval(updateConnectedUsers, 2000)
+  sortedConvos.value.forEach(convo => {
+    if (convo.id_conversation === store.state.selectedConvo.id_conversation) {
+      selectedConvo.value = convo
+    }
+  })
+  
 })
+
+
 
 onBeforeUnmount(() => {
   clearInterval(updateTimer.value)

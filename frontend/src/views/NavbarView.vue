@@ -362,8 +362,8 @@ export default {
         convos.value = store.getters.convos
         notif.value = store.getters.notif
         notifs.value = notif.value.sort((a, b) => { if (a.is_read !== b.is_read) 
-                          { return a.is_read - b.is_read }
-                        return new Date(b.date) - new Date(a.date)}).slice(0, 5)
+            { return a.is_read - b.is_read }
+            return new Date(b.date) - new Date(a.date)}).slice(0, 5)
         newMessage.value = await getNewMsg()
         menuConvos.value = sortAndFilterMessages(newMessage.value)
         newMsgNum.value = newMessage.value.filter(cur => !cur.is_read).length
@@ -372,7 +372,7 @@ export default {
       }
     }
 
-    const dataUpdate = setInterval(updateNotifAndMsg, 2000)
+    const dataUpdate = setInterval(updateNotifAndMsg, 1000)
 
     onUnmounted(() => {
       clearInterval(dataUpdate)

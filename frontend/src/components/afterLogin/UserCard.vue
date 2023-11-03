@@ -13,6 +13,7 @@
       </div>
 
       <q-avatar class="justify-center" size="150px">
+        <img class="icon-avatar " square :src="likeIcon">
         <img :src="profileImage(user.name)"/>
       </q-avatar>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
@@ -25,10 +26,6 @@
         </span>
       </span>
 
-      <!-- <div class="note">
-        <p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
-          <q-rating icon="mdi-heart" :color="user.gender === 'male' ? 'blue' : 'pink'" readonly dense size="2em" :modelValue="user.rating" half-increments class="rating"/>
-      </div> -->
       <div class="note">
         <p class="caption text-capitalize rating_value">{{ user.rating ? user.rating.toFixed(1) : 'N/A' }}</p>
         <q-rating
@@ -65,11 +62,14 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 import utility from '@/utility'
+import axios from 'axios'
+const getLikeIcon = utility.getLikeIcon
 
 const location = computed(() => store.getters.location)
 const connectedUsers = computed(() => store.state.connectedUsers)
 const updateTimer = ref(null)
 const store = useStore()
+let likeIcon = ref('')
 
 const props = defineProps({
   user: {
@@ -77,6 +77,33 @@ const props = defineProps({
     default: () => ({})
   }
 })
+
+const getHistory = async () => {
+  try {
+    const selectedUserId = props.user.user_id;
+    const token = store.getters.user.token || localStorage.getItem('token');
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`;
+    const headers = { 'x-auth-token': token };
+    const typesToFilter = ['he_like', 'you_like', 'he_like_back', 'you_like_back', 'he_unlike', 'you_unlike'];
+    const result = await axios.get(url, { headers });
+
+    const latestInteraction = result.data
+      .filter((item) => typesToFilter.includes(item.type))
+      .filter((item) => item.his_id === selectedUserId)
+      .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))[0];
+
+    likeIcon.value = latestInteraction ? getLikeIcon(latestInteraction.type) : getLikeIcon('default');
+  } catch (err) {
+    console.error('Error in frontend/ProfileHistory.vue:', err);
+  }
+  updateTimer.value = setInterval(updateConnectedUsers, 500)
+}
+
+onBeforeUnmount(() => {
+  clearInterval(updateTimer.value)
+})
+
+
 
 const age = computed(() => {
   return new Date().getFullYear() - new Date(props.user.birthdate).getFullYear()
@@ -127,8 +154,9 @@ function updateConnectedUsers() {
 }
 
 onMounted(async () => {
+  getHistory()
   updateConnectedUsers()
-  updateTimer.value = setInterval(updateConnectedUsers, 2000)
+  updateTimer.value = setInterval(updateConnectedUsers, 1000)
 });
 
 onBeforeUnmount(() => {
@@ -138,6 +166,15 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
+.icon-avatar {
+  width: 35px !important;
+  height: 35px !important;
+  position: absolute;
+  size: 100%; 
+  top: 5px; 
+  left: 80%; 
+  transform: translateX(-50%);
+}
 .icon-male {
   background-image: url('@/assets/userCard/male.png');
   background-size: 90%;

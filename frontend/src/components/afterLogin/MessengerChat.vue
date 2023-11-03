@@ -154,6 +154,9 @@ watch(() => seenConvo, () => {
 })
 
 onMounted(() => {
+  fetchNewMessages()
+  getChat()
+  // location.reload()
   const top = document.querySelector('.top_chat')
   top.addEventListener('scroll', async (e) => {
     if (!limit.value && top.scrollTop <= 10) {
@@ -186,7 +189,7 @@ const fetchNewMessages = async () => {
   }
 }
 
-const messagePollingInterval = setInterval(fetchNewMessages, 1000)
+const messagePollingInterval = setInterval(fetchNewMessages, 500)
 
 onBeforeUnmount(() => {
   clearInterval(messagePollingInterval)

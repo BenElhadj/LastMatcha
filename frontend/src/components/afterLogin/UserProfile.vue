@@ -44,7 +44,6 @@
               <q-separator style="margin-left: 50px;" ></q-separator>
               
               <q-btn flat @click="matchFunction" >
-
                 <img class="icon-size" :src="likeIcon">
               </q-btn>
 
@@ -383,38 +382,28 @@ const reportUser = async () => {
   }
 }
 
-
-
-
-
-
-
-
-
+ const syncConvo = async (convo) => {
+      try {
+        store.dispatch('syncConvo', convo[0])
+        router.push('/chat').catch(err => {
+          console.error('err syncConvo router.push in frontend/NavbarView.view ===> ', err)
+        })
+      } catch (err) {
+        console.error('err syncConvo in frontend/NavbarView.view ===> ', err)
+      }
+    }
 
 const goToChat = async () => {
-  console.log('go to chat')
-  if (!userCanChat.value)
-    alert.value = { state: true, color: 'red', text: `You will need to add ${user.value.first_name} ${user.value.last_name} to your friends list to be able to chat with him`}
-  const convo = store.state.convos.find((cur) => cur.user_id === route.params.id)
-  console.log('convo', convo)
-  if (convo) {
-    syncConvo({
-      username: convo.username,
-      id_conversation: convo.id_conversation,
-      profile_image: convo.profile_image,
-    })
-    router.push("/chat")
+  if (!userCanChat.value) 
+   return  alert.value = { state: true, color: 'red', text: `You will need to add ${user.value.first_name} ${user.value.last_name} to your friends list to be able to chat with him`}
+
+  const conversation = store.getters.convos.filter(obj => obj.user_id == route.params.id);
+
+  if (conversation) {
+
+    syncConvo(conversation)
   }
 }
-
-
-
-
-
-
-
-
 
 const fetchUser = async (id) => {
   if (id && loading.value) {

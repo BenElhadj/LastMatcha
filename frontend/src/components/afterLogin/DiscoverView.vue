@@ -114,8 +114,6 @@ const connectedUsers = computed(() => store.state.connectedUsers)
 
 const store = useStore()
 const { user, allTags, status, online, blocked, blockedBy } = store.getters
-console.log('-------------- blocked', blocked)
-console.log('++++++++++++ blockedBy', blockedBy)
 const userLocation = store.state.location
 const model = ref(null)
 const max = ref(0)
@@ -316,7 +314,6 @@ const isComplete = computed(() => {
   return user.gender && user.gender.length && user.looking && user.biography && user.tags && user.images.length && user.city && user.country && user.postal_code
 })
 
-const hystory = ref([])
 async function created() {
   const typesToFilter = ['he_block', 'you_block']
   const token = localStorage.getItem('token')
@@ -331,21 +328,10 @@ async function created() {
       ...cur,
       rating: Number(cur.rating)
     }))
-  console.log('users.value ===> ', users.value.length)
   if (!resHistory.data.msg) {
     const blockedHistory = resHistory.data.filter((item) => typesToFilter.includes(item.type))
-    
-    
-    // const blockedUserIds = blockedHistory.map(item => item.his_id)
-    // console.log('blockedUserIds ===> ', blockedUserIds)
-users.value = users.value.filter(user => !blockedHistory.some(historyItem => historyItem.his_id === user.id))
-    // users.value = users.value.filter(user => !blockedHistory.his_id.includes(user.id))
-// users.value = filteredUsers
-    
-    
-    console.log('users.value ===> ', users.value.length)
-    console.log('users.value ===> ', users.value[0])
-
+    const blockedUserIds = blockedHistory.map(item => item.his_id)
+    users.value = users.value.filter(user => !blockedHistory.some(historyItem => historyItem.his_id === user.user_id))
   }
     await calculateMaxDistance()
     whoIsUp()
@@ -367,7 +353,6 @@ onMounted(async () => {
     onlineUsers.value = users
     console.log('onlineUsers ===> ', onlineUsers.value)
     })
-    // getHistory()
     if (!res.data.msg && maxDis.value > 0) {
       const user = res.data
       if (user.birthdate) {
