@@ -26,8 +26,6 @@ const getInChat = async (req, res) => {
 		return res.json({ msg: 'Not logged in' })
 	try {
 		let result = await chatModel.getInChat(req.user.id)
-		// console.log(result)
-		
 		res.json(result)
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })

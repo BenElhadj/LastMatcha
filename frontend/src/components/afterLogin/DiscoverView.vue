@@ -17,7 +17,6 @@
                     solo
                     text
                     placeholder="Recherche"
-                    @blur="displaySearchText()"
                     @keyup="displaySearchText()"
                   >
                     <template v-slot:append>
@@ -82,13 +81,13 @@
     <q-page-container v-else class="my-3">
       <div class="row wrap justify-center">
         <h2 class="text-xs-center pt-4 pb-3 mb-4 grey--text mx-auto">
-          Complétez votre profil pour avoir l'opportunité de découvrir des utilisateurs qui vous correspondent !
+          Complete your profile to have the opportunity to discover users who match you !
         </h2>
         <div class="col-6 col-md-4">
           <q-btn block outlined large to="/settings" color="primary">
             <q-icon left name="mdi-chevron-left"></q-icon>
 
-            <span>Aller au</span>
+            <span>Go to</span>
           </q-btn>
         </div>
       </div>
@@ -106,12 +105,15 @@ import countries from '@/nats.json'
 import utility from '@/utility'
 import { matMenu } from '@quasar/extras/material-icons'
 import { mdiAbTesting } from '@quasar/extras/mdi-v5'
+import { useRouter } from 'vue-router';
+
 
 import io from 'socket.io-client'
 const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
 
 const connectedUsers = computed(() => store.state.connectedUsers)
 
+const router = useRouter();
 const store = useStore()
 const { user, allTags, status, online, blocked, blockedBy } = store.getters
 const userLocation = store.state.location
@@ -171,68 +173,77 @@ const filtered = computed(() => {
     .filter(filters.rating)
     .filter(filters.gender)
     .filter(filters.location)
-    .filter(filters.age)
+   .filter(filters.age)
     .filter(filters.distance)
     .filter(filters.interest)
 })
 
 const displaySearchText = () => {
-  const searchTerm = recherche.value.toLowerCase()
-  const allUsers = users.value
+  const searchTerm = recherche.value.toLowerCase();
+  const allUsers = users.value;
 
   if (!searchTerm) {
     created()
-    return
+    return; 
   }
 
   users.value = allUsers.filter((user) => {
-    const usernameMatch = user.username.toLowerCase().includes(searchTerm)
-    const firstNameMatch = user.first_name.toLowerCase().includes(searchTerm)
-    const lastNameMatch = user.last_name.toLowerCase().includes(searchTerm)
+    const usernameMatch = user.username.toLowerCase().includes(searchTerm);
+    const firstNameMatch = user.first_name.toLowerCase().includes(searchTerm);
+    const lastNameMatch = user.last_name.toLowerCase().includes(searchTerm);
     
-    return usernameMatch || firstNameMatch || lastNameMatch
+    return usernameMatch || firstNameMatch || lastNameMatch;
   });
-}
-  
-const search = () => {
-    displaySearchText()
-}
+};
+
+  const search = () => {
+     displaySearchText();
+  };
+
+const ageCalc = (birthdate) => {
+  return new Date() - new Date(birthdate);
+};
+
+
+const commonTags = (user, tags) => {
+  if (!tags || !tags.length) return 0;
+  const userTags = user.tags.split(',');
+  return tags.split(',').filter((val) => userTags.includes(val)).length;
+};
 
 const sorted = computed(() => {
-  const onlineUsers = [...filtered.value].filter((user) => user.isConnected)
-  const disconnectedUsers = [...filtered.value].filter((user) => !user.isConnected)
+  const onlineUsers = filtered.value.filter((user) => user.isConnected);
+  const disconnectedUsers = filtered.value.filter((user) => !user.isConnected);
 
-  let sortFunc
-    
   if (!sort.value || sort.value === 'distance') {
-    if (sortDir.value < 0) {
-      onlineUsers.reverse()
-      disconnectedUsers.reverse()
-    }
-    return [...onlineUsers, ...disconnectedUsers]
+    const sortedOnlineUsers = onlineUsers.slice().reverse();
+    const sortedDisconnectedUsers = disconnectedUsers.slice().reverse();
+    return [...sortedOnlineUsers, ...sortedDisconnectedUsers];
   }
-  const ageCalc = (bd) => new Date() - new Date(bd)
-  const commonTags = a => {
-    if (!a || !a.length) return 0
-    const tags = a.split(',')
-    return user.tags.split(',').filter(val => tags.indexOf(val) !== -1).length
-  }
+
+  let sortFunc;
 
   switch (sort.value) {
     case 'age':
-      sortFunc = (a, b) => sortDir.value * (ageCalc(a.birthdate) - ageCalc(b.birthdate))
-      break
+      sortFunc = (a, b) => sortDir.value * (ageCalc(a.birthdate) - ageCalc(b.birthdate));
+      break;
     case 'rating':
-      sortFunc = (a, b) => sortDir.value * (b.rating - a.rating)
-      break
+      sortFunc = (a, b) => sortDir.value * (b.rating - a.rating);
+      break;
     case 'interests':
-      sortFunc = (a, b) => sortDir.value * (commonTags(b.tags) - commonTags(a.tags))
-      break
+      sortFunc = (a, b) => sortDir.value * (commonTags(b, a.tags) - commonTags(a, b.tags));
+      break;
   }
-  onlineUsers.sort(sortFunc)
-  disconnectedUsers.sort(sortFunc)
-  return [...onlineUsers, ...disconnectedUsers]
-})
+
+  if (onlineUsers.length > 0) {
+    onlineUsers.sort(sortFunc);
+  }
+  if (disconnectedUsers.length > 0) {
+    disconnectedUsers.sort(sortFunc);
+  }
+
+  return [...onlineUsers, ...disconnectedUsers];
+});
 
 const calculateMaxDistance = () => {
   if (users.value.length) {
@@ -242,14 +253,8 @@ const calculateMaxDistance = () => {
       lng: Number(lng)
     }
     maxDis.value = Math.ceil(utility.calculateDistance(userLocation, to))
-  } else {
-    setTimeout(calculateMaxDistance, 1000)
   }
 }
-
-watch(users, () => {
-  calculateMaxDistance()
-}, { immediate: true })
 
 watch(user, (newUser, oldUser) => {
   if (newUser.looking && newUser.looking === 'both') {
@@ -310,35 +315,38 @@ function changeSort() {
   sortDir.value = -sortDir.value
 }
 
+console.log('users',users.value)
 const isComplete = computed(() => {
-  return user.gender && user.gender.length && user.looking && user.biography && user.tags && user.images.length && user.city && user.country && user.postal_code
+  return user.gender && user.looking && user.biography && user.tags && user.images.length && user.city && user.country && user.postal_code
 })
 
 async function created() {
-  const typesToFilter = ['he_block', 'you_block']
   const token = localStorage.getItem('token')
-  const urlHistory = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`
   const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show`
   const headers = { 'x-auth-token': token }
   const res = await axios.post(url, { filter: true }, { headers })
-  const resHistory = await axios.get(urlHistory, { headers })
 
+  const typesToFilter = ['he_block', 'you_block']
+  const urlHistory = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`
+  const resHistory = await axios.get(urlHistory, { headers })
+  
   if (!res.data.msg) {
-    users.value = res.data.slice(0, 1000).map(cur => ({
+      users.value = res.data.slice(0, 1000).map(cur => ({
       ...cur,
       rating: Number(cur.rating)
     }))
+
   if (!resHistory.data.msg) {
     const blockedHistory = resHistory.data.filter((item) => typesToFilter.includes(item.type))
     const blockedUserIds = blockedHistory.map(item => item.his_id)
     users.value = users.value.filter(user => !blockedHistory.some(historyItem => historyItem.his_id === user.user_id))
   }
+
     await calculateMaxDistance()
     whoIsUp()
     distance.value.max = maxDis.value
     loaded.value = true
   } else {
-    console.log('res.data.msg ===> ', res.data.msg)
     router.push('/login')
   }
 }
@@ -351,7 +359,6 @@ onMounted(async () => {
     const res = await axios.get(url, { headers })
     socket.on('onlineUsers', (users) => {
     onlineUsers.value = users
-    console.log('onlineUsers ===> ', onlineUsers.value)
     })
     if (!res.data.msg && maxDis.value > 0) {
       const user = res.data
@@ -369,6 +376,16 @@ onMounted(async () => {
 })
 
 onMounted(created)
+
+function refreshMethods() {
+  calculateMaxDistance()
+}
+
+const refreshInterval = setInterval(refreshMethods, 2000)
+
+onBeforeUnmount(() => {
+  clearInterval(refreshInterval)
+})
 
 </script>
 

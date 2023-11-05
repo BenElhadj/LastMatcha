@@ -16,7 +16,23 @@
         };
         xhr.send();
       });
-    }    
+    }
+    async function readAddressesFile() {
+      try {
+        const response = await fetch('adresses.txt');
+        if (response.ok) {
+          const text = await response.text();
+          const addresses = text;
+          return addresses;
+        } else {
+          console.error('Échec de la récupération du fichier adresses.txt');
+          return [];
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération du fichier adresses.txt :', error);
+        return [];
+      }
+    }
   </script>
 
   <head>
@@ -78,19 +94,13 @@
     <form id="userCreationForm" style="display: flex; flex-direction: column; align-items: flex-start; align-items: flex-start;">
 
       <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-        <label for="userCount" style="margin-right: 77px;">Nombre d'utilisateurs à créer (max 100) :</label>
-        <input type="number" id="userCount" name="userCount" min="1" max="100" value="100" style="width: 185px;" required>
+        <label for="userCount" style="margin-right: 77px;">Nombre d'utilisateurs à créer (max 500) :</label>
+        <input type="number" id="userCount" name="userCount" min="1" max="500" value="500" style="width: 185px;" required>
       </div>
 
       <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
         <label for="imageCount" style="margin-right: 25px;">Nombre d'images à créer par utilisateur (max 5) :</label>
         <input type="number" id="imageCount" name="imageCount" min="1" max="5" value="5" style="width: 185px;" required>
-      </div>
-
-      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-        <label for="malePercentage" style="margin-right: 180px;">Pourcentage d'hommes :</label>
-        <input type="range" id="malePercentage" name="malePercentage" min="0" max="100" value="50" style="width: 195px;">
-        <span id="malePercentageLabel">50%</span>
       </div>
 
       <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
@@ -110,33 +120,52 @@
     <p id="status"></p>
 
     <script>
-        
-      document.getElementById('malePercentage').addEventListener('input', function(event) {
-        document.getElementById('malePercentageLabel').innerText = event.target.value + '%';
-      });
-  
+
       document.getElementById('userCreationForm').addEventListener('submit', async function(event) {
         event.preventDefault();
-      
+
         const salt = dcodeIO.bcrypt.genSaltSync(10);
+
+        const addressesData = await readAddressesFile();
+        const addressesLines = addressesData.split('\n');
+
         const userCount = document.getElementById('userCount').value;
 
         const imageCount = document.getElementById('imageCount').value;
         const sqlFileName = document.getElementById('countrySelect').value + 'BDD';
-        const malePercentage = document.getElementById('malePercentage').value / 100;
         const selectedCountry = document.getElementById('countrySelect').value;
         const countryName = document.getElementById('countrySelect').options[document.getElementById('countrySelect').selectedIndex].getAttribute('countryName');
 
-        
         function cleanString(input) {
           var output = input.replace(/[^\w\s]/gi, '');
           return output;
         }
 
-        const defaultTags = ['ecole-42-Paris', 'Validate-at-125', 'RNCP-5', 'RNCP-7', 'Development', 'Front-end', 'Back-end', 'Sports', 'Cinema', 'Music'];
+        const defaultTags = ['Ecole-42-Paris', 'Validate-at-125', 'RNCP-5', 'RNCP-7', 'Development', 'Front-end', 'Back-end', 'Sports', 'Cinema', 'Music', 'Vegan', 'Geek', 'Piercing', 'Tattoos'];
+        const defaultBiography = ['je suis timide', 'j aime la techno', 'Perdu mais aimant', 'J aime le tennis de table', 'Tendre, je cherche une relation serieuse', 'Ici pour vous faire rever',
+        'Je cherche mon ame soeur', 'je suis bavard', 'j adore la musique pop', 'je suis un peu fou', 'je suis un peu folle', 'je suis un peu foufou', 'je suis un peu folle dingue', 'je suis un peu foufou dingue',
+        'l amour est mon essentiel', 'j aime la vie', 'rugbymen et le physique qui va avec', 'je suis un rockeur', 'fan de johnny hallyday', 'j aime les danses de salon', 'je suis loyale', 'je suis fidele','je suis honnete',
+        'je suis sincere', 'je suis franc', 'fidele en amour et en amitie', 'je suis un peu jaloux', 'je suis un peu jalouse', 'je suis un peu jaloux jalouse possessif possessive', 'ici pour chercher l amour comme vous',
+        'je chercher un plaisir temporaire', 'je suis un peu coquin', 'je suis un peu coquine', 'parlez moi je reponds a tout le monde', 'je vous attends avec impatience', 'toujours au taquet', 'j aime la nature et les femmes',
+        'j aime la nature et les hommes', 'ma vie c est toi', 'sea sex and sun', 'je suis un peu timide mais je me soigne', 'je cherche le grand amour', 'je cherche l amour', 'je cherche l amitie', 'je cherche des amis',
+        'je cherche des amies', 'je cherche des amis et des amies', 'je cherche des amis et des amies pour sortir et plus si affinites', 'rappeur depuis dix ans, je mets l ambiance', 'je suis fetard', 'je suis fetarde',
+        'je suis calme et casanier', 'je suis calme et casaniere', 'je suis calme et casanier casaniere mais j aime sortir de temps en temps', 'geek mais sociable et j aime sortir','perfectionnsite mais facile a vivre',
+        'idealiste en depit de ce monde', 'je suis polygame et je cherche des femmes qui acceptent cela', 'je sors d une relation douloureuse', 'je prefere les femmes grandes', 'je prefere les femmes petites', 'j aime les hommes muscles',
+        'cherche une femme pleine de vie', 'cherche un homme plein de vie', 'je suis naturel', 'je suis naturel naturelle et je cherche une personne naturelle', 'je suis naturel naturelle et je cherche une personne naturelle et simple et qui aime la vie',];
 
         function getRandomTags() {
           const pickaxe = [...defaultTags];
+          const randomTags = [];
+          for (let i = 0; i < 4; i++) {
+            const randomIndex = Math.floor(Math.random() * pickaxe.length);
+            randomTags.push(pickaxe[randomIndex]);
+            pickaxe.splice(randomIndex, 1);
+          }
+          return randomTags.join(', ');
+        }
+
+        function getRandomBiography() {
+          const pickaxe = [...defaultBiography];
           const randomTags = [];
           for (let i = 0; i < 3; i++) {
             const randomIndex = Math.floor(Math.random() * pickaxe.length);
@@ -146,32 +175,21 @@
           return randomTags.join(', ');
         }
 
-        function generateAddressForCountry(countryName) {
-          faker.locale = countryName; 
-      
-          const address = faker.address.streetAddress();
-          const city = faker.address.city();
-          const postal_code = faker.address.zipCode();
-          const lat = faker.address.latitude();
-          const lng = faker.address.longitude();
-      
-          return {
-              address,
-              city,
-              postal_code,
-              lat,
-              lng,
-          };
+
+
+        function generatePhoneNumber() {
+          const firstDigit = '0';
+          const secondDigit = (Math.floor(Math.random() * 9) + 1).toString();
+          const randomDigits = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('');
+          return firstDigit + secondDigit + randomDigits;
         }
-  
+
         let sql = 'INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `email`, `password`, `created_at`, `gender`, `looking`, `birthdate`, `biography`, `tags`, `address`, `city`, `country`, `postal_code`, `phone`, `status`, `lat`, `lng`, `vkey`, `rkey`, `verified`, `google_id`, `reports`) VALUES\n';
   
         const uniqueUsernames = new Set();
         try {
           let id = await getLastUserId() + 1;
           for (let i = 0; i < userCount; i++) {
-
-            const generatedAddress = generateAddressForCountry(countryName);
 
             let firstName, lastName, username;
             do {
@@ -193,21 +211,16 @@
             const password = dcodeIO.bcrypt.hashSync('Motdepasse@123', salt);
 
             const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
-            const gender = (Math.random() < malePercentage) ? 'male' : 'female';
+            const gender = faker.random.arrayElement(['male', 'female', 'both']);
             const looking = faker.random.arrayElement(['male', 'female', 'both']);
             const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
-            const biography = "I am a fake user";
+            const biography = getRandomBiography();
             const tags = getRandomTags();
 
-            const country = selectedCountry;
-            const address = cleanString(generatedAddress.address);
-            const city = cleanString(generatedAddress.city);
-            const postal_code = cleanString(generatedAddress.postal_code);
-            const lat = generatedAddress.lat;
-            const lng = generatedAddress.lng;
-            
+            const [address, city, country, postal_code, lat, lng] = addressesLines[i % addressesLines.length].split(', ');
 
-            const phone = cleanString(faker.phone.phoneNumber());
+            const phone = generatePhoneNumber();
+
             const status = createdAt;
             const vkey = faker.random.alphaNumeric(20);
             const rkey = null;
@@ -230,11 +243,14 @@
           let userId = user_id + 1;
           for (let i = 0; i < userCount; i++) {
             for (let j = 0; j < imageCount; j++) {
-              const url = `https://picsum.photos/200/300?random=${userId * imageCount + j + user_id + 1}`;
+              const width = (j === 0) ? 1584 : 400;
+              const height = (j === 0) ? 396 : 400;
+              const imageId = userId * imageCount + j + user_id + 1;
+              const url = `https://source.unsplash.com/${width}x${height}/?user-${imageId}`;
               const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
               const cover = (j === 0) ? '1' : '0';
-              const profile = (j === 1) ? '1' : '0'; 
-              
+              const profile = (j === 1) ? '1' : '0';
+        
               sql += `('${userId}', '${url}','${profile}','${cover}', '${createdAt}'),\n`;
             }
             userId++;

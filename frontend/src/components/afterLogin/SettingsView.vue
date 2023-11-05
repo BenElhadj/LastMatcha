@@ -149,6 +149,7 @@ const uploadImage = async (type, event) => {
         };
         const result = await axios.post(urlProfile.value, imageObject, { headers });
         console.log('Result:', result.data);
+        profileImage.value = result.data.name;
       };
 
       reader.readAsDataURL(selectedFile);

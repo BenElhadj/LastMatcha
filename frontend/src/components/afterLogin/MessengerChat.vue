@@ -189,10 +189,15 @@ const fetchNewMessages = async () => {
   }
 }
 
-const messagePollingInterval = setInterval(fetchNewMessages, 500)
+
+function refreshMethods() {
+  fetchNewMessages()
+}
+
+const refreshInterval = setInterval(refreshMethods, 1000)
 
 onBeforeUnmount(() => {
-  clearInterval(messagePollingInterval)
+  clearInterval(refreshInterval)
 })
 
 </script>

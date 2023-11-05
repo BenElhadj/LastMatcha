@@ -189,6 +189,10 @@ const getMatches = async (req, res) => {
 	}
 }
 
+// const connectedUsers = {
+// 	return  (connectedUsers)
+// }
+
 module.exports = {
 	showUsers,
 	showUserById,

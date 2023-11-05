@@ -361,7 +361,7 @@ const block = async () => {
           clearInterval(interval)
           resolve()
         }
-      }, 500)
+      }, 1000)
     })
     router.push("/")
   } else {
@@ -474,15 +474,21 @@ onMounted(() => {
   
   if (user.value && route.params.id) {
     fetchUser(route.params.id)
-    updateConnectedUsers()
   }
-  updateTimer.value = setInterval(updateConnectedUsers, 500)
 })
+
+
+
+function refreshMethods() {
+  updateConnectedUsers()
+
+}
+
+const refreshInterval = setInterval(refreshMethods, 1000)
 
 onBeforeUnmount(() => {
-  clearInterval(updateTimer.value)
+  clearInterval(refreshInterval)
 })
-
 </script>
 
 <style scoped>

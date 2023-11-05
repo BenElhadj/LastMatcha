@@ -32,7 +32,7 @@
           </div>
         </q-form>
       </div>
-      <AlertView :alert="alert"></AlertView>
+      <AlertView :alert="alert" :redirect="true"></AlertView>
     </q-page-container>
   </q-layout>
 </template>
@@ -43,7 +43,9 @@ import AlertView from '@/views/AlertView.vue'
 import utility from '@/utility.js'
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
-
+import { useRouter } from 'vue-router'
+ 
+const router = useRouter()
 const firstname = ref('')
 const lastname = ref('')
 const username = ref('')
@@ -101,15 +103,21 @@ const registerUser = async () => {
         passwordConfirm: passwordConfirm.value
       };
       const res = await axios.post(url, data)
-      if (res.data.ok) {
-        alert.value.state = true;
-        alert.value.color = 'green';
-        alert.value.text = 'please check your email to finalize your registration'
-      } else {
-        alert.value.state = true;
-        alert.value.color = 'red';
-        alert.value.text = res.data.msg;
-      }
+
+  if (res.data.ok) {
+    alert.value = { state: true, color: 'green', text: 'Please check your email to finalize your registration' }; 
+    await new Promise(resolve => {
+      const interval = setInterval(() => {
+        if (!alert.value.state) {
+          clearInterval(interval)
+          resolve()
+        }
+      }, 1000)
+    })
+    router.push('/login')
+  } else {
+    alert.value = { state: true, color: 'red', text: res.data.msg };
+  }
     } catch (err) {
       console.error('err registerUser in frontend/RegisterView.vue ===> ', err)
     }

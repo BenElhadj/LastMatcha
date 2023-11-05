@@ -107,21 +107,13 @@ function updateConnectedUsers() {
 }
 
 onMounted(async () => {
-  updateTimer.value = setInterval(updateConnectedUsers, 1000)
-  updateConnectedUsers()
   sortedConvos.value.forEach(convo => {
     if (convo.id_conversation === store.state.selectedConvo.id_conversation) {
       selectedConvo.value = convo
     }
   })
-  
 })
 
-
-
-onBeforeUnmount(() => {
-  clearInterval(updateTimer.value)
-})
 
 watch([online, convos], updateConnectedUsers,{ immediate: true })
 
@@ -140,6 +132,22 @@ const sortedConvos = computed(() => {
     .map(user_id => convos.value.find(convo => convo.user_id === user_id))
 
   return uniqueConvos.sort(sortByLastSeen)
+})
+
+
+function refreshMethods() {
+  updateConnectedUsers()
+  sortedConvos.value.forEach(convo => {
+    if (convo.id_conversation === store.state.selectedConvo.id_conversation) {
+      selectedConvo.value = convo
+    }
+  })
+}
+
+const refreshInterval = setInterval(refreshMethods, 1000)
+
+onBeforeUnmount(() => {
+  clearInterval(refreshInterval)
 })
 
 </script>

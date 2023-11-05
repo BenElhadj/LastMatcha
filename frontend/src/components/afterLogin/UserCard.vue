@@ -63,6 +63,9 @@ import { useStore } from 'vuex'
 import moment from 'moment'
 import utility from '@/utility'
 import axios from 'axios'
+import io from 'socket.io-client'
+const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
+
 const getLikeIcon = utility.getLikeIcon
 
 const location = computed(() => store.getters.location)
@@ -77,33 +80,6 @@ const props = defineProps({
     default: () => ({})
   }
 })
-
-const getHistory = async () => {
-  try {
-    const selectedUserId = props.user.user_id;
-    const token = store.getters.user.token || localStorage.getItem('token');
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`;
-    const headers = { 'x-auth-token': token };
-    const typesToFilter = ['he_like', 'you_like', 'he_like_back', 'you_like_back', 'he_unlike', 'you_unlike'];
-    const result = await axios.get(url, { headers });
-
-    const latestInteraction = result.data
-      .filter((item) => typesToFilter.includes(item.type))
-      .filter((item) => item.his_id === selectedUserId)
-      .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))[0];
-
-    likeIcon.value = latestInteraction ? getLikeIcon(latestInteraction.type) : getLikeIcon('default');
-  } catch (err) {
-    console.error('Error in frontend/ProfileHistory.vue:', err);
-  }
-  updateTimer.value = setInterval(updateConnectedUsers, 500)
-}
-
-onBeforeUnmount(() => {
-  clearInterval(updateTimer.value)
-})
-
-
 
 const age = computed(() => {
   return new Date().getFullYear() - new Date(props.user.birthdate).getFullYear()
@@ -134,6 +110,26 @@ const profileImage = (image) => {
   return utility.getFullPath(image)
 }
 
+const getHistory = async () => {
+  try {
+    const selectedUserId = props.user.user_id;
+    const token = store.getters.user.token || localStorage.getItem('token');
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`;
+    const headers = { 'x-auth-token': token };
+    const typesToFilter = ['he_like', 'you_like', 'he_like_back', 'you_like_back', 'he_unlike', 'you_unlike'];
+    const result = await axios.get(url, { headers });
+
+    const latestInteraction = result.data
+      .filter((item) => typesToFilter.includes(item.type))
+      .filter((item) => item.his_id === selectedUserId)
+      .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))[0];
+
+    likeIcon.value = latestInteraction ? getLikeIcon(latestInteraction.type) : getLikeIcon('default');
+  } catch (err) {
+    console.error('Error in frontend/ProfileHistory.vue:', err);
+  }
+}
+
 function updateConnectedUsers() {
   utility.getConnectedUsers()
     .then(data => {
@@ -153,16 +149,21 @@ function updateConnectedUsers() {
     });
 }
 
-onMounted(async () => {
-  getHistory()
+onMounted(() => {
   updateConnectedUsers()
-  updateTimer.value = setInterval(updateConnectedUsers, 1000)
-});
+  getHistory()
+})
+
+function refreshMethods() {
+  updateConnectedUsers()
+  getHistory()
+}
+
+const refreshInterval = setInterval(refreshMethods, 5000)
 
 onBeforeUnmount(() => {
-  clearInterval(updateTimer.value)
-});
-
+  clearInterval(refreshInterval)
+})
 </script>
 
 <style>

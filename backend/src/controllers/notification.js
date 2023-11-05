@@ -52,7 +52,6 @@ const updateNotif = async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
 	try {
-		// console.log('id: ', req.user.id)
 		await notifModel.seenNotif(req.user.id)
 		res.json({ ok: true })
 	} catch (err) {

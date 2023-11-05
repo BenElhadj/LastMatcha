@@ -37,7 +37,7 @@
             <q-input v-model="user.last_name" :readonly="!isEditing" label="Last Name" class="tow-input"/>
           </div>
 
-          <q-input v-model="formatBirthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
+          <q-input v-model="user.birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
           <q-input v-model="user.phone"  :readonly="!isEditing" label="Phone Number" class="one-input"/>
           
           <div class="q-gutter-md row">
@@ -90,7 +90,7 @@ import moment from 'moment'
 
 const store = useStore()
 const isEditing = ref(false)
-const genders = ['male', 'female']
+const genders = ['male', 'female', 'both']
 const looking = ['male', 'female', 'both']
 const tagEsc = [13, ':', ',', ';']
 const tagsString = ref('')
@@ -105,6 +105,8 @@ const alert = ref({
   color: '',
   text: '',
 });
+
+
 
 const updateUserTags = (newTags) => {
   user.tags = newTags.join(', ');
@@ -123,12 +125,14 @@ const handleTagsInput = (event) => {
   }
 }
 
-const formatBirthdate = computed(() => {
-  if (user.birthdate) {
-    return moment(user.birthdate).format('YYYY-MM-DD')
-  }
-  return ''
-})
+console.log('user.birthdate ===> ', user.birthdate)
+
+// const formatBirthdate = computed(() => {
+//   if (user.birthdate) {
+//     return moment(user.birthdate).format('YYYY-MM-DD')
+//   }
+//   return ''
+// })
 
 const resetForm = () => {
   if (initialUser.value) {
@@ -142,14 +146,20 @@ const resetForm = () => {
 
 const updateUser = async () => {
   try {
+    user.birthdate = moment(user.birthdate).format('YYYY-MM-DD')
+
     const token = localStorage.getItem('token')
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
     const headers = { 'x-auth-token': token }
-    const res = await axios.post(url, user, { headers })
+ 
 
+
+    const res = await axios.post(url, user, { headers })
+    
     if (res && res.data && !res.data.msg) {
       isEditing.value = false
       store.dispatch('updateUser', user)
+
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
     } else {
       alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}

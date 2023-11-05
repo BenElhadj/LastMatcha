@@ -82,7 +82,7 @@ app.get('/allTags', (req, res) => {
     })
 })
 
-app.get('/api/', (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
+app.get('/', (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
 
 const io = socketIo(server, {
 	cors: {

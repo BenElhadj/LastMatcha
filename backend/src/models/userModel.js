@@ -145,6 +145,7 @@ const getUserByUsername = (username, callback) => {
 // Filling information for the 1st time 
 
 const updateProfile = (user, callback) => {
+	// console.log(Object.values(user))
 	let request = ` UPDATE users SET 
 		first_name = ?,
 		last_name = ?,
@@ -162,7 +163,7 @@ const updateProfile = (user, callback) => {
 		phone = ?
 		WHERE id = ?
 	`
-	db.query(request, Object.values(user), (error, results) => {
+		db.query(request, Object.values(user), (error, results) => {
 		if (error) throw error
 		callback(results)
 	})

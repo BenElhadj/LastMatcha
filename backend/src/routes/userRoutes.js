@@ -26,6 +26,7 @@ routes.post('/show', authCheck, browsing.showUsers)
 routes.get('/show/:id', authCheck, browsing.showUserById)
 
 routes.post('/report', authCheck, block.reportUser)
+// routes.get('/connectedUsers', authCheck, browsing.connectedUsers)
 routes.post('/block', authCheck, block.blockUser)
 routes.post('/unblock', authCheck, block.unblockUser)
 routes.get('/getblocked', authCheck, browsing.getBlocked)

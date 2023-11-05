@@ -13,5 +13,4 @@ app.use(Quasar)
 app.use(Vue3TagsInput)
 app.use(store)
 app.use(router)
-
 app.mount('#app')

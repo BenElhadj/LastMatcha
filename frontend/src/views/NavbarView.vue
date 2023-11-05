@@ -151,265 +151,258 @@
   </q-header>
 </template>
 
-<script>
+<script setup>
 import utility from '@/utility.js'
-import { computed, watch, ref, onMounted, onUnmounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onUnmounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import acceilImage from '@/assets/Navbar/acceil.png'
 import decouvrirImage from '@/assets/Navbar/decouvrir.png'
-import rechercheImage from '@/assets/Navbar/recherche.png'
 import chatImage from '@/assets/Navbar/chat.png'
 import notificationImage from '@/assets/Navbar/notification.png'
 import parametreImage from '@/assets/Navbar/parametre.png'
 
-export default {
-  name: 'NavbarView',
-  setup (_, { app }) {
-    const store = useStore()
-    const router = useRouter()
-    const timer = {}
-    const searchText = ref('')
-    const drawer = ref(false)
-    const image = computed(() => store.getters.profileImage)
-    const links = [
-      {
-        text: 'Accueil',
-        route: '/',
-        public: true,
-        image: acceilImage
-      },
-      {
-        text: 'Découvrir',
-        route: '/discover',
-        public: false,
-        image: decouvrirImage
-      },
-      
-      {
-        text: 'Chat',
-        route: '/chat',
-        public: false,
-        image: chatImage
-      },
-      {
-        text: 'Notifications',
-        route: '/notifications',
-        public: false,
-        image: notificationImage
-      },
-      {
-        text: 'Paramètres',
-        route: '/settings',
-        public: false,
-        image: parametreImage
+const store = useStore()
+const router = useRouter()
+const searchText = ref('')
+const drawer = ref(false)
+const image = computed(() => store.getters.profileImage)
+const links = [
+  {
+    text: 'Accueil',
+    route: '/',
+    public: true,
+    image: acceilImage
+  },
+  {
+    text: 'Découvrir',
+    route: '/discover',
+    public: false,
+    image: decouvrirImage
+  },
+  {
+    text: 'Chat',
+    route: '/chat',
+    public: false,
+    image: chatImage
+  },
+  {
+    text: 'Notifications',
+    route: '/notifications',
+    public: false,
+    image: notificationImage
+  },
+  {
+    text: 'Paramètres',
+    route: '/settings',
+    public: false,
+    image: parametreImage
+  }
+]
+let notifMenu = ref(false)
+let msgMenu = ref(false)
+let notifNum = ref(0)
+let newMsgNum = ref(0)
+const user = computed(() => store.getters.user)
+const connected = computed(() => store.getters.status || localStorage.getItem('token'))
+const profileImage = computed(() => store.getters.profileImage)
+
+let notif = ref([])
+notif.value = store.getters.notif
+let convos = ref([])
+convos.value = store.getters.convos
+let notifs = ref([])
+notifs.value = notif.value.sort((a, b) => {
+  if (a.is_read !== b.is_read) {
+    return a.is_read - b.is_read
+  }
+  return new Date(b.date) - new Date(a.date)
+}).slice(0, 5)
+
+let menuConvos = ref([])
+let newMessage = ref([])
+
+const getFullPath = utility.getFullPath
+const getNotifMsg = utility.getNotifMsg
+const getNotifIcon = utility.getNotifIcon
+const formatNotifDate = utility.formatTime
+const updateOneNotif = utility.updateOneNotif
+
+const toUserProfile = (id_from) => {
+  try {
+    updateOneNotif(id_from, user.value.id)
+    router.push(`/user/${id_from}`)
+  } catch (err) {
+    console.error('err toUserProfile in frontend/NavbarView.view ===> ', err)
+  }
+}
+
+const toUserChat = (convo) => {
+  try {
+    syncConvo(convo)
+  } catch (err) {
+    console.error('err toUserChat in frontend/NavbarView.view ===> ', err)
+  }
+}
+
+const handleClickOutside = (e) => {
+  const drawerElement = document.querySelector('.q-drawer')
+  if (drawerElement && drawer.value && !drawerElement.contains(e.target)) {
+    drawer.value = false
+  }
+}
+
+onMounted(() => {
+  document.body.addEventListener('click', handleClickOutside, true)
+})
+
+onUnmounted(() => {
+  document.body.removeEventListener('click', handleClickOutside, true)
+})
+
+onMounted(async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
+    const headers = { 'x-auth-token': token }
+    const res = await axios.get(url, { headers })
+    if (!res.data.msg) {
+      const user = res.data
+      if (user.birthdate) {
+        user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
       }
-    ]
-    let notifMenu = ref(false)
-    let msgMenu = ref(false)
-    let notifNum = ref(0)
-    let newMsgNum = ref(0)
+      store.dispatch('login', user)
+      updateNotifAndMsg()
+    }
+  } catch (err) {
+    console.error('err async onMounted in frontend/NavbarView.view ===> ', err)
+  }
+})
 
-    const user = computed(() => store.getters.user)
-    const connected = computed(() => store.getters.status || localStorage.getItem('token'))
-    const profileImage = computed(() => store.getters.profileImage)
+const syncConvo = async (convo) => {
+  try {
+    store.dispatch('syncConvo', convo)
+    router.push('/chat').catch(err => {
+      console.error('err syncConvo router.push in frontend/NavbarView.view ===> ', err)
+    })
+  } catch (err) {
+    console.error('err syncConvo in frontend/NavbarView.view ===> ', err)
+  }
+}
 
-    let notif = ref([])
-    notif.value = store.getters.notif
+const logout = async (userId) => {
+  try {
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
+    const headers = { 'x-auth-token': user.value.token }
+    const res = await axios.get(url, { headers })
+    if (res.data.ok) {
+      store.dispatch('logout', user.value.id)
+    }
+    router.push('/').catch(err => {
+      console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
+    })
+  } catch (err) {
+    console.error('err logout in frontend/NavbarView.view ===> ', err)
+  }
+}
 
-    let convos = ref([])
+function sortAndFilterMessages(messages) {
+  messages.sort((a, b) => {
+    if (a.is_read !== b.is_read) {
+      return a.is_read - b.is_read
+    } else if (a.id_conversation === b.id_conversation) {
+      const dateA = new Date(a.last_update)
+      const dateB = new Date(b.last_update)
+      return dateB - dateA
+    } else {
+      return b.id_conversation - a.id_conversation
+    }
+  })
+
+  const uniqueConversations = new Set()
+  const uniqueMessages = []
+
+  for (const message of messages) {
+    if (!uniqueConversations.has(message.id_conversation)) {
+      uniqueMessages.push(message)
+      uniqueConversations.add(message.id_conversation)
+    }
+  }
+
+  return uniqueMessages.slice(0, 5)
+}
+
+menuConvos.value = sortAndFilterMessages(newMessage.value)
+
+const getNewMsg = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/getInChat`
+    const headers = { 'x-auth-token': token }
+    const result = await axios.get(url, { headers })
+    return result.data
+  } catch (err) {
+    console.error('Error fetching new messages:', err)
+  }
+}
+
+const updateNotifAndMsg = async () => {
+  if (connected.value !== null) {
     convos.value = store.getters.convos
-
-    let notifs = ref([])
-    notifs.value = notif.value.sort((a, b) => { if (a.is_read !== b.is_read) 
-                      { return a.is_read - b.is_read }
-                    return new Date(b.date) - new Date(a.date)}).slice(0, 5)
-    
-    let menuConvos = ref([])
-    let newMessage = ref([])
-
-
-    const getFullPath = utility.getFullPath
-    const getNotifMsg = utility.getNotifMsg
-    const getNotifIcon = utility.getNotifIcon
-    const formatNotifDate = utility.formatTime
-    const updateOneNotif = utility.updateOneNotif
-
-    const toUserProfile = (id_from) => {
-      try {
-        updateOneNotif(id_from, user.value.id)
-        router.push(`/user/${id_from}`)
-      } catch (err) {
-        console.error('err toUserProfile in frontend/NavbarView.view ===> ', err)
+    notif.value = store.getters.notif
+    notifs.value = notif.value.sort((a, b) => {
+      if (a.is_read !== b.is_read) {
+        return a.is_read - b.is_read
       }
-    }
-
-    const toUserChat = (convo) => {
-      try {
-        syncConvo(convo)
-      } catch (err) {
-        console.error('err toUserChat in frontend/NavbarView.view ===> ', err)
-      }
-    }
-
-    const handleClickOutside = (e) => {
-      const drawerElement = document.querySelector('.q-drawer')
-      if (drawerElement && drawer.value && !drawerElement.contains(e.target)) {
-        drawer.value = false
-      }
-    }
-
-    onMounted(() => {
-      document.body.addEventListener('click', handleClickOutside, true)
-    })
-
-    onUnmounted(() => {
-      document.body.removeEventListener('click', handleClickOutside, true)
-    })
-
-    onMounted(async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-        const headers = { 'x-auth-token': token }
-        const res = await axios.get(url, { headers })
-        if (!res.data.msg) {
-          const user = res.data
-          if (user.birthdate) {
-            user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
-          }
-          store.dispatch('login', user)
-          updateNotifAndMsg()
-        }
-      } catch (err) {
-        console.error('err async onMounted in frontend/NavbarView.view ===> ', err)
-      }
-    })
-
-
-
-    const syncConvo = async (convo) => {
-      try {
-        store.dispatch('syncConvo', convo)
-        router.push('/chat').catch(err => {
-          console.error('err syncConvo router.push in frontend/NavbarView.view ===> ', err)
-        })
-      } catch (err) {
-        console.error('err syncConvo in frontend/NavbarView.view ===> ', err)
-      }
-    }
-
-    const logout = async (userId) => {
-      try {
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
-        const headers = { 'x-auth-token': user.value.token }
-        const res = await axios.get(url, { headers })
-        if (res.data.ok) {
-          store.dispatch('logout', user.value.id)
-        }
-        router.push('/').catch(err => {
-          console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
-        })
-      } catch (err) {
-        console.error('err logout in frontend/NavbarView.view ===> ', err)
-      }
-    }
-
-
-    function sortAndFilterMessages(messages) {
-        messages.sort((a, b) => {
-            if (a.is_read !== b.is_read) {
-                return a.is_read - b.is_read;
-            } else if (a.id_conversation === b.id_conversation) {
-                const dateA = new Date(a.last_update);
-                const dateB = new Date(b.last_update);
-                return dateB - dateA;
-            } else {
-                return b.id_conversation - a.id_conversation;
-            }
-        });
-
-        const uniqueConversations = new Set();
-        const uniqueMessages = [];
-
-        for (const message of messages) {
-            if (!uniqueConversations.has(message.id_conversation)) {
-                uniqueMessages.push(message);
-                uniqueConversations.add(message.id_conversation);
-            }
-        }
-
-        return uniqueMessages.slice(0, 5);
-    }
-    
-    menuConvos.value = sortAndFilterMessages(newMessage.value)
-
-    const getNewMsg = async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/chat/getInChat`
-        const headers = { 'x-auth-token': token }
-        const result = await axios.get(url, { headers })
-        return result.data
-      } catch (err) {
-        console.error('Error fetching new messages:', err)
-      }
-    };
-
-     const updateNotifAndMsg = async () => {
-      if (connected.value !== null) {
-        convos.value = store.getters.convos
-        notif.value = store.getters.notif
-        notifs.value = notif.value.sort((a, b) => { if (a.is_read !== b.is_read) 
-            { return a.is_read - b.is_read }
-            return new Date(b.date) - new Date(a.date)}).slice(0, 5)
-        newMessage.value = await getNewMsg()
-        menuConvos.value = sortAndFilterMessages(newMessage.value)
-        newMsgNum.value = newMessage.value.filter(cur => !cur.is_read).length
-        const newNotif = computed(() => store.getters.notif)
-        notifNum.value = newNotif.value.filter(cur => !cur.is_read).length
-      }
-    }
-
-    const dataUpdate = setInterval(updateNotifAndMsg, 1000)
-
-    onUnmounted(() => {
-      clearInterval(dataUpdate)
-    })
-
-    onBeforeUnmount(() => {
-      clearInterval(dataUpdate)
-    })
-
-    return {
-      user,
-      notif,
-      notifs,
-      connected,
-      convos,
-      profileImage,
-      searchText,
-      drawer,
-      links,
-      notifMenu,
-      msgMenu,
-      image,
-      syncConvo,
-      toUserProfile,
-      toUserChat,
-      logout,
-      menuConvos,
-      notifNum,
-      newMsgNum,
-      newMessage,
-      formatNotifDate,
-      getFullPath,
-      getNotifMsg,
-      getNotifIcon
+      return new Date(b.date) - new Date(a.date)
+    }).slice(0, 5)
+    newMessage.value = await getNewMsg()
+    if (newMessage.value) {
+      menuConvos.value = sortAndFilterMessages(newMessage.value)
+      newMsgNum.value = newMessage.value.filter(cur => !cur.is_read).length
+      const newNotif = computed(() => store.getters.notif)
+      notifNum.value = newNotif.value.filter(cur => !cur.is_read).length
     }
   }
 }
+
+function refreshMethods() {
+  updateNotifAndMsg()
+}
+
+const refreshInterval = setInterval(refreshMethods, 2000)
+
+onBeforeUnmount(() => {
+  clearInterval(refreshInterval)
+})
+
+// return {
+//   user,
+//   notif,
+//   notifs,
+//   connected,
+//   convos,
+//   profileImage,
+//   searchText,
+//   drawer,
+//   links,
+//   notifMenu,
+//   msgMenu,
+//   image,
+//   syncConvo,
+//   toUserProfile,
+//   toUserChat,
+//   logout,
+//   menuConvos,
+//   notifNum,
+//   newMsgNum,
+//   newMessage,
+//   formatNotifDate,
+//   getFullPath,
+//   getNotifMsg,
+//   getNotifIcon
+// }
 </script>
 
 <style scoped>

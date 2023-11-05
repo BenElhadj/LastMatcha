@@ -238,6 +238,7 @@ const deleteImage = async (req, res) => {
 	try {
 		await userModel.getImagesById(req.body.id, req.user.id, async (result) => {
 			if (result.length) {
+				
 				if (!isExternal(result[0].name)) {
 					try {
 						await unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
