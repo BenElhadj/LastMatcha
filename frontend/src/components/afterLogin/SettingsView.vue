@@ -136,9 +136,15 @@ const uploadImage = async (type, event) => {
     if (type === 'cover') {
       const formData = new FormData();
       formData.append('image', selectedFile);
-      
-      const result = await axios.post(urlCover.value, formData, { headers })
-      console.log('Result:', result.data)
+      const result = await axios.post(urlCover.value, formData, { headers });
+
+      if (result.data.ok) {
+        await store.commit('updateCoverImage', result.data);
+        coverPhoto.value = store.getters.coverPhoto;
+        alert.value = { state: true, color: 'green', text: 'Cover image updated successfully' };
+      } else {
+        alert.value = { state: true, color: 'red', text: `This error occurred while updating the image : ${result.data.msg}` };
+      }
       
     } else if (type === 'profile') {
       const reader = new FileReader();
@@ -148,15 +154,22 @@ const uploadImage = async (type, event) => {
           image: base64Image,
         };
         const result = await axios.post(urlProfile.value, imageObject, { headers });
-        console.log('Result:', result.data);
-        profileImage.value = result.data.name;
+
+        if (result.data.ok) {
+          await store.commit('updateProfileImage', result.data);
+          profileImage.value = store.getters.profileImage;
+          alert.value = { state: true, color: 'green', text: 'Profile image updated successfully' };
+        } else {
+          alert.value = { state: true, color: 'red', text: `This error occurred while updating the image : ${result.data.msg}` };
+        }
       };
 
       reader.readAsDataURL(selectedFile);
     }
 
   } catch (err) {
-    console.error('Error in uploadImage:', err);
+    console.error('Erreur lors de la mise à jour de l\'image :', err);
+    alert.value = { state: true, color: 'red', text: `Une erreur s'est produite lors de la mise à jour de l'image : ${err}` };
   }
 };
 

@@ -125,15 +125,6 @@ const handleTagsInput = (event) => {
   }
 }
 
-console.log('user.birthdate ===> ', user.birthdate)
-
-// const formatBirthdate = computed(() => {
-//   if (user.birthdate) {
-//     return moment(user.birthdate).format('YYYY-MM-DD')
-//   }
-//   return ''
-// })
-
 const resetForm = () => {
   if (initialUser.value) {
     for (const prop in initialUser.value) {

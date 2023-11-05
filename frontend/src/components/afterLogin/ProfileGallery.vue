@@ -50,7 +50,6 @@ const deleteImg = async (image) => {
     if (res.data.ok) {
       await store.dispatch('delImg', image.id)
       alert.value = { state: true, color: 'green', text: 'Photo has been removed' }
-      alert
     } else {
       alert.value = { state: true, color: 'red', text: 'Oups.. something went wrong' }
     }

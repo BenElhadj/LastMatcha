@@ -119,7 +119,7 @@ const validateEmail = (vkey, callback) => {
 // Get user data by ID
 
 const getUserById = (id, callback) => {
-	let request = `SELECT * from users WHERE id= ? `
+	let request = `SELECT * from users WHERE id = ? `
 	db.query(request, [id], (error, results) => {
 		if (error) throw error
 		callback(results)
@@ -127,7 +127,7 @@ const getUserById = (id, callback) => {
 }
 
 const getUserByIdD = (id) => {
-	let request = `SELECT * from users WHERE id= ? `
+	let request = `SELECT * from users WHERE id = ? `
 	return db.query(request, [id])
 }
 
@@ -135,7 +135,17 @@ const getUserByIdD = (id) => {
 // Get user data by Username 
 
 const getUserByUsername = (username, callback) => {
-	let request = `SELECT * from users WHERE username='${username}'`
+	let request = `SELECT * from users WHERE username ='${username}'`
+	db.query(request, (error, results) => {
+		if (error) throw error
+		callback(results)
+	})
+}
+
+// Get user by Username / email 
+
+const getUserByIdentifier = (identifier, callback) => {
+	let request = `SELECT * FROM users WHERE username = '${identifier}' OR email = '${identifier}'`
 	db.query(request, (error, results) => {
 		if (error) throw error
 		callback(results)
@@ -350,6 +360,7 @@ module.exports = {
 	getUser,
 	getVkey,
 	validateEmail,
+	getUserByIdentifier,
 	getUserById,
 	getUserByUsername,
 	getUserByemail,

@@ -1,10 +1,15 @@
 const validateInput = (input, type) => {
 	if (!input) return false
 	switch (type) {
+		case 'identifier':
+			return (
+				input.length >= 7 &&
+				input.length <= 55 &&
+				(!/[^a-zA-Z0-9]+/.test(input) || /.+@.+/.test(input)));
 		case 'username':
-			return !(input.length < 8 || input.length > 25 || /[^a-zA-Z0-9]+/.test(input))
+			return !(input.length < 7 || input.length > 25 || /[^a-zA-Z0-9]+/.test(input))
 		case 'password':
-			return !(input.length < 8 || input.length > 255 || !(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(input)))
+			return !(input.length < 7 || input.length > 255 || !(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(input)))
 		case 'email':
 			return (/.+@.+/.test(input))
 		case 'fname':

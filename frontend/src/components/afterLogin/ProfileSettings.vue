@@ -265,8 +265,6 @@ const rules = {
   ]
 }
 
-
-
 const validPwd = computed(() => {
   return rules.newPwd.every(rule => rule(newPwd.value) === true)
 })
@@ -325,6 +323,7 @@ const saveEmail = async () => {
       pwd.value = ''
       if (res.data.ok) {
         alert.value = { state: true, color: 'green', text: 'Your email has been updated' }
+        store.getters.user.email = newEmail.value
         closeEmail()
       } else {
         alert.value = { state: true, color: 'red', text: res.data.msg }

@@ -315,7 +315,6 @@ function changeSort() {
   sortDir.value = -sortDir.value
 }
 
-console.log('users',users.value)
 const isComplete = computed(() => {
   return user.gender && user.looking && user.biography && user.tags && user.images.length && user.city && user.country && user.postal_code
 })
