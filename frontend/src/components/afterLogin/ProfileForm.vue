@@ -11,10 +11,10 @@
       </div>
 
       <div v-else class="note">
-        <p class="caption text-capitalize rating_value">{{ user.rating ? user.rating.toFixed(1) : 'N/A' }}</p>
+        <p class="caption text-capitalize rating_value">{{ user.rating ? user.rating.toFixed(1) : '0.0' }}</p>
         <q-rating
-          :color="user.gender === 'male' ? 'blue-3' : 'pink-2'"
-          :color-selected="user.gender === 'male' ? 'blue-9' : 'pink-8'"
+          :color="user.gender === 'male' ? 'blue-3' : user.gender === 'female' ? 'pink-2' : 'blue-5'"
+          :color-selected="user.gender === 'male' ? 'blue-9' : user.gender === 'female' ? 'pink-8' : 'pink-4'"
           :modelValue="user.rating && !isNaN(user.rating) ? user.rating : 0"
           icon="mdi-heart-outline"
           icon-selected="mdi-heart"
@@ -58,7 +58,6 @@
           
           <div class="one-input">
             <span class="text-h8 text-grey-7">Tags</span>
-            <!-- <vue3-tags-input v-if="isEditing" :max-tags="20" :maxlength="25" :add-on-key="tagEsc" :tags="tags" @on-tags-changed="newTags => tags = newTags"/>    -->
             <vue3-tags-input v-if="isEditing" :max-tags="20" :maxlength="25" :add-on-key="tagEsc" :tags="tags" @on-tags-changed="updateUserTags"/>   
             <div v-else>
               <q-input v-model="user.tags" readonly />

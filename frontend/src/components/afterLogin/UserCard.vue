@@ -19,7 +19,7 @@
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">
-        <q-icon class="mr-2" size="25px" :name="user.gender === 'male' ? 'icon-male' : 'icon-femel'"/>
+        <q-icon class="mr-2" size="25px" :name="user.gender === 'male' ? 'icon-male' : (user.gender === 'female' ? 'icon-femel' : 'icon-both')"/>
         <span v-if="user.birthdate">
           <q-icon size="30px" name="icon-age"/>
           {{ age }}
@@ -27,10 +27,10 @@
       </span>
 
       <div class="note">
-        <p class="caption text-capitalize rating_value">{{ user.rating ? user.rating.toFixed(1) : 'N/A' }}</p>
+        <p class="caption text-capitalize rating_value">{{ user.rating ? user.rating.toFixed(1) : '0.0' }}</p>
         <q-rating
-          :color="user.gender === 'male' ? 'blue-3' : 'pink-2'"
-          :color-selected="user.gender === 'male' ? 'blue-9' : 'pink-8'"
+          :color="user.gender === 'male' ? 'blue-3' : user.gender === 'female' ? 'pink-2' : 'blue-5'"
+          :color-selected="user.gender === 'male' ? 'blue-9' : user.gender === 'female' ? 'pink-8' : 'pink-4'"
           :modelValue="user.rating && !isNaN(user.rating) ? user.rating : 0"
           icon="mdi-heart-outline"
           icon-selected="mdi-heart"
@@ -183,6 +183,11 @@ onBeforeUnmount(() => {
 }
 .icon-femel {
   background-image: url('@/assets/userCard/femel.png');
+  background-size: 90%;
+  background-repeat: no-repeat;
+}
+.icon-both {
+  background-image: url('@/assets/userCard/both.png');
   background-size: 90%;
   background-repeat: no-repeat;
 }

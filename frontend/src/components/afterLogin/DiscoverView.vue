@@ -24,8 +24,12 @@
                     </template>
                   </q-input>
                 <h4 class="title mb-4">Afficher</h4>
-                <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/>
-                
+                <!-- <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/> -->
+                <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[
+                    { label: 'Man', value: 'male', class: 'icon-male mr-1' },
+                    { label: 'Woman', value: 'female', class: 'icon-femel mr-1' },
+                    { label: 'Both', value: 'both', class: 'icon-both mr-1' }
+                  ]"/>
                 <h4 class="title mb-3">Distance</h4>
                 <q-range v-model="distance" :min="0" :max="maxDis" :step="step" label-always thumb-label="always" thumb-size="30" class="custom-slider mx-3 mb-5 pt-3"></q-range>
                 
@@ -33,7 +37,7 @@
                 <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
                 
                 <h4 class="title mb-3">Note</h4>
-                <q-range v-model="rating" :min="0" :max="5" :step="0.5" label-always thumb-label="always" thumb-size="25" class="mx-3 mb-5 pt-3"></q-range>
+                <q-range v-model="rating" :min="0" :max="7" :step="0.1" label-always thumb-label="always" thumb-size="25" class="mx-3 mb-5 pt-3"></q-range>
                 
                 <h4 class="title mb-4">Localisation</h4>
                 <q-input v-model="location" class="location_input mb-5" color="primary" hide-details outlined solo text>
@@ -129,7 +133,7 @@ const location = ref(null)
 const hasBoth = ref(false)
 const loaded = ref(false)
 const age = ref({min: 18, max: 85})
-const rating = ref({min: 0, max: 5})
+const rating = ref({min: 0, max: 7})
 const distance = ref({min: 0, max: 0})
 const maxDis = ref(null)
 const sortTypes = ['age', 'distance', 'rating', 'interests']
@@ -173,7 +177,7 @@ const filtered = computed(() => {
     .filter(filters.rating)
     .filter(filters.gender)
     .filter(filters.location)
-   .filter(filters.age)
+    .filter(filters.age)
     .filter(filters.distance)
     .filter(filters.interest)
 })
@@ -393,6 +397,25 @@ a{
   text-decoration: none;
   color: inherit;
 }
+.icon-male {
+  background-image: url('@/assets/userCard/male.png');
+  background-size: 90%;
+  background-repeat: no-repeat;
+  size: 11px;
+}
+.icon-femel {
+  background-image: url('@/assets/userCard/femel.png');
+  background-size: 90%;
+  background-repeat: no-repeat;
+  size: 11px;
+}
+.icon-both {
+  background-image: url('@/assets/userCard/both.png');
+  background-size: 90%;
+  background-repeat: no-repeat;
+  size: 11px;
+}
+
 .discover {
   margin-left: 80px;
 }

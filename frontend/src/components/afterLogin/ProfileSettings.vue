@@ -141,10 +141,11 @@
                 </q-item-section>
 
                 <div class="note">
-                  <p class="caption text-capitalize rating_value">{{ banned.rating ? banned.rating.toFixed(1) : 'N/A' }}</p>
+                  <p class="caption text-capitalize rating_value">{{ banned.rating ? banned.rating.toFixed(1) : '0.0' }}</p>
+                  
                   <q-rating
-                    :color="banned.gender === 'male' ? 'blue-3' : 'pink-2'"
-                    :color-selected="banned.gender === 'male' ? 'blue-9' : 'pink-8'"
+                    :color="user.gender === 'male' ? 'blue-3' : user.gender === 'female' ? 'pink-2' : 'blue-5'"
+                    :color-selected="user.gender === 'male' ? 'blue-9' : user.gender === 'female' ? 'pink-8' : 'pink-4'"
                     :modelValue="banned.rating && !isNaN(banned.rating) ? banned.rating : 0"
                     icon="mdi-heart-outline"
                     icon-selected="mdi-heart"

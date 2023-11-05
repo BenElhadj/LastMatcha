@@ -262,16 +262,20 @@ const createTagsTable = async () => {
 	}
 };
 
- const procedures = async () => {
+const procedures = async () => {
   try {
-    const createProcedureQuery = `DELIMITER $$
-    DROP PROCEDURE IF EXISTS matcha.CALC_RATING $$
-    CREATE DEFINER = root@localhost PROCEDURE CALC_RATING
-    (OUT visites  INT, 
-     OUT likesCount INT, 
-     OUT reported INT, 
-     IN id_user   INT
-    ) SQL SECURITY INVOKER COMMENT 'Calculate the user''s rating'
+    const createProcedureQuery1 = `
+    DROP PROCEDURE IF EXISTS matcha.CALC_RATING;
+    `;
+    const createProcedureQuery2 = `
+    CREATE PROCEDURE matcha.CALC_RATING(
+      OUT visites INT, 
+      OUT likesCount INT, 
+      OUT reported INT, 
+      IN id_user INT
+    )
+    SQL SECURITY INVOKER
+    COMMENT 'Calculate the user''s rating'
     BEGIN
         SELECT COUNT(*)
         INTO likesCount
@@ -285,30 +289,35 @@ const createTagsTable = async () => {
         INTO reported
         FROM matcha.users
         WHERE id = id_user;
-    END $$
-    DELIMITER ;
-    
-    DELIMITER $$
-    DROP FUNCTION IF EXISTS matcha.GET_RATING $$
-    CREATE DEFINER=root@localhost FUNCTION GET_RATING(id_user INT)
-    RETURNS double DETERMINISTIC
+    END;
+    `;
+    const createProcedureQuery3 = `
+    DROP FUNCTION IF EXISTS matcha.GET_RATING;
+    `;
+    const createProcedureQuery4 = `
+    CREATE FUNCTION matcha.GET_RATING(id_user INT)
+    RETURNS DOUBLE
+    DETERMINISTIC
     BEGIN
-    DECLARE visit INT;
-    DECLARE likes INT;
-    DECLARE reports INT;
-    
-    CALL CALC_RATING(visit, likes, reports, id_user);
-    
-    RETURN (likes / 20 + visit / 100 - reports / 250);
-    END $$
-    DELIMITER`;
+      DECLARE visit INT;
+      DECLARE likes INT;
+      DECLARE reports INT;
+      CALL CALC_RATING(visit, likes, reports, id_user);
+      RETURN (likes / 20 + visit / 100 - reports / 250);
+    END;
+    `;
 
-await pool.query(createProcedureQuery);  
-console.log('Procedures created successfully!');
+    await pool.query(createProcedureQuery1);
+    await pool.query(createProcedureQuery2);
+    await pool.query(createProcedureQuery3);
+    await pool.query(createProcedureQuery4);
+
+    console.log('Procedures created successfully!');
   } catch (error) {
     console.error('Error creating procedures:', error);
   }
 }
+
 
 
 
