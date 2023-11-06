@@ -7,7 +7,7 @@
           <div class="col-2">
             <q-page-container class="px-5">
               <q-layout class="column">
-                <h4 class="title mb-4">Rechechre</h4>
+                <h4 class="title mb-4">Search</h4>
                  <q-input
                     v-model="recherche"
                     class="location_input mb-5"
@@ -16,6 +16,7 @@
                     outlined
                     solo
                     text
+                    label="First/Last name or Nickname"
                     placeholder="Recherche"
                     @keyup="displaySearchText()"
                   >
@@ -23,33 +24,29 @@
                       <q-icon name="mdi-magnify"></q-icon>
                     </template>
                   </q-input>
-                <h4 class="title mb-4">Afficher</h4>
-                <!-- <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[ {label: 'Homme', value: 'male', icon: 'mdi-gender-male'}, {label: 'Femme', value: 'female', icon: 'mdi-gender-female'} ]"/> -->
+                <h4 class="title mb-4">Gender</h4>
                 <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[
                     { label: 'Man', value: 'male', class: 'icon-male mr-1' },
                     { label: 'Woman', value: 'female', class: 'icon-femel mr-1' },
-                    { label: 'Both', value: 'both', class: 'icon-both mr-1' }
-                  ]"/>
+                    { label: 'Both', value: 'both', class: 'icon-both mr-1' }]"/>
                 <h4 class="title mb-3">Distance</h4>
                 <q-range v-model="distance" :min="0" :max="maxDis" :step="step" label-always thumb-label="always" thumb-size="30" class="custom-slider mx-3 mb-5 pt-3"></q-range>
                 
                 <h4 class="title mb-3">Age</h4>
                 <q-range v-model="age" :min="18" :max="85" :step="1" label-always thumb-label="always" thumb-size="25" class="custom-slider mx-3 mb-4 pt-3"></q-range>
                 
-                <h4 class="title mb-3">Note</h4>
+                <h4 class="title mb-3">Rating</h4>
                 <q-range v-model="rating" :min="0" :max="7" :step="0.1" label-always thumb-label="always" thumb-size="25" class="mx-3 mb-5 pt-3"></q-range>
                 
-                <h4 class="title mb-4">Localisation</h4>
-                <q-input v-model="location" class="location_input mb-5" color="primary" hide-details outlined solo text>
+                <h4 class="title mb-4">Location</h4>
+                <q-input v-model="location" class="location_input mb-5" label="City or Town" color="primary" hide-details outlined solo text>
                   <template v-slot:append>
                     <q-icon name="mdi-map-marker" />
                   </template>
                 </q-input>
 
-                <h4 class="title mb-4">Interêts</h4>
+                <h4 class="title mb-4">Interests</h4>
                 <q-select v-model="interests" :options="allTags" multiple hide-dropdown-icon label="Select tag" style="width: 250px" outlined/>
-
-
 
                 <div class="row justify-between mb-4">
                   <h4 class="title">Sort by</h4>
@@ -90,7 +87,6 @@
         <div class="col-6 col-md-4">
           <q-btn block outlined large to="/settings" color="primary">
             <q-icon left name="mdi-chevron-left"></q-icon>
-
             <span>Go to</span>
           </q-btn>
         </div>
@@ -110,7 +106,6 @@ import utility from '@/utility'
 import { matMenu } from '@quasar/extras/material-icons'
 import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 import { useRouter } from 'vue-router';
-
 
 import io from 'socket.io-client'
 const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
@@ -208,7 +203,6 @@ const ageCalc = (birthdate) => {
   return new Date() - new Date(birthdate);
 };
 
-
 const commonTags = (user, tags) => {
   if (!tags || !tags.length) return 0;
   const userTags = user.tags.split(',');
@@ -220,8 +214,8 @@ const sorted = computed(() => {
   const disconnectedUsers = filtered.value.filter((user) => !user.isConnected);
 
   if (!sort.value || sort.value === 'distance') {
-    const sortedOnlineUsers = onlineUsers.slice().reverse();
-    const sortedDisconnectedUsers = disconnectedUsers.slice().reverse();
+    const sortedOnlineUsers = onlineUsers.slice();
+    const sortedDisconnectedUsers = disconnectedUsers.slice();
     return [...sortedOnlineUsers, ...sortedDisconnectedUsers];
   }
 
@@ -258,7 +252,12 @@ const calculateMaxDistance = () => {
     }
     maxDis.value = Math.ceil(utility.calculateDistance(userLocation, to))
   }
+  setTimeout(calculateMaxDistance, 1000)
 }
+
+watch(users, () => {
+  calculateMaxDistance()
+}, { immediate: true })
 
 watch(user, (newUser, oldUser) => {
   if (newUser.looking && newUser.looking === 'both') {
@@ -314,9 +313,9 @@ function reset() {
   distance.value = {min: 0, max: maxDis.value}
   location.value = null
 }
-
 function changeSort() {
   sortDir.value = -sortDir.value
+  users.value.reverse()
 }
 
 const isComplete = computed(() => {
@@ -344,7 +343,6 @@ async function created() {
     const blockedUserIds = blockedHistory.map(item => item.his_id)
     users.value = users.value.filter(user => !blockedHistory.some(historyItem => historyItem.his_id === user.user_id))
   }
-
     await calculateMaxDistance()
     whoIsUp()
     distance.value.max = maxDis.value
@@ -366,7 +364,7 @@ onMounted(async () => {
     if (!res.data.msg && maxDis.value > 0) {
       const user = res.data
       if (user.birthdate) {
-        user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+        user.birthdate = new Date(user.birthdate).toISOString()
       }
       store.dispatch('login', user)
     }

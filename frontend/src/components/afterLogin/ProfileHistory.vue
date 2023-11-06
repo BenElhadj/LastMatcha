@@ -19,24 +19,19 @@
             :right="true"
             :color="getNotifIcon(entry.type)[2]"
             :class="getNotifIcon(entry.type)[2]"
-            :icon="getNotifIcon(entry.type)[1]"
-          >
-
+            :icon="getNotifIcon(entry.type)[1]">
             <q-avatar clickable v-ripple avatar @click="redirectToUser(entry.his_id)">
               <img :src="getFullPath(entry.avatar)">
             </q-avatar>
-
             <q-item-section right>
               {{ moment(entry.created_at).fromNow() }}
             </q-item-section>
-            
           </q-timeline-entry>
 
           <q-timeline-entry
             :subtitle="!moreToLoad ? 'you can\'t see more history' : null"
             :title="moreToLoad ? 'You can show more history' : 'you created your profile on ' + moment(user.created_at).format('D MMMM, YYYY, h:mm A')"
-            side="left"
-          ></q-timeline-entry>
+            side="left"/>
 
         </q-timeline>
       </q-timeline>
@@ -59,14 +54,11 @@ const router = useRouter()
 const limit = ref(25)
 const user = computed(() => store.getters.user)
 const getNotifIcon = utility.getNotifIcon
-
 const allHistory = ref([])
-
 const fromNow = utility.fromNow
 const formatTime = utility.formatTime
 const getFullPath = utility.getFullPath
 const getHistoryAction = utility.getHistoryAction
-
 const getHistory = async () => {
   try {
     const token = user.value.token || localStorage.getItem('token')
@@ -83,10 +75,8 @@ getHistory();
 
 const redirectToUser = (hisId) => {
   if (hisId === user.value.id || hisId === user.value._id) {
-    console.log('hisId === user.value.id hisId =>', hisId, 'user.value.id =>', user.value.id)
     router.push('/')
   } else {
-    console.log('hisId !== user.value.id hisId =>', hisId, 'user.value.id =>', user.value.id)
     router.push(`/user/${hisId}`)
   }
 }
@@ -101,7 +91,6 @@ const moreToLoad = computed(() => {
   return limit.value < allHistory.value.length - 1
 })
 
-
 const increaseLimit = () => {
   if (limit.value + 24 < allHistory.value.length) {
     limit.value += 25
@@ -112,9 +101,7 @@ const increaseLimit = () => {
 
 </script>
 
-
 <style>
-
 .timeline_container {
   margin-top: 20px;
 }

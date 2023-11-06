@@ -3,10 +3,10 @@
     <q-list style="background-color: WhiteSmoke">
 
       <q-item>
-        <q-item-section>Discussions récentes</q-item-section>
+        <q-item-section>Recent Discussions</q-item-section>
       </q-item>
       <q-item v-if="sortedConvos.length == 0" style="align-items: center, justify-content: center, display: flex">
-        <q-item-section >Pas de conversations</q-item-section>
+        <q-item-section>No conversations</q-item-section>
       </q-item>
 
       <q-item clickable v-ripple v-for="(convo) in sortedConvos.sort(sortByLastSeen)"
@@ -114,7 +114,6 @@ onMounted(async () => {
   })
 })
 
-
 watch([online, convos], updateConnectedUsers,{ immediate: true })
 
 const sortByLastSeen = (a, b) => {
@@ -133,7 +132,6 @@ const sortedConvos = computed(() => {
 
   return uniqueConvos.sort(sortByLastSeen)
 })
-
 
 function refreshMethods() {
   updateConnectedUsers()
@@ -160,7 +158,7 @@ onBeforeUnmount(() => {
   background-color: silver;
 }
 .truncate-text {
-  min-width: 40px; /* Ajustez cette valeur en fonction de votre préférence */
+  min-width: 40px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

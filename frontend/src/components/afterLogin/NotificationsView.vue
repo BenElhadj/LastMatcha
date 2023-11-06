@@ -1,20 +1,18 @@
 <template>
   <q-layout>
     <q-page padding>
-      <h1 class="text-h5 q-my-md">
+      <h1 class="q-pb-md" style="margin-top: -10px; text-align: center;">
         Notifications
       </h1>
       <div
         v-for="(entry, i) in notifs"
         :key="i"
-        class="q-my-md"
-      >
+        class="q-my-md">
         <div class="row justify-center items-start q-pa-md">
           <div class="col-3 text-center">
             <q-tooltip
               anchor="bottom middle"
-              self="top middle"
-            >
+              self="top middle">
               <template #activator="{ on }">
                 <strong
                   class="mt-2 d-block grey--text"
@@ -36,8 +34,7 @@
                   <div class="q-ml-md">
                     <router-link
                       :to="`/user/${entry.id_from}`"
-                      class="timeline_link"
-                    >
+                      class="timeline_link">
                     <span class="text-h6 text-weight-bold">{{ entry.username }}</span>
                     </router-link>
                     <q-icon small style="font-size:16px !important;" class="mr-2 q-ml-xl">
@@ -54,20 +51,22 @@
           </div>
         </div>
       </div>
-      <q-btn
-        v-if="moreToLoad"
-        block
-        color="primary"
-        class="my-4"
-        @click="increaseLimit"
-      >
-        Afficher plus
-      </q-btn>
+      <div class="my-4 q-mx-auto q-mb-md flex justify-center">
+        <q-btn
+          v-if="moreToLoad"
+          block
+          color="primary"
+          class="my-4"
+          style="text-align: center !important;"
+          @click="increaseLimit">
+          Show more
+        </q-btn>
+      </div>
     </q-page>
   </q-layout>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
@@ -75,81 +74,59 @@ import axios from 'axios'
 import utility from '@/utility.js'
 import moment from 'moment'
 
-export default {
-  name: 'NotificationsView',
-  setup () {
-    const store = useStore()
-    const router = useRouter()
-    const limit = ref(15)
+const store = useStore()
+const router = useRouter()
+const limit = ref(15)
+const user = computed(() => store.state.user)
+const notif = computed(() => store.state.notif)
+const notChats = computed(() => notif.value.filter(cur => cur.type !== 'chat'))
+const notifs = computed(() => [...notChats.value].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, limit.value))
+const { fromNow, formatTime, getFullPath, getNotifMsg, getNotifIcon } = utility
 
-    const user = computed(() => store.state.user)
-    const notif = computed(() => store.state.notif)
-    const notChats = computed(() => notif.value.filter(cur => cur.type !== 'chat'))
-    const notifs = computed(() => [...notChats.value].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, limit.value))
-    const { fromNow, formatTime, getFullPath, getNotifMsg, getNotifIcon } = utility
-
-    const increaseLimit = () => {
-      if (limit.value + 11 < notChats.value.length) {
-        limit.value += 10
-      } else {
-        limit.value = notChats.value.length - 1
-      }
-    }
-
-    const moreToLoad = computed(() => {
-      return limit.value < notChats.value.length - 1
-    })
-
-    const logout = async (userId) => {
-      try {
-        const url = `${import.meta.env.VITE_APP_API_URL}/logout`
-        const res = await axios.post(url, { userId })
-        if (res.data.ok) {
-          store.dispatch('logout')
-        } else {
-          console.log('Logout failed : ', res.data.message)
-        }
-      } catch (err) {
-        console.error('err logout in frontend/NotificationsView.vue ===> ', err)
-      }
-    }
-
-    watch(user, async (newUser) => {
-      const token = newUser.token || localStorage.getItem('token')
-      if (token) {
-        try {
-          const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
-          const headers = { 'x-auth-token': token }
-          const res = await axios.get(url, { headers })
-          if (!res.data.msg) return
-        } catch (err) {
-          console.error('err watch user in frontend/NotificationsView.vue ===> ', err)
-        }
-      }
-      await logout(newUser.id)
-    }, { immediate: true })
-
-    onMounted(() => {
-      store.dispatch('seenNotif', {id: user.value.id})
-    })
-
-    return {
-      user,
-      notif,
-      notChats,
-      notifs,
-      moreToLoad,
-      increaseLimit,
-      logout,
-      fromNow,
-      formatTime,
-      getFullPath,
-      getNotifMsg,
-      moment,
-      getNotifIcon
-    }
+const increaseLimit = () => {
+  if (limit.value + 11 < notChats.value.length) {
+    limit.value += 10
+  } else {
+    limit.value = notChats.value.length - 1
   }
 }
+
+const moreToLoad = computed(() => {
+  return limit.value < notChats.value.length - 1
+})
+
+const logout = async (userId) => {
+  try {
+    const url = `${import.meta.env.VITE_APP_API_URL}/logout`
+    const res = await axios.post(url, { userId })
+    if (res.data.ok) {
+      store.dispatch('logout')
+    } else {
+      console.error('err logout in frontend/NotificationsView.vue 1 ===> ', res.data.message)
+    }
+  } catch (err) {
+    console.error('err logout in frontend/NotificationsView.vue 2 ===> ', err)
+  }
+}
+
+watch(user, async (newUser) => {
+  const token = newUser.token || localStorage.getItem('token')
+  if (token) {
+    try {
+      const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/isloggedin`
+      const headers = { 'x-auth-token': token }
+      const res = await axios.get(url, { headers })
+      if (!res.data.msg) return
+    } catch (err) {
+      console.error('err watch user in frontend/NotificationsView.vue ===> ', err)
+    }
+  }
+  await logout(newUser.id)
+}, { immediate: true })
+
+onMounted(() => {
+  store.dispatch('seenNotif', { id: user.value.id })
+})
 </script>
 
 <style scoped>

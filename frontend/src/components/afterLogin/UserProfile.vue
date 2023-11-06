@@ -130,7 +130,6 @@ import AlertView from '@/views/AlertView.vue'
 import LoaderView from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
 import ProfileEditor from '@/components/afterLogin/ProfileEditor.vue'
-import ProfileBadge from '@/components/afterLogin/ProfileBadge.vue'
 import ProfileTabs from '@/components/afterLogin/ProfileTabs.vue'
 import ProfileForm from '@/components/afterLogin/ProfileForm.vue'
 import ProfileSettings from '@/components/afterLogin/ProfileSettings.vue'
@@ -266,7 +265,6 @@ watch(user, async (newUser) => {
     }
   }
 }, { immediate: true })
-
 
 const distance = computed(() => {
   const from = store.state.location
@@ -477,11 +475,8 @@ onMounted(() => {
   }
 })
 
-
-
 function refreshMethods() {
   updateConnectedUsers()
-
 }
 
 const refreshInterval = setInterval(refreshMethods, 1000)

@@ -2,14 +2,11 @@
   <q-page class="page-container">
     <q-page-container v-if="loaded">
 
-
       <div>
         <div class="profile__cover">
           <img :src="coverPhoto" alt="Cover Photo" class="cover__img">
         </div>
         <input accept=".jpg, image/*" type="file" ref="fileInputCover" id="fileInputCover" style="display: none" @change="uploadImage('cover', $event)">
-        
-
 
         <q-btn @click="openImageUploadDialog('cover')" fab small outlined flat round lighten-3 class="update__img" style="top:85px;">
           <q-icon name="mdi-image" ></q-icon>
@@ -25,8 +22,6 @@
         </q-avatar>
         <input accept=".jpg, image/*" type="file" ref="fileInputProfile" id="fileInputProfile" style="display: none" @change="uploadImage('profile', $event)">
 
-
-
         <q-btn @click="openImageUploadDialog('profile')" fab small outlined flat round lighten-3 class="update__img"  style="top:470px;left:190px;">
           <q-icon name="mdi-image"></q-icon>
 
@@ -35,8 +30,6 @@
           </q-tooltip>
         </q-btn>
       </div>
-
-
 
       <q-separator spacing class="separator-margin"></q-separator>
       <div class=" centered-tabs" style="max-width: 800px;">  
@@ -71,7 +64,6 @@
 
         </q-card>
       </div>
-
       <AlertView :alert="alert"></AlertView>
     </q-page-container>
     <LoaderView v-else />
@@ -83,13 +75,11 @@ import AlertView from '@/views/AlertView.vue'
 import LoaderView from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
 import ProfileEditor from '@/components/afterLogin/ProfileEditor.vue'
-import ProfileBadge from '@/components/afterLogin/ProfileBadge.vue'
 import ProfileTabs from '@/components/afterLogin/ProfileTabs.vue'
 import ProfileForm from '@/components/afterLogin/ProfileForm.vue'
 import ProfileSettings from '@/components/afterLogin/ProfileSettings.vue'
 import ProfileGallery from '@/components/afterLogin/ProfileGallery.vue'
 import ProfileHistory from '@/components/afterLogin/ProfileHistory.vue'
-
 
 import axios from 'axios'
 import { useStore } from 'vuex'
@@ -116,60 +106,60 @@ const urlCover = ref('');
 const openImageUploadDialog = (type) => {
   if (type === 'cover') {
     fileInputCover.value.click();
-    urlCover.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`;
+    urlCover.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
   } else if (type === 'profile') {
     fileInputProfile.value.click(); 
-    urlProfile.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image`;
+    urlProfile.value = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
   }
 };
 
 const uploadImage = async (type, event) => {
   try {
-    const selectedFile = event.target.files[0];
+    const selectedFile = event.target.files[0]
     if (!selectedFile) {
-      console.error("Aucun fichier sélectionné");
+      console.error("Aucun fichier sélectionné")
       return;
     }
 
-    const headers = { 'x-auth-token': user.value.token };
+    const headers = { 'x-auth-token': user.value.token }
 
     if (type === 'cover') {
       const formData = new FormData();
       formData.append('image', selectedFile);
-      const result = await axios.post(urlCover.value, formData, { headers });
+      const result = await axios.post(urlCover.value, formData, { headers })
 
       if (result.data.ok) {
-        await store.commit('updateCoverImage', result.data);
+        await store.commit('updateCoverImage', result.data)
         coverPhoto.value = store.getters.coverPhoto;
-        alert.value = { state: true, color: 'green', text: 'Cover image updated successfully' };
+        alert.value = { state: true, color: 'green', text: 'Cover image updated successfully' }
       } else {
-        alert.value = { state: true, color: 'red', text: `This error occurred while updating the image : ${result.data.msg}` };
+        alert.value = { state: true, color: 'red', text: `This error occurred while updating the image : ${result.data.msg}` }
       }
       
     } else if (type === 'profile') {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = async (e) => {
-        const base64Image = e.target.result;
+        const base64Image = e.target.result
         const imageObject = {
           image: base64Image,
         };
-        const result = await axios.post(urlProfile.value, imageObject, { headers });
+        const result = await axios.post(urlProfile.value, imageObject, { headers })
 
         if (result.data.ok) {
-          await store.commit('updateProfileImage', result.data);
-          profileImage.value = store.getters.profileImage;
-          alert.value = { state: true, color: 'green', text: 'Profile image updated successfully' };
+          await store.commit('updateProfileImage', result.data)
+          profileImage.value = store.getters.profileImage
+          alert.value = { state: true, color: 'green', text: 'Profile image updated successfully' }
         } else {
-          alert.value = { state: true, color: 'red', text: `This error occurred while updating the image : ${result.data.msg}` };
+          alert.value = { state: true, color: 'red', text: `This error occurred while updating the image : ${result.data.msg}` }
         }
       };
 
-      reader.readAsDataURL(selectedFile);
+      reader.readAsDataURL(selectedFile)
     }
 
   } catch (err) {
-    console.error('Erreur lors de la mise à jour de l\'image :', err);
-    alert.value = { state: true, color: 'red', text: `Une erreur s'est produite lors de la mise à jour de l'image : ${err}` };
+    console.error('Erreur lors de la mise à jour de l\'image :', err)
+    alert.value = { state: true, color: 'red', text: `Une erreur s'est produite lors de la mise à jour de l'image : ${err}` }
   }
 };
 
@@ -196,7 +186,6 @@ const filteredImages = computed(() => {
   return user.value.images.filter(cur => !cur.cover)
 })
 
-
 const updateUser = async () => {
   try {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
@@ -204,11 +193,9 @@ const updateUser = async () => {
     const res = await axios.post(url, user.value, { headers })
 
     if (res && res.data && !res.data.msg) {
-      console.log('Alert, green, Your account has been updated successfully')
       alert.value = { state: true, color: 'green', text: 'Your account has been updated successfully'}
       store.dispatch('updateUser', user.value)
     } else {
-      console.log('Alert, red, Oops... something went wrong!')
       alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}
     }
   } catch (err) {
@@ -229,7 +216,7 @@ onMounted(async () => {
         return
       }
     } catch (err) {
-      console.log('Got error here --> ', err)
+      console.error('Got error here --> ', err)
     }
   }
 
@@ -294,10 +281,10 @@ const syncUser = (updatedUser) => {
   color: black;
   position: absolute;
   transform: translate(50%, 50%) scale(1);
-  background: rgba(211, 211, 211, 0.3); /* Arrière-plan gris clair */
+  background: rgba(211, 211, 211, 0.3);
 }
 .centered-tabs {
-  max-width: 800px; /* Largeur personnalisée */
-  margin: 0 auto; /* Centrage horizontal */
+  max-width: 800px;
+  margin: 0 auto;
 }
 </style>

@@ -25,8 +25,6 @@ app.set('view engine', 'ejs')
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 
-// routes 
-
 app.use(express.static(`${path.dirname(path.dirname(__dirname))}/client/dist`))
 app.use('/api/users/', require('./src/routes/userRoutes'))
 app.use('/api/auth/', require('./src/routes/authRoutes'))

@@ -19,11 +19,11 @@
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">
-        <q-icon class="mr-2" size="25px" :name="user.gender === 'male' ? 'icon-male' : (user.gender === 'female' ? 'icon-femel' : 'icon-both')"/>
-        <span v-if="user.birthdate">
-          <q-icon size="30px" name="icon-age"/>
-          {{ age }}
-        </span>
+      <q-icon class="mr-2" size="25px" :name="user.gender === 'male' ? 'icon-male' : (user.gender === 'female' ? 'icon-femel' : 'icon-both')"/>
+      <span v-if="user.birthdate">
+        <q-icon size="30px" name="icon-age"/>
+        {{ age }}
+      </span>
       </span>
 
       <div class="note">
@@ -44,15 +44,11 @@
       </div>
 
       <div class="row justify-center align-center bottom mb-0 mt-auto py-2 px-4 grey-2">
-      <div>
-
-      </div>
-        
         <q-icon color="primary" size="40px" name="icon-map"></q-icon>
         <span v-if="user.city && user.country" class="text-truncate">{{ `${user.city},  ${user.country}` }}</span>
         <span v-else class="text-truncate">Earth</span>
-
       </div>
+
     </div>
   </q-card>
 </template>
@@ -203,9 +199,9 @@ onBeforeUnmount(() => {
 }
 .note {
   display: flex;
-    align-items: flex-start;
-    flex-direction: row;
-    justify-content: center;
+  align-items: flex-start;
+  flex-direction: row;
+  justify-content: center;
 }
 .name {
   color: #828282;
@@ -241,7 +237,6 @@ onBeforeUnmount(() => {
 .align-center {
   text-align: center;
   gap: 10px;
-
 }
 
 .q-card:hover {

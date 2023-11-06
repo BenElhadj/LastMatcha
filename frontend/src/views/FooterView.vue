@@ -7,7 +7,7 @@
     <div class="full-container">
       <div class="top-container">
         <div class="contact-container">
-          <h2>Contactez-nous:</h2>
+          <h2>Contact-us:</h2>
           <div class="link-box">
             <a class="links-contact-container" href="mailto:42projetsweb@gmail.com">
               <img src="@/assets/Footer/email.png" alt="Email">
@@ -24,7 +24,7 @@
                 <a href="https://profile.intra.42.fr/users/bhamdi">Bhamdi</a>
                 &amp;
                 <a href="https://profile.intra.42.fr/users/mbouzaie">Mbouzae</a>
-                Vous présentent
+                Present to you
                 <a href="https://projects.intra.42.fr/projects/42cursus-matcha">MATCHA © 2023</a>
               </p>
             </q-item>
@@ -32,7 +32,7 @@
         </div>
         <div class="follow-container">
           <div class="follow-text-container">
-            <h2>Suivez-nous:</h2>
+            <h2>Follow-us:</h2>
           </div>
           <div class="follow-links-container link-box">
             <a class="links-follow-container" href="https://www.facebook.com/42Matcha">
@@ -79,7 +79,6 @@ onBeforeUnmount(() => {
 })
 
 </script>
-
 
 <style scoped>
 * {

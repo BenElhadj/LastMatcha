@@ -11,9 +11,9 @@ const sendMail = async (to, key, type) => {
 		const path = resolve(dirname(__dirname), 'views', 'mail.ejs')
 		const raw = await readFileAsync(path, 'utf8')
 		const data = {
-			title: type == 'users/verify' ? 'Vérifier email' : 'Réinitialiser mot de passe',
-			body: `Merci pour votre inscription.<br>Il vous reste une dernière étape avent de trouver l'amour de votre vie ! <br>Veuillez cliquer sur ce lien pour ${type == 'users/verify' ? 'Vérifier votre compte' : 'Réinitialiser votre mot de passe'}`,
-			action: type == 'users/verify' ? 'Vérifier' : 'Réinitialiser',
+			title: type == 'users/verify' ? 'Check email' : 'Reset password',
+			body: `Thank you for your registration.\nThere is one last step left before you find the love of your life!\nPlease click this link to${type == 'users/verify' ? 'Verify your account' : 'Reset your password'}`,
+			action: type == 'users/verify' ? 'Check' : 'Reset',
 			url: `${process.env.API_URL}/api/${type}/${key}`
 		}
 		const html = ejs.render(raw, data)

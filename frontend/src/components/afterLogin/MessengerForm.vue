@@ -55,7 +55,6 @@ const sendMsg = async (e) => {
           message: msg.value
         }
         const result = await axios.post(url, data, { headers })
-        //console.log('result.data ===> ', store.state.selectedConvo)
         if (result.data.ok) {
           msg.value = ''
           store.dispatch('updateConvos', data)

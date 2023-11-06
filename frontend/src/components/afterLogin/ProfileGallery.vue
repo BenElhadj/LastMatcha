@@ -11,6 +11,7 @@
           <img :src="profileImage(image.name)" class="image full-width">
         </div>
       </div>
+
       <AlertView :alert="alert"/>
     </q-page-container>
   </q-page>
@@ -23,10 +24,8 @@ import utility from '@/utility.js';
 import AlertView from '@/views/AlertView.vue';
 import axios from 'axios';
 
-const props = defineProps({
-  images: Array
-})
 const store = useStore()
+const props = defineProps({ images: Array })
 const getFullPath = utility.getFullPath
 const user = computed(() => store.state.user)
 const alert = ref({

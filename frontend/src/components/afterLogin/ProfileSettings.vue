@@ -3,6 +3,7 @@
     <q-page-container>
       <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">Settings</h1>
       <h3 style="margin-top: -70px; margin-bottom:70px; text-align: center;">{{user.username}}</h3>
+      
       <div class="q-pa-md row flex flex-center justify-between" style="margin: 7%;">
         <div class="col-xs-12 col-sm-6 q-pa-md">
           <div class="row items-center">
@@ -142,7 +143,6 @@
 
                 <div class="note">
                   <p class="caption text-capitalize rating_value">{{ banned.rating ? banned.rating.toFixed(1) : '0.0' }}</p>
-                  
                   <q-rating
                     :color="user.gender === 'male' ? 'blue-3' : user.gender === 'female' ? 'pink-2' : 'blue-5'"
                     :color-selected="user.gender === 'male' ? 'blue-9' : user.gender === 'female' ? 'pink-8' : 'pink-4'"
@@ -183,7 +183,6 @@
   </q-page>
 </template>
 
-
 <script setup>
 import moment from 'moment'
 import { ref, onMounted, computed, nextTick } from 'vue'
@@ -195,7 +194,6 @@ import mapLocationSelector from 'vue-google-maps-location-selector'
 
 const store = useStore()
 const user = computed(() => store.getters.user)
-
 const emailDialog = ref(false)
 const passDialog = ref(false)
 const locDialog = ref(false)
@@ -209,9 +207,7 @@ const confNewPwd = ref('')
 const oldEmail = ref('')
 const newEmail = ref('')
 const blacklist = ref(null)
-
 const blackListDialog = ref(false)
-
 const latitude = computed(() => location.value ? Number(location.value.lat) : 0)
 const longitude = computed(() => location.value ? Number(location.value.lng) : 0)
 const location = computed(() => store.getters.location)

@@ -11,8 +11,10 @@
   </div>
 </template>
 
-<script>
-export default { name: 'LoaderView' }
+<script setup>
+
+const { alert } = defineProps(['alert'])
+
 </script>
 
 <style>

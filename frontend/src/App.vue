@@ -10,7 +10,7 @@ const components = {
 
 onMounted(() => {
   window.initMap = function () {
-    // Votre code ici
+
   }
   const script = document.createElement('script');
   script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_APP_GOOGLE_KEY}&callback=initMap`;

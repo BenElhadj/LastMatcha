@@ -3,7 +3,6 @@
     <q-page-container>
       <h1 class="q-pb-md" style="margin-top: -10px; text-align: center;">Profile</h1>
       <h3 style="margin-top: -70px; margin-bottom:100px; text-align: center;">{{user.username}}</h3>
-      
 
       <div v-if="owner" class="q-flex column items-center justify-center">
         <q-btn v-if="isEditing" class="edit icon-edit stack" flat square fab @click="isEditing = false" />
@@ -37,7 +36,8 @@
             <q-input v-model="user.last_name" :readonly="!isEditing" label="Last Name" class="tow-input"/>
           </div>
 
-          <q-input v-model="user.birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
+
+          <q-input v-model="birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
           <q-input v-model="user.phone"  :readonly="!isEditing" label="Phone Number" class="one-input"/>
           
           <div class="q-gutter-md row">
@@ -58,7 +58,7 @@
           
           <div class="one-input">
             <span class="text-h8 text-grey-7">Tags</span>
-            <vue3-tags-input v-if="isEditing" :max-tags="20" :maxlength="25" :add-on-key="tagEsc" :tags="tags" @on-tags-changed="updateUserTags"/>   
+            <vue3-tags-input v-if="isEditing" :max-tags="20" :maxlength="25" :add-on-key="tagEsc" :tags="tags" @on-tags-changed="updateUserTags" />   
             <div v-else>
               <q-input v-model="user.tags" readonly />
             </div>
@@ -84,7 +84,6 @@ import utility from '@/utility.js'
 import { createTags } from '@johmun/vue-tags-input'
 import axios from 'axios'
 import AlertView from '@/views/AlertView.vue'
-import { defineProps } from 'vue'
 import moment from 'moment'
 
 const store = useStore()
@@ -105,7 +104,12 @@ const alert = ref({
   text: '',
 });
 
-
+const birthdate = computed({
+  get: () => moment(user.birthdate).format('YYYY-MM-DD').toString().split('T')[0],
+  set: (value) => {
+    user.birthdate = moment(value).format('YYYY-MM-DD')
+  }
+})
 
 const updateUserTags = (newTags) => {
   user.tags = newTags.join(', ');
@@ -136,13 +140,10 @@ const resetForm = () => {
 
 const updateUser = async () => {
   try {
-    user.birthdate = moment(user.birthdate).format('YYYY-MM-DD')
 
     const token = localStorage.getItem('token')
     const url = `${import.meta.env.VITE_APP_API_URL}/api/users/updateprofile`
     const headers = { 'x-auth-token': token }
- 
-
 
     const res = await axios.post(url, user, { headers })
     
@@ -228,7 +229,6 @@ onMounted(async () => {
   left: 50%;
   transform: translate(-50%, 25%);
   height: 1.2px;
-  /* background: var(--color-primary); */
   transition: width .2s ease-in-out;
 }
 
@@ -241,28 +241,11 @@ onMounted(async () => {
   transform: translate(-.5px, -1.2px);
 }
 
-.ti-item {
-  /* background-color: #fafafa !important; */
-}
-
-.ti-item.ti-selected-item {
-  /* background-color: var(--color-primary) !important; */
-}
-
-.vue-tags-input.ti-disabled > .ti-input > .ti-tags > .ti-tag {
-  /* background: #c8c8c8 !important; */
-}
-
-.vue-tags-input.ti-disabled > .ti-input {
-  /* border-bottom: 1px dashed #c8c8c8 !important; */
-}
-
 .vue-tags-input.ti-focus .ti-input::after {
   width: 100%;
 }
 
 .vue-tags-input .ti-input {
   border: none !important;
-  /* border-bottom: 1px solid grey !important; */
 }
 </style>

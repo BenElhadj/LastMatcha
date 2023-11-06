@@ -135,16 +135,7 @@ onBeforeUnmount(() => {
   width: 25%;
   min-width: 120px;
 }
-/*.left-scroll {
-  height: 100%;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  width: 25%;
-  max-width: 270px;
-  min-width: 120px;
-}
-*/
+
 .right-scroll {
   height: 100%;
   overflow-y: auto;

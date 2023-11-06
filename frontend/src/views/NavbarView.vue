@@ -24,12 +24,6 @@
       <q-space></q-space>
       
       <div v-if="connected" justify-end class="search-notif-msg">
-      
-        <!-- <q-input v-model="recherche" class="location_input mb-5" color="primary" hide-details outlined solo text placeholder="Recherche" @blur="displaySearchText()">
-          <template v-slot:append>
-            <q-icon name="mdi-magnify"></q-icon>
-          </template>
-        </q-input> -->
 
         <div>
           <q-btn ripple flat round dense class="icon-size">
@@ -59,9 +53,9 @@
                   </q-item-label>
                 </q-item-section>
               </q-item>
-              <q-item clickable @click="$router.push('/notifications')">
+              <q-item class="flex justify-center" clickable @click="$router.push('/notifications')">
                 <q-item-label class="see_all" style="font-size:24px !important;">
-                  Consulter toutes les notifications
+                  Show all notifications
                 </q-item-label>
               </q-item>
             </q-list>
@@ -97,9 +91,9 @@
                   </q-item-label>
                 </q-item-section>
               </q-item>
-              <q-item clickable @click="$router.push('/chat')">
+              <q-item class="justify-center" clickable @click="$router.push('/chat')">
                 <q-item-label class="see_all" style="font-size:24px !important;">
-                  Voir toutes les discussions
+                  Show all discussions
                 </q-item-label>
               </q-item>
             </q-list>
@@ -109,8 +103,8 @@
       </div>
 
       <div v-else>
-        <span class="text-link q-ml-xl" @click="$router.push('/login')">Connexion</span>
-        <span class="text-link q-ml-xl" @click="$router.push('/register')">Inscription</span>
+        <span class="text-link q-ml-xl" @click="$router.push('/login')">Connection</span>
+        <span class="text-link q-ml-xl" @click="$router.push('/register')">Registration</span>
       </div>
       
     </q-toolbar>
@@ -142,7 +136,7 @@
         <q-item clickable @click="logout">
           <img src="@/assets/Navbar/deconnexion.png" alt="Déconnexion" class="icon-size">
           <q-item-section>
-            <q-item-label>Se déconnecter</q-item-label>
+            <q-item-label>Sign out</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -157,6 +151,7 @@ import { ref, onMounted, onUnmounted, onBeforeUnmount, computed, watch } from 'v
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+
 import acceilImage from '@/assets/Navbar/acceil.png'
 import decouvrirImage from '@/assets/Navbar/decouvrir.png'
 import chatImage from '@/assets/Navbar/chat.png'
@@ -377,32 +372,6 @@ onBeforeUnmount(() => {
   clearInterval(refreshInterval)
 })
 
-// return {
-//   user,
-//   notif,
-//   notifs,
-//   connected,
-//   convos,
-//   profileImage,
-//   searchText,
-//   drawer,
-//   links,
-//   notifMenu,
-//   msgMenu,
-//   image,
-//   syncConvo,
-//   toUserProfile,
-//   toUserChat,
-//   logout,
-//   menuConvos,
-//   notifNum,
-//   newMsgNum,
-//   newMessage,
-//   formatNotifDate,
-//   getFullPath,
-//   getNotifMsg,
-//   getNotifIcon
-// }
 </script>
 
 <style scoped>

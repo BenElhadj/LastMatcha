@@ -38,12 +38,11 @@
             </q-chat-message>
 
           </q-item>
-
         </div>
       </div>
     </div>
   </q-layout>
-  <h2 v-else class="text-xs-center text-md-left pt-4 pb-3 mb-4 hidden-sm-and-down grey--text">matcher-vous avec des autrui pour commencer à discuter avec d'autres utilisateurs</h2>
+  <h2 v-else class="text-xs-center text-md-left pt-4 pb-3 mb-4 hidden-sm-and-down grey--text">Match with others to start chatting with other users</h2>
 </template>
 
 <script setup>
@@ -156,7 +155,6 @@ watch(() => seenConvo, () => {
 onMounted(() => {
   fetchNewMessages()
   getChat()
-  // location.reload()
   const top = document.querySelector('.top_chat')
   top.addEventListener('scroll', async (e) => {
     if (!limit.value && top.scrollTop <= 10) {
@@ -173,25 +171,28 @@ onBeforeUnmount(() => {
 })
 
 const fetchNewMessages = async () => {
-  try {
-    const result = await getChat()
-    checkLimit(result.data)
-    const newMessages = result.data.filter((message) => {
-      return !messages.value.some((msg) => msg.id === message.id)
-    })
+  if (!selectedConvo) {
+    try {
+      const result = await getChat()
+      checkLimit(result.data)
+      const newMessages = result.data.filter((message) => {
+        return !messages.value.some((msg) => msg.id === message.id)
+      })
 
-    if (newMessages.length > 0) {
-      messages.value = [...messages.value, ...newMessages]
-      scroll()
+      if (newMessages.length > 0) {
+        messages.value = [...messages.value, ...newMessages]
+        scroll()
+      }
+    } catch (err) {
+      console.error('Error fetching new messages:', err)
     }
-  } catch (err) {
-    console.error('Error fetching new messages:', err)
   }
 }
 
-
 function refreshMethods() {
-  fetchNewMessages()
+    if (!selectedConvo) {
+    fetchNewMessages()
+  }
 }
 
 const refreshInterval = setInterval(refreshMethods, 1000)

@@ -6,20 +6,21 @@
         <div class="header_content row justify-center align-center">
           <div class="header_center">
             <h1 class="display-3 hidden-xs-only text-xs-center mb-5">
-              Si vous n'aimez pas vos imperfections, <br />quelqu'un les aimera pour vous
+              If you don't like your imperfections,<br />Someone will love them for you
             </h1>
               <q-btn
                 to="/discover"  
                 rounded
-                
+                plat
                 class="q-btn-primary q-btn-lg"  
                 role="button"
                 style="     margin-top: -100px;   margin-left: -26px;    margin-bottom: -306px;"
               >
-                Rechercher votre bonheur
+                Find your happiness here
               </q-btn>         
               <div class="row justify-center align-center" >
              <img :src="img" alt="homepage" style="width: 100%; height: 100%; object-fit: contain;"/>
+             
             </div>
           </div>
         </div>
@@ -84,7 +85,6 @@ export default {
   margin-bottom: 50px !important;
 }
 
-/* .header_layout, */
 .header_content {
   height: 100%;
   width: 100%;
@@ -100,8 +100,6 @@ export default {
 }
 
 .header {
-  /* font-size: 30px;
-  font-weight: 300px; */
   height: calc(100vh - 64px);
   background-position: center;
   background-size: cover;
@@ -116,7 +114,6 @@ export default {
 }
 
 .home_toggle.theme--light.q-btn-toggle {
-  /* background: transparent !important; */
   display: flex;
   justify-content: center;
 }

@@ -4,23 +4,19 @@
       <q-card class="q-pa-md">
         <q-card-section class="q-pt-5">
           <q-avatar
-            ref="vueavatar"
             :width="280"
             :height="280"
             :border="0"
-            @vue-avatar-editor:image-ready="onImageReady"
             @file_error="error = true"
             @file_success="error = false"
             class="q-mb-md"
           ></q-avatar>
-          <q-avatar-scale
-            ref="vueavatarscale"
-            @vue-avatar-editor-scale:change-scale="onChangeScale"
+          <q-avatar
             :width="250"
             :min="1"
             :max="3"
             :step="0.02"
-          ></q-avatar-scale>
+          ></q-avatar>
         </q-card-section>
         <q-card-actions>
           <q-btn text color="primary" @click="closeEditor">Annuler</q-btn>
@@ -36,10 +32,7 @@
 import { ref } from 'vue';
 import { mapGetters } from 'vuex';
 import axios from 'axios';
-
 import AlertView from '@/views/AlertView.vue'
-import VueAvatar from '@/components/afterLogin/VueAvatar.vue'
-import VueAvatarScale from '@/components/afterLogin/VueAvatarScale.vue'
 
 const error = ref(null);
 const dialog = ref(false);

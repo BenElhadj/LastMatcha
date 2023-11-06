@@ -29,6 +29,7 @@
           <q-btn block large color="primary" @click="registerUser"  class="my-5">Submit</q-btn>
           <div class="row justify-end">
             <q-btn flat label="Have an account? Login" color="primary" to="/login"></q-btn>
+            <q-btn flat label="Forgot password" color="primary" to="/forgot"></q-btn>
           </div>
         </q-form>
       </div>

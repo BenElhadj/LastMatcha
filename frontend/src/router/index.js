@@ -23,8 +23,6 @@ const router = createRouter({
       name: 'register',
       component: () => import('@/components/beforeLogin/RegisterView.vue')
     },
-
-
     {
       path: '/discover',
       name: 'discover',
@@ -41,19 +39,6 @@ const router = createRouter({
       component: () => import('@/components/afterLogin/NotificationsView.vue')
     },
     {
-      path: '/search',
-      name: 'search',
-      component: () => import('@/components/afterLogin/SearchView.vue'),
-      props: route => ({
-        data: {
-          gender: route.query.gender,
-          location: route.query.location,
-          min: route.query.min,
-          max: route.query.max
-        }
-      })
-    },
-    {
       path: '/settings',
       name: 'settings',
       component: () => import('@/components/afterLogin/SettingsView.vue')
@@ -68,8 +53,6 @@ const router = createRouter({
       name: 'users',
       component: () => import('@/components/afterLogin/UsersView.vue')
     },
-
-
     {
       path: '/404',
       name: '404',
@@ -82,7 +65,7 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const publicPages = ['/login', '/register', '/forgot', '/recover']
   const authRequired = !publicPages.includes(to.path)
   const loggedIn = !!localStorage.getItem('token')

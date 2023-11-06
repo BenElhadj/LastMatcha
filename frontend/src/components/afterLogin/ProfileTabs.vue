@@ -24,14 +24,12 @@ const props = defineProps({
   active: { type: String, default: '' }
 })
 
-
 const emit = defineEmits(['change-tab'])
 const activeTab = ref(props.active)
 const links = ref([
   { 
     text: 'Infos', 
     route: 'profile',
-    // width: '7px important!',
     icon: userImage
     },
   { 

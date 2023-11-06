@@ -66,9 +66,7 @@ const log = async () => {
     })
     const data = await res.json()
     if (data.msg) {
-      alert.value.state = true
-      alert.value.color = 'red'
-      alert.value.text = data.msg
+      alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : data.msg }
     } else {
       const user = data
       if (user.id) {
@@ -80,7 +78,7 @@ const log = async () => {
       }
     }
   } catch (err) {
-    console.error('err async log in frontend/LoginView.vue ===> ', err)
+    alert.value = { state: true, color: 'red', text:  'Your account is still not verified,\nPlease check your email' }
   }
 }
 

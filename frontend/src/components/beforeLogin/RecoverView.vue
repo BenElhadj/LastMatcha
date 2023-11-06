@@ -30,122 +30,95 @@
   </q-layout>
 </template>
 
-<script>
-import { ref, onMounted, computed } from 'vue'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import AlertView from '@/views/AlertView.vue'
 import LoaderView from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
-import router from '@/router/index'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 
-export default {
-  name: 'RecoverView',
-  components: {
-    AlertView,
-    LoaderView
-  },
-  setup () {
-    const store = useStore()
-    const password = ref('')
-    const passwordConfirm = ref('')
-    const notSubmited = ref(true)
-    const valid = ref(false)
-    const loading = ref(true)
-    const showPass = ref(false)
-    const showConfPass = ref(false)
-    const passRules = [
-      v => !!v || 'This field is required',
-      v => /^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(v) || 'Password must contain at least one letter, one number and one special char',
-      v => v.length >= 8 || 'Password must be at least 8 characters long'
-    ]
-    const confPassRules = [
-      v => !!v || 'This field is required'
-    ]
-    const alert = {
-      state: false,
-      color: '',
-      text: ''
+const store = useStore()
+const password = ref('')
+const passwordConfirm = ref('')
+const notSubmited = ref(true)
+const valid = ref(false)
+const loading = ref(true)
+const showPass = ref(false)
+const showConfPass = ref(false)
+const passRules = [
+  v => !!v || 'This field is required',
+  v => /^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(v) || 'Password must contain at least one letter, one number and one special char',
+  v => v.length >= 8 || 'Password must be at least 8 characters long'
+]
+const confPassRules = [
+  v => !!v || 'This field is required'
+]
+const alert = {
+  state: false,
+  color: '',
+  text: ''
+}
+const router = useRouter()
+
+const user = computed(() => store.state.user)
+
+onMounted(async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const key = localStorage.getItem('key')
+    const headers = { 'x-auth-token': token }
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/recover`
+    const res = await axios.get(url, { key }, { headers })
+    loading.value = false
+    if (res.ok) {
+      router.replace('/recover').catch(err => {
+        console.error('err onMounted router.replace in frontend/RecoverView.vue ===> ', err)
+      })
+    } else {
+      router.push('/404')
     }
+  } catch (err) {
+    console.error('err onMounted in frontend/RecoverView.vue ===> ', err)
+  }
+})
 
-    const user = computed(() => store.state.user)
+const passwordMatch = () => {
+  return !passwordConfirm.value.length || password.value === passwordConfirm.value ? '' : 'Les mots de passe ne correspondent pas'
+}
 
-    onMounted(async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const key = localStorage.getItem('key')
-        const headers = { 'x-auth-token': token }
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/recover`
-        const res = await axios.get(url, { key }, { headers })
-        this.loading = false
-        if (res.ok) {
-          router.replace('/recover').catch(err => {
-            console.error('err onMounted router.replace in frontend/RecoverView.vue ===> ', err)
-          })
-        } else {
-          this.$router.push('/404')
-        }
-      } catch (err) {
-        console.error('err onMounted in frontend/RecoverView.vue ===> ', err)
-      }
-    })
-
-    const passwordMatch = () => {
-      return !passwordConfirm.value.length || password.value === passwordConfirm.value ? '' : 'Les mots de passe ne correspondent pas'
+const submit = async () => {
+  loading.value = true
+  try {
+    const token = localStorage.getItem('token')
+    const key = localStorage.getItem('key')
+    const headers = { 'x-auth-token': token }
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/rkeycheck`
+    const data = { key, password: password.value }
+    const res = await axios.post(url, data, { headers })
+    loading.value = false
+    if (res.data.ok) {
+      notSubmited.value = false
+      alert.state = true
+      alert.color = 'green'
+      alert.text = 'Votre mot de passe a été réinitialisé !'
+    } else {
+      alert.state = true
+      alert.color = 'red'
+      alert.text = 'Oups, une erreur s\'est produite. Merci de réessayer.'
     }
-
-    const submit = async () => {
-      this.loading = true
-      try {
-        const token = localStorage.getItem('token')
-        const key = localStorage.getItem('key')
-        const headers = { 'x-auth-token': token }
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/rkeycheck`
-        const data = { key, password: this.password }
-        const res = await axios.post(url, data, { headers })
-        this.loading = false
-        if (res.data.ok) {
-          this.notSubmited = false
-          this.alert.state = true
-          this.alert.color = 'green'
-          this.alert.text = 'Votre mot de passe a été réinitialisé !'
-        } else {
-          this.alert.state = true
-          this.alert.color = 'red'
-          this.alert.text = 'Oups, une erreur s\'est produite. Merci de réessayer.'
-        }
-      } catch (err) {
-        console.error('err submit in frontend/RecoverView.vue ===> ', err)
-      }
-    }
-
-    const beforeDestroy = async () => {
-      const headers = { 'x-auth-token': user.value.token }
-      const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/destroykey`
-      await axios.get(url, { headers })
-    }
-
-    return {
-      password,
-      passwordConfirm,
-      notSubmited,
-      valid,
-      loading,
-      showPass,
-      showConfPass,
-      passRules,
-      confPassRules,
-      alert,
-      user,
-      beforeDestroy,
-      passwordMatch,
-      submit
-    }
-  },
-  methods: {
-    ...utility
+  } catch (err) {
+    console.error('err submit in frontend/RecoverView.vue ===> ', err)
   }
 }
+
+const beforeDestroy = async () => {
+  const headers = { 'x-auth-token': user.value.token }
+  const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/destroykey`
+  await axios.get(url, { headers })
+}
+
 </script>
 
 <style scoped>

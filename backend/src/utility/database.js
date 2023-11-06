@@ -60,8 +60,6 @@ const createUserTable = async () => {
 	  `;
     const insertTableQuery = `
       INSERT INTO users (id, first_name, last_name, username, email, password, created_at, gender, looking, birthdate, biography, tags, address, city, country, postal_code, phone, status, lat, lng, vkey, rkey, verified, google_id, reports) VALUES
-      (1, 'Test', 'Admin', 'AdminTest', '42projetsweb@gmail.com', '$2a$10$LG21UOau1qzQ9nCIWNq7iuAltnSsgoPCWHFl5H33PsBRqs0ghyUZK', '2023-07-07 03:09:20', 'male', 'both', '1990-04-09', 'je suis timide', 'Music,Development,Sports', '5 Passage Bullourde', 'Paris', 'France', '75011', '0605868051', '2023-07-07 03:09:20', '48.841463', '2.3614006', 'a0e06538e2e0570769c4', NULL, 1, NULL, 0),
-      (2, 'Hamdi', 'ELHADJ', 'TestAdmin', '42bhamdi@gmail.com', '$2a$10$UdgzWKD3wKGQWMGK.UWdK.dM53o1wmq/XZGXD46ihtJRaMBOf5ZIa', '2023-07-07 03:10:08', 'male', 'both', '1985-02-05', 'je n ai rien a dire', 'Sports,Music,Development', '107 rue de Charenton', 'Paris', 'France', '75012', '0605868051', '2023-07-07 03:10:08', '48.8414475', '2.3614038', 'e4bb422eaa17a7fac050', NULL, 1, NULL, 0);
     `;
 	  await pool.query(createTableQuery);
 	  console.log('User table created successfully!');
@@ -165,13 +163,6 @@ const createImagesTable = async () => {
 	  `;
     const insertTableQuery = `
       INSERT INTO images (id, user_id, name, profile, cover, created_at) VALUES
-      (1, 1, '1-272bde9498ecd678e39a.png', 0, 0, '2023-08-04 04:18:12'),
-      (2, 1, '1-601e5d26148bfc6b0bae.png', 0, 1, '2023-08-04 04:18:38'),
-      (3, 1, '1-f5dc4b563cff46483ef5.png', 1, 0, '2023-08-04 04:19:22'),
-      (4, 2, 'https://picsum.photos/200/300?random=5', 0, 0, '2022-08-25 00:39:59'),
-      (5, 2, 'https://picsum.photos/200/300?random=7', 0, 0, '2022-08-16 12:15:43'),
-      (6, 2, '2-ff8f42946a042ecc7669.png', 0, 1, '2023-08-04 04:16:39'),
-      (7, 2, '2-9b6d684f04448dad3048.png', 1, 0, '2023-08-04 04:17:00');
     `
 	  await pool.query(createTableQuery);
 	  console.log('Images table created successfully!');
@@ -236,16 +227,27 @@ const createTagsTable = async () => {
 	  `;
     const insertTableQuery = `
       INSERT INTO tags (value) VALUES
-      ('42'),
       ('125'),
+      ('42'),
+      ('Back-end'),
+      ('Cinema'),
+      ('Football'),
+      ('Gaming'),
+      ('Tae-kwon-do'),
+      ('Front-end'),
+      ('Geek'),
+      ('Music'),
       ('RNCP-5'),
       ('RNCP-7'),
+      ('Sports'),
+      ('Tattoos'),
+      ('Vegan'),
       ('Web'),
-      ('Front-end'),
-      ('Back-end'),
-      ('sports'),
-      ('cinema'),
-      ('music');
+      ('Web-Design'),
+      ('Web-Development'),
+      ('Web-Integration'),
+      ('Web-UI-UX'),
+      ('Webmaster');
     `;
 	  await pool.query(createTableQuery);
     console.log('Tags table created successfully!');

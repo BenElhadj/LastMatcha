@@ -1,83 +1,98 @@
 <template>
   <q-layout>
-    <q-page class="forgot mt-5">
-      <h1 class="page-header font-weight-light text-primary">
-        Réinialisation de mot de passe
-      </h1>
-      <p class="subheading text-primary mt-3">
-        Veuillez fournir votre adresse e-mail afin de changer votre mot de passe
-      </p>
-      <div class="row q-gutter-sm">
-        <q-input v-model="email" outlined label="Email" require class="my-5" @keyup.enter="recover"></q-input>
-        <q-btn large outline color="primary" class="ml-0 py-3 send_btn" @click.prevent="recover">
-          Envoyer
-        </q-btn>
-      </div>
-      <AlertView :alert="alert"></AlertView>
-    </q-page>
+    <q-page-container class="mt-4">
+      <q-form class="forgot mt-5 my-4">
+        <h1 class="page-header text-h3 text-secondary">Rreset password</h1>
+        <q-form class="my-4">
+          <p class="subheading text-primary mt-3">Please provide your email address to reset your password</p>
+          <q-input v-model="email" color="primary" class="my-5" :rules="rules.email" label="Email" required @keyup.enter="recover"></q-input>
+          <q-btn block large color="primary"  @click.prevent="recover" class="my-5" type="submit">Send</q-btn>
+          <div class="row justify-end">
+            <q-btn flat label="Have an account? Login" color="primary" to="/login"></q-btn>
+            <q-btn flat label="Don't have an account? Sign up" color="primary" to="/register"></q-btn>
+          </div>
+        </q-form>
+      </q-form>
+      <AlertView :alert="alert" :redirect="true"/>
+    </q-page-container>
   </q-layout>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue'
 import AlertView from '@/views/AlertView.vue'
 import utility from '@/utility'
 import axios from 'axios'
 
-export default {
-  name: 'ForgotView',
-  components: { AlertView },
-  setup () {
-    const email = ref(null)
-    const alert = ref({
-      state: false,
-      color: '',
-      text: ''
-    })
+const email = ref(null)
+const alert = ref({
+  state: false,
+  color: '',
+  text: ''
+})
 
-    const recover = async (e) => {
-      if (email.value && email.value.length && /.+@.+/.test(email.value)) {
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/forget_password`
-        const res = await axios.post(url, { email: email.value })
-        email.value = ''
-        if (res.data.ok) {
-          alert.value.state = true
-          alert.value.color = 'green'
-          alert.value.text = 'Please check your email ..'
-        } else {
-          alert.value.state = true
-          alert.value.color = 'red'
-          alert.value.text = 'Ouups something went wrong!'
-        }
-      } else {
-        alert.value.state = true
-        alert.value.color = 'red'
-        alert.value.text = 'Please provide a valid email'
-      }
-    }
+const rules = {
+  email: [
+    v => !!v || 'Email field is required',
+    v => /.+@.+/.test(v) || 'Invalid email'
+  ]}
 
-    return {
-      email,
-      alert,
-      recover,
-      ...utility
+const emailRule = (v) => {
+  if (!v || (v.length >= 10 && v.length <= 55 && /.+@.+/.test(v))) {
+    return true
+  }
+  return alert.value = { state: true, color: 'red', text: 'Please provide a valid email and ensure it has a length between 10 and 55 characters.'}
+}
+
+const recover = async () => {
+  if (emailRule(email.value) === true) {
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/forget_password`
+    const res = await axios.post(url, { email: email.value })
+    email.value = ''
+    if (res.data.ok) {
+      alert.value = { state: true, color: 'green', text: res.data.msg ? res.data.msg : 'Please check your email ..'}
+    } else {
+      alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}
     }
+  } else {
+    alert.value = { state: true, color: 'red', text: 'Please provide a valid email and ensure it has a length between 10 and 55 characters.'}
   }
 }
 </script>
 
+
 <style scoped>
-.q-input--outline.q-input--single-line input {
-  margin-top: 0 !important;
+/*.send_btn {
+  margin-top: 25px;
+  height: 40px;
 }
 
-.theme--light.q-input--outline:not(.v-input--is-focused):not(.v-input--has-state)>.v-input__control>.v-input__slot:hover {
-  box-shadow: none;
-  border: 1px solid var(--color-primary);
+.page-header {
+  text-align: center;
 }
 
-.send_btn {
-  height: 56px;
-  margin-left: -1px !important;
+.subheading {
+  text-align: center;
+}
+*/
+
+
+
+.alert-enter-active, .alert-leave-active, .register {
+  transition: all .5s;
+}
+.alert-enter, .alert-leave-to {
+  opacity: 0;
+}
+.alert {
+  position: absolute;
+  left: 50%;
+  top: 1rem;
+  transform: translateX(-50%);
+}
+.forgot, .alert {
+  width: 100%;
+  max-width: 40rem;
+  margin: auto;
 }
 </style>

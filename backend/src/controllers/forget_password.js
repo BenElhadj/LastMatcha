@@ -52,7 +52,6 @@ const recover_password = async (req, res) => {
 				const payload = { id: result[0].id }
 				const token = await sign(payload, process.env.SECRET, tokenExp)
 				return res.status(200).render('recover', { token, rkey })
-				// res.json({ msg: 'ok' })
 			}
 		})
 	} catch (err) {
