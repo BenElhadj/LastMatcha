@@ -66,7 +66,6 @@ const alert = ref({
 const rules = {
   name: [
     v => !!v || 'Firstname and Lastname field is required',
-    // eslint-disable-next-line
     v => !(/[^a-zA-Z\- ]+/.test(v)) || 'Name must contain letters only',
     v => (v.length >= 3 && v.length <= 255) || 'The name must contain between 3 and 255 characters'
   ],

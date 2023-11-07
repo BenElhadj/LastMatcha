@@ -23,7 +23,9 @@ import { ref } from 'vue'
 import AlertView from '@/views/AlertView.vue'
 import utility from '@/utility'
 import axios from 'axios'
-
+import { useRouter } from 'vue-router'
+ 
+const router = useRouter()
 const email = ref(null)
 const alert = ref({
   state: false,
@@ -51,6 +53,15 @@ const recover = async () => {
     email.value = ''
     if (res.data.ok) {
       alert.value = { state: true, color: 'green', text: res.data.msg ? res.data.msg : 'Please check your email ..'}
+      await new Promise(resolve => {
+        const interval = setInterval(() => {
+          if (!alert.value.state) {
+            clearInterval(interval)
+            resolve()
+          }
+        }, 1000)
+      })
+    router.push('/login')
     } else {
       alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops... something went wrong!'}
     }
@@ -62,22 +73,6 @@ const recover = async () => {
 
 
 <style scoped>
-/*.send_btn {
-  margin-top: 25px;
-  height: 40px;
-}
-
-.page-header {
-  text-align: center;
-}
-
-.subheading {
-  text-align: center;
-}
-*/
-
-
-
 .alert-enter-active, .alert-leave-active, .register {
   transition: all .5s;
 }

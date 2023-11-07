@@ -165,13 +165,13 @@ const drawer = ref(false)
 const image = computed(() => store.getters.profileImage)
 const links = [
   {
-    text: 'Accueil',
+    text: 'Homepage',
     route: '/',
     public: true,
     image: acceilImage
   },
   {
-    text: 'Découvrir',
+    text: 'Discover',
     route: '/discover',
     public: false,
     image: decouvrirImage
@@ -189,7 +189,7 @@ const links = [
     image: notificationImage
   },
   {
-    text: 'Paramètres',
+    text: 'Settings',
     route: '/settings',
     public: false,
     image: parametreImage

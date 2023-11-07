@@ -1,32 +1,40 @@
 <template>
   <q-layout>
-    <q-container class="recover mt-5">
-      <form v-if="notSubmited && !loading" class="my-4" @submit.prevent="submit">
-        <div class="row justify-center">
-          <div class="col-xs-12">
-            <h1 class="text-h5 mb-5 font-weight-light text-grey-7">
-              Reset password
-            </h1>
-          </div>
-          <div class="col-md-8 col-sm-10 col-xs-12">
-            <q-input v-model="password" filled :rules="passRules" label="New password" :type="showPass ? 'text' : 'password'" :append="showPass ? 'visibility_off' : 'visibility'" @click:append="showPass = !showPass"></q-input>
-          </div>
-          <div class="col-md-8 col-sm-10 col-xs-12">
-            <q-input v-model="passwordConfirm" filled :rules="confPassRules" label="Confirm new password" :type="showConfPass ? 'text' : 'password'" :append="showConfPass ? 'visibility_off' : 'visibility'" @click:append="showConfPass = !showConfPass"></q-input>
-          </div>
-          <div class="col-md-8 col-sm-10 col-xs-12">
-            <q-btn color="primary" size="large" block :disable="!valid" class="mt-5 text-white" @click="submit">
-              Submit
-            </q-btn>
-          </div>
+    <q-page-container class="recover mt-4">
+      <q-form class="recover mt-5 my-4">
+      <!-- <form v-if="notSubmited && !loading" class="my-4" @submit.prevent="submit"> -->
+        <div class="my-4">
+          <h1 class="page-header text-h3 text-secondary">Reset password</h1>
+          <q-form @submit.prevent="submit" class="my-4">
+            
+            <q-input v-model="password" color="primary" class="my-5" :rules="passRules" label="New password" :type="showPass ? 'text' : 'password'">
+              <template #append>
+                <q-icon :name="showPass ? 'mdi-eye-off' : 'mdi-eye'" class="cursor-pointer" @click="showPass = !showPass"/>
+              </template>
+            </q-input>
+
+            <q-input v-model="passwordConfirm" color="primary" class="my-5" :rules="confPassRules" label="Confirm new password" :type="showConfPass ? 'text' : 'password'" @keyup.enter="submit">
+              <template #append>
+                <q-icon :name="showConfPass ? 'mdi-eye-off' : 'mdi-eye'" class="cursor-pointer" @click="showConfPass = !showConfPass"/>
+              </template>
+            </q-input>
+
+            <q-btn block large color="primary" @click="submit" class="my-5" type="submit">Submit</q-btn>
+
+            <div class="row justify-end">
+              <q-btn flat label="Have an account? Login" color="primary" to="/login"></q-btn>
+              <q-btn flat label="Don't have an account? Sign up" color="primary" to="/register"></q-btn>
+            </div>
+
+          </q-form>
         </div>
-      </form>
+      </q-form>
       <q-btn v-if="!notSubmited && !loading" color="primary" large block to="/" class="mt-5 py-3">
         Go back
       </q-btn>
-      <LoaderView v-if="loading" />
+      <!-- <LoaderView v-if="loading" /> -->
       <AlertView :alert="alert"></AlertView>
-    </q-container>
+    </q-page-container>
   </q-layout>
 </template>
 
@@ -53,7 +61,8 @@ const passRules = [
   v => v.length >= 8 || 'Password must be at least 8 characters long'
 ]
 const confPassRules = [
-  v => !!v || 'This field is required'
+  v => !!v || 'This field is required',
+  v => v === password.value || 'Passwords do not match'
 ]
 const alert = {
   state: false,
@@ -66,27 +75,30 @@ const user = computed(() => store.state.user)
 
 onMounted(async () => {
   try {
-    const token = localStorage.getItem('token')
-    const key = localStorage.getItem('key')
-    const headers = { 'x-auth-token': token }
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/recover`
-    const res = await axios.get(url, { key }, { headers })
-    loading.value = false
-    if (res.ok) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const headers = {
+      'x-auth-token': localStorage.getItem('token'), // Récupérez le token du localStorage
+      'x-auth-key': localStorage.getItem('key'), // Récupérez la clé du localStorage
+    };
+    console.log('headers ===> ', headers);
+    console.log('token ===> ', localStorage.getItem('token'));
+    console.log('key ===> ', localStorage.getItem('key'));
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/recover`;
+    const res = await axios.get(url, { headers });
+    loading.value = false;
+    if (res.status === 200) {
       router.replace('/recover').catch(err => {
-        console.error('err onMounted router.replace in frontend/RecoverView.vue ===> ', err)
-      })
+        console.error('err onMounted router.replace in frontend/RecoverView.vue ===> ', err);
+      });
     } else {
-      router.push('/404')
+      router.push('/404');
     }
   } catch (err) {
-    console.error('err onMounted in frontend/RecoverView.vue ===> ', err)
+    console.error('err onMounted in frontend/RecoverView.vue ===> ', err);
   }
-})
+});
 
-const passwordMatch = () => {
-  return !passwordConfirm.value.length || password.value === passwordConfirm.value ? '' : 'Les mots de passe ne correspondent pas'
-}
+
 
 const submit = async () => {
   loading.value = true
@@ -94,6 +106,8 @@ const submit = async () => {
     const token = localStorage.getItem('token')
     const key = localStorage.getItem('key')
     const headers = { 'x-auth-token': token }
+    console.log('key ===> ', key)
+    console.log('token ===> ', token)
     const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/rkeycheck`
     const data = { key, password: password.value }
     const res = await axios.post(url, data, { headers })
@@ -132,5 +146,10 @@ const beforeDestroy = async () => {
   top: 30%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+.recover, .alert {
+  width: 100%;
+  max-width: 40rem;
+  margin: auto;
 }
 </style>
