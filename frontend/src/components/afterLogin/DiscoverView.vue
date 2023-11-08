@@ -309,7 +309,7 @@ function reset() {
   sort.value = null
   gender.value = null
   age.value = {min: 18, max: 85}
-  rating.value = {min: 0, max: 5}
+  rating.value = {min: 0, max: 7}
   distance.value = {min: 0, max: maxDis.value}
   location.value = null
 }
