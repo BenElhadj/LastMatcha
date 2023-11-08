@@ -74,10 +74,11 @@ const addRkey = (user, callback) => {
 	})
 }
 
-// Destroy password  key  [rkey] ---- Using Email 
+// Check Reset password  key  [rkey]
 
-const destroyRkey = (id, callback) => {
-	let request = `UPDATE users SET rkey = '' where id = '${id}'`
+const getRkey = (rkey, callback) => {
+	console.log(rkey)
+	let request = `SELECT id FROM users WHERE rkey = '${rkey}'`
 	db.query(request, (error, results) => {
 		if (error) throw error
 		callback(results)
@@ -94,17 +95,15 @@ const changeFrogottenPassword = (user, callback) => {
 	})
 }
 
+// Destroy password  key  [rkey] ---- Using Email 
 
-// Check Reset password  key  [rkey]
-
-const getRkey = (rkey, callback) => {
-	let request = `SELECT id FROM users WHERE rkey = '${rkey}'`
+const destroyRkey = (id, callback) => {
+	let request = `UPDATE users SET rkey = '' where id = '${id}'`
 	db.query(request, (error, results) => {
 		if (error) throw error
 		callback(results)
 	})
 }
-
 
 // Validate an Email 
 

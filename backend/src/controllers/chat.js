@@ -21,14 +21,17 @@ const getConAll = async (req, res) => {
 	}
 }
 
+// getInChat
+
 const getInChat = async (req, res) => {
-	if (!req.user.id)
-		return res.json({ msg: 'Not logged in' })
+	if (!req.user || !req.user.id) {
+		return res.json({ msg: 'Not logged in' });
+	}
 	try {
-		let result = await chatModel.getInChat(req.user.id)
-		res.json(result)
+		let result = await chatModel.getInChat(req.user.id);
+		res.json(result);
 	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
+		return res.json({ msg: 'Fatal error', err });
 	}
 }
 
