@@ -21,7 +21,6 @@
 </template>
 
 <script setup>
-console.log('===> login ===> ')
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'

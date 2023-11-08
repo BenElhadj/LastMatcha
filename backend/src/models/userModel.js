@@ -77,7 +77,6 @@ const addRkey = (user, callback) => {
 // Check Reset password  key  [rkey]
 
 const getRkey = (rkey, callback) => {
-	console.log(rkey)
 	let request = `SELECT id FROM users WHERE rkey = '${rkey}'`
 	db.query(request, (error, results) => {
 		if (error) throw error
@@ -154,7 +153,6 @@ const getUserByIdentifier = (identifier, callback) => {
 // Filling information for the 1st time 
 
 const updateProfile = (user, callback) => {
-	// console.log(Object.values(user))
 	let request = ` UPDATE users SET 
 		first_name = ?,
 		last_name = ?,
@@ -218,14 +216,12 @@ const getImagesById = (id, user_id, callback) => {
 	})
 }
 
-
 // Get image by userid
 
 const getImagesByUid = (user_id) => {
 	let request = `SELECT * FROM images WHERE user_id = ?`
 	return db.query(request, [user_id])
 }
-
 
 // Add images 
 
@@ -293,7 +289,6 @@ const setImages = (user_id) => {
 		if (error) throw error
 	})
 }
-
 
 // get Blocked  users 
 

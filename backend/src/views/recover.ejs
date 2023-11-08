@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-</head>
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/node-localstorage/2.0.0/localStorage.min.js"></script>
-    <script>
-        const LocalStorage = require('node-localstorage').LocalStorage;
-        const localStorage = new LocalStorage('./scratch');
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	</head>
+	<body>
+		<script>
+			// Récupérez la clé et le token de votre backend
+			const key = '<%= rkey %>';
+			const token = '<%= token %>';
+			
+			// Redirigez vers la page de récupération avec les données
+			window.location = '<%= process.env.APP_URL %>' + '/recover?key=' + key + '&token=' + token;
 
-        try {
-            localStorage.setItem('key', '<%= rkey %>');
-            localStorage.setItem('token', '<%= token %>');
-            
-            // Perform the redirection here
-            window.location = '<%= process.env.APP_URL %>' + '/recover';
-        } catch (err) {
-            console.log(err);
-        }
-    </script>
-</body>
+			// Stockez la clé et le token dans le localStorage
+			window.localStorage.setItem('key', key);
+			window.localStorage.setItem('token', token);
+		</script>
+	</body>
 </html>
+

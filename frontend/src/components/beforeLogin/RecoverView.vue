@@ -2,7 +2,6 @@
   <q-layout>
     <q-page-container class="recover mt-4">
       <q-form class="recover mt-5 my-4">
-      <!-- <form v-if="notSubmited && !loading" class="my-4" @submit.prevent="submit"> -->
         <div class="my-4">
           <h1 class="page-header text-h3 text-secondary">Reset password</h1>
           <q-form @submit.prevent="submit" class="my-4">
@@ -19,7 +18,7 @@
               </template>
             </q-input>
 
-            <q-btn block large color="primary" @click="submit" class="my-5" type="submit">Submit</q-btn>
+            <q-btn block large color="primary" @click="submit" class="my-5" type="submit" :disabled="!valid">Submit</q-btn>
 
             <div class="row justify-end">
               <q-btn flat label="Have an account? Login" color="primary" to="/login"></q-btn>
@@ -29,11 +28,7 @@
           </q-form>
         </div>
       </q-form>
-      <q-btn v-if="!notSubmited && !loading" color="primary" large block to="/" class="mt-5 py-3">
-        Go back
-      </q-btn>
-      <!-- <LoaderView v-if="loading" /> -->
-      <AlertView :alert="alert"></AlertView>
+      <AlertView v-if="alert.state" :alert="alert"/>
     </q-page-container>
   </q-layout>
 </template>
@@ -50,11 +45,10 @@ import axios from 'axios'
 const store = useStore()
 const password = ref('')
 const passwordConfirm = ref('')
-const notSubmited = ref(true)
-const valid = ref(false)
-const loading = ref(true)
+const submitting = ref(false)
 const showPass = ref(false)
 const showConfPass = ref(false)
+
 const passRules = [
   v => !!v || 'This field is required',
   v => /^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(v) || 'Password must contain at least one letter, one number and one special char',
@@ -64,63 +58,69 @@ const confPassRules = [
   v => !!v || 'This field is required',
   v => v === password.value || 'Passwords do not match'
 ]
-const alert = {
+const valid = computed(() => {
+  return passRules.every(rule => rule(password.value) === true) &&
+         confPassRules.every(rule => rule(passwordConfirm.value) === true)
+})
+
+const alert = ref({
   state: false,
   color: '',
   text: ''
-}
+});
 const router = useRouter()
 
 const user = computed(() => store.state.user)
 
 onMounted(async () => {
-  try {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    const headers = {
-      'x-auth-token': localStorage.getItem('token'), // Récupérez le token du localStorage
-      'x-auth-key': localStorage.getItem('key'), // Récupérez la clé du localStorage
-    };
-    console.log('headers ===> ', headers);
-    console.log('token ===> ', localStorage.getItem('token'));
-    console.log('key ===> ', localStorage.getItem('key'));
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/recover`;
-    const res = await axios.get(url, { headers });
-    loading.value = false;
-    if (res.status === 200) {
-      router.replace('/recover').catch(err => {
-        console.error('err onMounted router.replace in frontend/RecoverView.vue ===> ', err);
-      });
-    } else {
-      router.push('/404');
+    try {
+        await new Promise(resolve => setTimeout(resolve, 100))
+        const params = new URLSearchParams(window.location.search)
+        const key = params.get('key')
+        const token = params.get('token')
+        localStorage.setItem('key', key)
+        localStorage.setItem('token', token)
+        const headers = {
+            'x-auth-token': token,
+            'x-auth-key': key,
+        };
+    } catch (err) {
+        console.error('err onMounted in frontend/RecoverView.vue ===> ', err)
     }
-  } catch (err) {
-    console.error('err onMounted in frontend/RecoverView.vue ===> ', err);
-  }
 });
 
-
-
 const submit = async () => {
-  loading.value = true
+  if (submitting.value) return
   try {
+    submitting.value = true
     const token = localStorage.getItem('token')
     const key = localStorage.getItem('key')
     const headers = { 'x-auth-token': token }
-    console.log('key ===> ', key)
-    console.log('token ===> ', token)
     const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/rkeycheck`
-    const data = { key, password: password.value }
+    const data = { key, password: passwordConfirm.value }
     const res = await axios.post(url, data, { headers })
-    loading.value = false
     if (res.data.ok) {
-      notSubmited.value = false
-      alert.state = true
-      alert.color = 'green'
-      alert.text = 'Votre mot de passe a été réinitialisé !'
+      alert.value = { state: true, color: 'green', text: 'Your password has been reset!'}
+      await new Promise(resolve => {
+        const interval = setInterval(() => {
+          if (!alert.value.state) {
+            clearInterval(interval)
+            resolve()
+          }
+        }, 1000)
+      })
+      router.push('/')
     } else {
-      alert.state = true
-      alert.color = 'red'
-      alert.text = 'Oups, une erreur s\'est produite. Merci de réessayer.'
+      alert.value = { state: true, color: 'red', text: res.data.msg ? res.data.msg : 'Oops, an error occurred. Please try again.'}
+      await new Promise(resolve => {
+        const interval = setInterval(() => {
+          if (!alert.value.state) {
+            clearInterval(interval)
+            resolve()
+          }
+        }, 1000)
+      })
+      router.push('/forgot')
     }
   } catch (err) {
     console.error('err submit in frontend/RecoverView.vue ===> ', err)
