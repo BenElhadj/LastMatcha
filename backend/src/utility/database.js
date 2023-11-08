@@ -58,10 +58,6 @@ const createUserTable = async () => {
         reports int(11) DEFAULT '0'
       ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 	  `;
-
-    48.8414262
-2.3613604
-
     const insertTableQuery = `
     INSERT INTO users (id, first_name, last_name, username, email, password, created_at, gender, looking, birthdate, biography, tags, address, city, country, postal_code, phone, status, lat, lng, vkey, rkey, verified, google_id, reports) VALUES
     ('1', 'Test', 'Admin', 'AdminTest', '42projetsweb@gmail.com', '$2a$10$LG21UOau1qzQ9nCIWNq7iuAltnSsgoPCWHFl5H33PsBRqs0ghyUZK', '2023-07-07 03:09:20', 'male', 'both', '1990-04-09', 'je suis timide', 'Music, Cinema, Geek, Development, Sports', '5 Passage Bullourde', 'Paris', 'France', '75011', '0605868051', '2023-07-07 03:09:20', '48.841463', '2.3614006', '', '', '1', '', '0'),
