@@ -19,7 +19,7 @@
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.username }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">{{ user.last_name }} {{ user.first_name }}</span>
       <span justify-center class="name headline text-capitalize mt-2 ">
-      <q-icon class="mr-2" size="25px" :name="user.gender === 'male' ? 'icon-male' : (user.gender === 'female' ? 'icon-femel' : 'icon-both')"/>
+      <q-icon class="mr-2" size="25px" :name="user.gender === 'male' ? 'icon-male' : (user.gender === 'female' ? 'icon-femel' : 'icon-other')"/>
       <span v-if="user.birthdate">
         <q-icon size="30px" name="icon-age"/>
         {{ age }}
@@ -59,8 +59,8 @@ import { useStore } from 'vuex'
 import moment from 'moment'
 import utility from '@/utility'
 import axios from 'axios'
-import io from 'socket.io-client'
-const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
+// import io from 'socket.io-client'
+// const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
 
 const getLikeIcon = utility.getLikeIcon
 
@@ -126,40 +126,40 @@ const getHistory = async () => {
   }
 }
 
-function updateConnectedUsers() {
-  utility.getConnectedUsers()
-    .then(data => {
-      const connectedUserIds = data
-      const userId = props.user.user_id.toString()
+// function updateConnectedUsers() {
+//   utility.getConnectedUsers()
+//     .then(data => {
+//       const connectedUserIds = data
+//       const userId = props.user.user_id.toString()
 
-      if (connectedUserIds.includes(userId)) {
-        props.user.lastSeen = 'online'
-        props.user.isConnected = true
-      } else {
-        props.user.lastSeen = moment(props.user.status, 'YYYY-MM-DD HH:mm:ss').fromNow()
-        props.user.isConnected = false
-      }
-    })
-    .catch(error => {
-      console.error('Erreur lors de la récupération des données :', error)
-    });
-}
+//       if (connectedUserIds.includes(userId)) {
+//         props.user.lastSeen = 'online'
+//         props.user.isConnected = true
+//       } else {
+//         props.user.lastSeen = moment(props.user.status, 'YYYY-MM-DD HH:mm:ss').fromNow()
+//         props.user.isConnected = false
+//       }
+//     })
+//     .catch(error => {
+//       console.error('Error retrieving data :', error)
+//     });
+// }
 
 onMounted(() => {
-  updateConnectedUsers()
+  // updateConnectedUsers()
   getHistory()
 })
 
-function refreshMethods() {
-  updateConnectedUsers()
-  getHistory()
-}
+// function refreshMethods() {
+//   updateConnectedUsers()
+//   // getHistory()
+// }
 
-const refreshInterval = setInterval(refreshMethods, 5000)
+// const refreshInterval = setInterval(refreshMethods, 2000)
 
-onBeforeUnmount(() => {
-  clearInterval(refreshInterval)
-})
+// onBeforeUnmount(() => {
+//   clearInterval(refreshInterval)
+// })
 </script>
 
 <style>
@@ -182,8 +182,8 @@ onBeforeUnmount(() => {
   background-size: 90%;
   background-repeat: no-repeat;
 }
-.icon-both {
-  background-image: url('@/assets/userCard/both.png');
+.icon-other {
+  background-image: url('@/assets/userCard/other.png');
   background-size: 90%;
   background-repeat: no-repeat;
 }

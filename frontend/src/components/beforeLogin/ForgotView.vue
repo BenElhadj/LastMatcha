@@ -59,7 +59,7 @@ const recover = async () => {
             clearInterval(interval)
             resolve()
           }
-        }, 1000)
+        }, 2000)
       })
     router.push('/login')
     } else {

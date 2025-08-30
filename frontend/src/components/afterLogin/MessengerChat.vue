@@ -62,7 +62,7 @@ const typing = ref(false)
 const messages = ref([])
 const user = computed(() => store.getters.user)
 const image = computed(() => store.getters.profileImage)
-const typingSec = computed(() => store.getters.typingSec)
+// const typingSec = computed(() => store.getters.typingSec)
 const newMessage = computed(() => store.getters.newMessage)
 const imageConvo = computed(() => store.getters.imageConvo)
 const idUserConvo = computed(() => store.getters.idUserConvo)
@@ -87,9 +87,12 @@ const formatTime = (created_at) => {
 }
 
 const scroll = () => {
-  const top = document.querySelector('.top_chat')
-  top.scrollTop = top.scrollHeight - top.clientHeight
-}
+  const chatContainer = document.querySelector('.chat_container .top_chat');
+  if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+};
+
 
 const getChat = async () => {
   try {
@@ -106,12 +109,21 @@ const getChat = async () => {
   }
 }
 
+socket.on('chat', (data) => {
+  // Handle the 'chat' event here
+  console.log('Received chat event from the backend:', data);
+
+  // Call the getChat function or perform any other actions as needed
+  getChat();
+});
+
 watch(() => selectedConvo.value, async () => {
   if (selectedConvo) {
     page.value = 0
     limit.value = false
     try {
       const result = await getChat()
+
       checkLimit(result.data)
       messages.value = result.data
       store.dispatch('syncNotif')
@@ -134,11 +146,11 @@ watch(() => newMessage.value, () => {
   }
 })
 
-watch(() => typingSec, () => {
-  if (typingSec) {
-    scroll()
-  }
-})
+// watch(() => typingSec, () => {
+//   if (typingSec) {
+//     scroll()
+//   }
+// })
 
 watch(() => seenConvo, () => {
   if (seenConvo) {
@@ -152,26 +164,29 @@ watch(() => seenConvo, () => {
   }
 })
 
-onMounted(() => {
-  fetchNewMessages()
-  getChat()
+onMounted(async () => {
+  await fetchNewMessages()
+  await getChat()
+  scroll()
+
   const top = document.querySelector('.top_chat')
   top.addEventListener('scroll', async (e) => {
     if (!limit.value && top.scrollTop <= 10) {
       const result = await getChat()
       checkLimit(result.data)
       messages.value = [...result.data, ...messages.value]
-      top.scrollTop = 150
+      scroll()
     }
   })
 })
+
 
 onBeforeUnmount(() => {
   socket.off('newMessage')
 })
 
 const fetchNewMessages = async () => {
-  if (!selectedConvo) {
+  if (selectedConvo) {
     try {
       const result = await getChat()
       checkLimit(result.data)
@@ -188,18 +203,24 @@ const fetchNewMessages = async () => {
     }
   }
 }
-
 function refreshMethods() {
-    if (!selectedConvo) {
+  if (selectedConvo) {
     fetchNewMessages()
+    getChat()
+    scroll()
+  }
+  else {
+    console.log('not refreshing')
   }
 }
 
-const refreshInterval = setInterval(refreshMethods, 1000)
+const refreshInterval = setInterval(refreshMethods,  2000);
+
 
 onBeforeUnmount(() => {
-  clearInterval(refreshInterval)
-})
+  clearInterval(refreshInterval);
+});
+
 
 </script>
 

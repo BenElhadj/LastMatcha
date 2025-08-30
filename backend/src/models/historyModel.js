@@ -169,10 +169,10 @@ const getAllHistory = async (id) => {
 		profile AS profile,
 		cover AS cover,
 		created_at AS created_at,
-		(SELECT name FROM images WHERE user_id = user_id AND profile = 1 LIMIT 1) AS avatar,
-		(SELECT u.username FROM users u WHERE u.id = user_id) AS username,
-		(SELECT u.first_name FROM users u WHERE u.id = user_id) AS first_name,
-		(SELECT u.last_name FROM users u WHERE u.id = user_id) AS last_name
+		(SELECT name FROM images WHERE user_id = ${id} AND profile = 1 LIMIT 1) AS avatar,
+		(SELECT u.username FROM users u WHERE u.id = ${id} ) AS username,
+		(SELECT u.first_name FROM users u WHERE u.id = ${id}) AS first_name,
+		(SELECT u.last_name FROM users u WHERE u.id = ${id}) AS last_name
 	  FROM images
 	  WHERE user_id = ${id}
 	`;

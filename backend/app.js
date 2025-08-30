@@ -11,10 +11,10 @@ const path = require('path')
 const pool = require('./src/utility/database')
 const cors = require('cors')
 
+app.use(cors())
+
 const { connectedUsers } = require('./src/controllers/auth');
 const server = http.createServer(app)
-
-app.use(cors())
 
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 app.use(bodyParser.json({ limit: '50mb', extended: true }))
@@ -54,7 +54,7 @@ app.get('/get_last_user_id', (req, res) => {
         }
     })
     connection.end()
-    console.log('Connection closed')
+    // console.log('Connection closed')
 })
 
 app.get('/allTags', (req, res) => {
@@ -93,16 +93,17 @@ const io = socketIo(server, {
 let users = {}
 io.setMaxListeners(5000)
 io.on('connection', socket => {
-    
-    io.on('chat', data => {
+    // console.log('connected')
+    socket.on('chat', data => {
         try {
             const id = users[data.id_to]
+            // console.log('emited chat');
             if (id) io.sockets.connected[id].emit('chat', data)
         } catch (err) {
             console.error('app.js chat error ===> ', err)
         }
     })
-    io.on('typing', data => {
+    socket.on('typing', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('typing', data)
@@ -110,7 +111,7 @@ io.on('connection', socket => {
             console.error('app.js typing error ===> ', err)
         }
     })
-    io.on('seenConvo', data => {
+    socket.on('seenConvo', data => {
         try {
             const id = users[data.user]
             if (id) io.sockets.connected[id].emit('seenConvo', data.convo)
@@ -118,7 +119,7 @@ io.on('connection', socket => {
             console.error('app.js seenConvo error ===> ', err)
         }
     })
-    io.on('match', data => {
+    socket.on('match', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('match', data)
@@ -126,7 +127,7 @@ io.on('connection', socket => {
             console.error('app.js match error ===> ', err)
         }
     })
-    io.on('visit', data => {
+    socket.on('visit', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('visit', data)
@@ -134,7 +135,7 @@ io.on('connection', socket => {
             console.error('app.js visit error ===> ', err)
         }
     })
-    io.on('block', data => {
+    socket.on('block', data => {
         try {
             const id = users[data.id_to]
             if (id) io.sockets.connected[id].emit('block', data.id_from)
@@ -142,7 +143,7 @@ io.on('connection', socket => {
             console.error('app.js block error ===> ', err)
         }
     })
-    io.on('auth', id => {
+    socket.on('auth', id => {
         try {
             users[id] = socket.id
             connectedUsers.add(id)
@@ -151,7 +152,7 @@ io.on('connection', socket => {
             console.error('app.js auth error ===> ', err)
         }
     })
-    io.on('logout', id => {
+    socket.on('logout', id => {
         try {
             const sql = `UPDATE users SET status = NOW() WHERE id = ?`
             pool.query(sql, [id])
@@ -162,7 +163,7 @@ io.on('connection', socket => {
             console.error('app.js logout error ===> ', err)
         }
     })
-    io.on('disconnect', () => {
+    socket.on('disconnect', () => {
         for (let key of Object.keys(users)) {
             if (users[key] === socket.id) {
                 try {

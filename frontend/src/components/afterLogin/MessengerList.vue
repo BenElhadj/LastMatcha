@@ -142,7 +142,7 @@ function refreshMethods() {
   })
 }
 
-const refreshInterval = setInterval(refreshMethods, 1000)
+const refreshInterval = setInterval(refreshMethods, 2000)
 
 onBeforeUnmount(() => {
   clearInterval(refreshInterval)

@@ -8,7 +8,7 @@
 		"dev": " nodemon app.js",
 		"build": " nodemon app.js"
 	},
-	"author": "kchikech",
+	"author": "mbouzaie",
 	"license": "ISC",
 	"dependencies": {
 		"bcrypt": "^5.1.0",

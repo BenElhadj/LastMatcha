@@ -6,7 +6,7 @@
       
       <div class="q-pa-md row flex flex-center justify-between" style="margin: 7%;">
         <div class="col-xs-12 col-sm-6 q-pa-md">
-          <div class="row items-center">
+          <div class="row items-center" style="display: flex; flex-direction: column; align-content: flex-start; align-items: center;">
             <img style="width: 130px; margin-left:7px" class="col-auto q-ml-md" src="@/assets/Settings/resetEmail.png" @click="emailDialog = true"/>
             <br>
             <q-input v-model="user.email" readonly label="Email"/>

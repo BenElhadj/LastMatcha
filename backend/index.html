@@ -211,8 +211,8 @@
             const password = dcodeIO.bcrypt.hashSync('Motdepasse@123', salt);
 
             const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
-            const gender = faker.random.arrayElement(['male', 'female', 'both']);
-            const looking = faker.random.arrayElement(['male', 'female', 'both']);
+            const gender = faker.random.arrayElement(['male', 'female', 'other']);
+            const looking = faker.random.arrayElement(['male', 'female', 'other', 'all']);
             const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
             const biography = getRandomBiography();
             const tags = getRandomTags();

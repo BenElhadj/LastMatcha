@@ -26,9 +26,10 @@
                   </q-input>
                 <h4 class="title mb-4">Gender</h4>
                 <q-btn-toggle v-model="gender" spread no-caps toggle-color="blue" color="white" text-color="black" :options="[
-                    { label: 'Man', value: 'male', class: 'icon-male mr-1' },
-                    { label: 'Woman', value: 'female', class: 'icon-femel mr-1' },
-                    { label: 'Both', value: 'both', class: 'icon-both mr-1' }]"/>
+                    { label: 'Man', value: 'male' },
+                    { label: 'Woman', value: 'female'},
+                    { label: 'Other', value: 'other' },
+                    { label: 'All', value: 'all'}]"/>
                 <h4 class="title mb-3">Distance</h4>
                 <q-range v-model="distance" :min="0" :max="maxDis" :step="step" label-always thumb-label="always" thumb-size="30" class="custom-slider mx-3 mb-5 pt-3"></q-range>
                 
@@ -126,6 +127,7 @@ const interests = ref([])
 const gender = ref(null)
 const location = ref(null)
 const hasBoth = ref(false)
+const hasAll = ref(false)
 const loaded = ref(false)
 const age = ref({min: 18, max: 85})
 const rating = ref({min: 0, max: 7})
@@ -140,7 +142,10 @@ const filters = {
   blocked: val => !blocked.includes(val.user_id),
   blockedBy: val => !blockedBy.includes(val.user_id),
   rating: val => val.rating >= rating.value.min && val.rating <= rating.value.max,
-  gender: val => !gender.value || val.gender === gender.value,
+  gender: val => {
+    // Check if gender.value is 'all' and return true, or apply the regular filter logic
+    return gender.value === 'all' || (!gender.value || val.gender === gender.value);
+  },
   location: val => !location.value || [val.country, val.address, val.city].some(cur => cur.includes(location.value)),
   distance: val => {
     if (val.lat && val.lng) {
@@ -252,7 +257,7 @@ const calculateMaxDistance = () => {
     }
     maxDis.value = Math.ceil(utility.calculateDistance(userLocation, to))
   }
-  setTimeout(calculateMaxDistance, 1000)
+  // setTimeout(calculateMaxDistance, 1000)
 }
 
 watch(users, () => {
@@ -260,8 +265,13 @@ watch(users, () => {
 }, { immediate: true })
 
 watch(user, (newUser, oldUser) => {
-  if (newUser.looking && newUser.looking === 'both') {
-    hasBoth.value = true
+  // console.log(newUser.looking)
+  if (newUser.looking && newUser.looking === 'other') {
+    hasOther.value = true
+  }
+  if(newUser.looking && newUser.looking === 'all') {
+    // console.log('all');
+   hasAll.value = true;
   }
 })
 
@@ -331,6 +341,7 @@ async function created() {
   const typesToFilter = ['he_block', 'you_block']
   const urlHistory = `${import.meta.env.VITE_APP_API_URL}/api/browse/allhistory`
   const resHistory = await axios.get(urlHistory, { headers })
+  // console.log(res.data)
   
   if (!res.data.msg) {
       users.value = res.data.slice(0, 1000).map(cur => ({
@@ -380,6 +391,7 @@ onMounted(created)
 
 function refreshMethods() {
   calculateMaxDistance()
+  whoIsUp()
 }
 
 const refreshInterval = setInterval(refreshMethods, 2000)
@@ -394,24 +406,6 @@ onBeforeUnmount(() => {
 a{
   text-decoration: none;
   color: inherit;
-}
-.icon-male {
-  background-image: url('@/assets/userCard/male.png');
-  background-size: 90%;
-  background-repeat: no-repeat;
-  size: 11px;
-}
-.icon-femel {
-  background-image: url('@/assets/userCard/femel.png');
-  background-size: 90%;
-  background-repeat: no-repeat;
-  size: 11px;
-}
-.icon-both {
-  background-image: url('@/assets/userCard/both.png');
-  background-size: 90%;
-  background-repeat: no-repeat;
-  size: 11px;
 }
 
 .discover {

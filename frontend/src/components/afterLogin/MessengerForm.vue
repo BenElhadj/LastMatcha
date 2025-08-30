@@ -1,7 +1,7 @@
 <template>
   <q-layout v-if="selectedConvo" align="center" justify="center" class="messenger_form px-3 chat_layout">
     <q-input class="custom-q-input" rows="1" outlined bottom-slots filled dense @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.enter="sendMsg">
-      <q-btn @click="sendMsg" flat round style="width: 10px" color="primary" icon="mdi-send"/>
+      <q-btn @click="sendMsg" @keyup.enter="sendMsg" flat round style="width: 10px" color="primary" icon="mdi-send"/>
     </q-input>
   </q-layout>
 </template>
@@ -13,6 +13,7 @@ import { useQuasar } from 'quasar'
 import axios from 'axios'
 import { io } from 'socket.io-client'
 
+
 const props = defineProps({
   toId: {
     type: Number,
@@ -20,16 +21,17 @@ const props = defineProps({
   }
 })
 
+const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
 const store = useStore()
 const $q = useQuasar()
 const msg = ref(null)
 const user = store.getters['user']
 const selectedConvo = store.getters['selectedConvo']
-let socket = null
+// let socket = null
 
-onMounted(() => {
-  socket = io(`${import.meta.env.VITE_APP_API_URL}`)
-})
+// onMounted(() => {
+//   socket = io(`${import.meta.env.VITE_APP_API_URL}`)
+// })
 
 watch(msg, () => {
   if (msg.value.length) {

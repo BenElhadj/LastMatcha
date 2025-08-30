@@ -84,15 +84,14 @@ const getAllTags = async () => {
 }
 
 const getConnectedUsers = async () => {
+  const url = `${import.meta.env.VITE_APP_API_URL}/connectedUsers`
+  const headers = { 'X-Requested-With': 'XMLHttpRequest' }
   try {
-      const url = `${import.meta.env.VITE_APP_API_URL}/connectedUsers`
-      const response = await axios.get(url, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      return response.data
+    const response = await axios.get(url, { headers });
+    return response.data
   } catch (error) {
     console.error('err getConnectedUsers in frontend/utility.js ===> ', error)
-      throw error
+    throw error
   }
 }
 
@@ -225,19 +224,6 @@ export default {
       case 'cover_img' :
         return 'You changed your cover'
     }
-    // "you_visit",
-    // "you_like",
-    // "you_unlike",
-    // "he_visit",
-    // "he_like",
-    // "you_like_back",
-    // "he_like_back",
-    // "he_unlike",
-    // "talk",
-    // "you_block",
-    // "he_block",
-    // "avatar_img",
-    // "cover_img"
   },
   getNotifMsg (notif) {
     switch (notif.type) {

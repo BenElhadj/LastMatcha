@@ -16,9 +16,9 @@ const validateInput = (input, type) => {
 		case 'lname':
 			return (input.length >= 3 && input.length <= 255 && !(/[^a-zA-Z]+/.test(input)))
 		case 'looking':
-			return !(input != 'male' && input != 'female' && input != 'both')
+			return !(input != 'male' && input != 'female' && input != 'other' && input != 'all')
 		case 'gender':
-			return !(input != 'male' && input != 'female' && input != 'both')
+			return !(input != 'male' && input != 'female' && input != 'other')
 		case 'msg':
 			return (input.length > 0 && input.length < 2048)
 		case 'phone':

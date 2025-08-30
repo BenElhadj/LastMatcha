@@ -93,7 +93,7 @@
             </q-tab-panel>
 
             <q-tab-panel  name="tab-photo">
-              <profile-gallery :images="filteredImages"></profile-gallery>
+              <profile-gallery :images="filteredImages" :userToto="user"></profile-gallery>
             </q-tab-panel>
 
           </q-tab-panels>
@@ -359,7 +359,7 @@ const block = async () => {
           clearInterval(interval)
           resolve()
         }
-      }, 1000)
+      }, 2000)
     })
     router.push("/")
   } else {

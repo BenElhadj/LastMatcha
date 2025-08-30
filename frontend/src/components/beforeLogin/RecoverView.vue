@@ -107,7 +107,7 @@ const submit = async () => {
             clearInterval(interval)
             resolve()
           }
-        }, 1000)
+        }, 2000)
       })
       router.push('/')
     } else {
@@ -118,7 +118,7 @@ const submit = async () => {
             clearInterval(interval)
             resolve()
           }
-        }, 1000)
+        }, 2000)
       })
       router.push('/forgot')
     }

@@ -41,7 +41,7 @@
           <q-input v-model="user.phone"  :readonly="!isEditing" label="Phone Number" class="one-input"/>
           
           <div class="q-gutter-md row">
-            <q-select v-model="user.gender" id="gender" :readonly="!isEditing" label="Gender" :options="genders" dropdown-icon="mdi-chevron-down" class="tow-input"/>
+            <q-select v-model="user.gender" label="Gender" id="gender" :readonly="!isEditing" :options="genders" dropdown-icon="mdi-chevron-down" class="tow-input"/>
             <q-separator vertical spacing class="separator-margin"></q-separator>
             <q-select v-model="user.looking" id="looking" :readonly="!isEditing" label="Looking For" :options="looking" dropdown-icon="mdi-chevron-down" class="tow-input"/>
           </div>
@@ -88,8 +88,8 @@ import moment from 'moment'
 
 const store = useStore()
 const isEditing = ref(false)
-const genders = ['male', 'female', 'both']
-const looking = ['male', 'female', 'both']
+const genders = ['male', 'female', 'other']
+const looking = ['male', 'female', 'other','all']
 const tagEsc = [13, ':', ',', ';']
 const tagsString = ref('')
 const owner = ref(false)

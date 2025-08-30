@@ -46,7 +46,7 @@ const delConv = (id1, id2) => {
 	return db.query(request, [id1, id2, id2, id1])
 }
 
-// get Chat for both users ((ALLLL ))
+// get Chat for other users ((ALLLL ))
 
 const getConvAll = (user1) => {
 	let request = `SELECT

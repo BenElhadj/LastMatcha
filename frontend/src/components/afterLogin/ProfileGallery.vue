@@ -2,7 +2,7 @@
   <q-page>
     <q-page-container>
       <h1  class="q-pb-md" style="margin-top: -10px; text-align: center;">Gallery</h1>
-      <h3 style="margin-top: -70px; margin-bottom:100px; text-align: center;">{{user.username}}</h3>
+      <h3 style="margin-top: -70px; margin-bottom:100px; text-align: center;">{{username}}</h3>
 
       <div class="row q-gutter-md mt-4">
         <div v-for="image in images" :key="image.id" class="col-xs-12 col-sm-6 col-md-4 img_container">
@@ -25,9 +25,10 @@ import AlertView from '@/views/AlertView.vue';
 import axios from 'axios';
 
 const store = useStore()
-const props = defineProps({ images: Array })
+
+const props = defineProps({ images: Array, userToto:Object })
 const getFullPath = utility.getFullPath
-const user = computed(() => store.state.user)
+const user = computed(() => store.getters.user)
 const alert = ref({
   state: false,
   color: '',
@@ -55,6 +56,13 @@ const deleteImg = async (image) => {
   } catch (err) {
     console.error('err deleteImg in frontend/ProfileGallery.vue ===> ', err)
   }
+}
+const username = ref('');
+
+if (props.userToto?.username ?? false) {
+  username.value = props.userToto.username;
+} else {
+  username.value = user.value.username;
 }
 </script>
 

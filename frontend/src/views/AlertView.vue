@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog v-model="alert.state" persistent transition-show="flip-down" transition-hide="flip-up">
+    <q-dialog v-model="alert.state" persistent transition-show="flip-down" transition-hide="flip-up" style="bottom: 100%;">
       <q-card :class="`bg-${alert.color} text-white`" style="width: 300px">
         <q-card-section>
           <div class="text-h6">Alert</div>

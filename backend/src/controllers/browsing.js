@@ -35,15 +35,8 @@ const showUsers = async (req, res) => {
 			delete cur.google_id
 			return cur
 		}).filter(cur => {
-			if (!req.body.filter)
-				return true
-			if (user.looking == 'both')
-				return cur.looking == 'both'
-			if (user.looking != user.gender)
-				return cur.looking != 'both' && cur.gender != user.gender && cur.gender != cur.looking
-			if (user.looking == user.gender)
-				return cur.looking != 'both' && cur.gender == user.gender && cur.gender == cur.looking
-			return false
+			if (!req.body.filter) return true;
+			return user.looking === 'all' || cur.gender === user.looking;
 		}).sort((a, b) => {
 			const aLoc = { lat: a.lat, lng: a.lng }
 			const bLoc = { lat: b.lat, lng: b.lng }

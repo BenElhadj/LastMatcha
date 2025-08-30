@@ -112,7 +112,7 @@ const registerUser = async () => {
           clearInterval(interval)
           resolve()
         }
-      }, 1000)
+      }, 2000)
     })
     router.push('/login')
   } else {
