@@ -1,17 +1,17 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mysqldb:
     container_name: mysql_db
     image: mysql:5.7
     ports:
-    - "3306:3306"
+      - "3306:3306"
     volumes:
-    - db:/var/lib/mysql/
+      - db:/var/lib/mysql/
     env_file:
-    - docker.env
+      - docker.env
     networks:
-    - mysql
+      - mysql
   phpmyadmin:
     container_name: phpmyadmin
     image: phpmyadmin/phpmyadmin
@@ -19,7 +19,7 @@ services:
     ports:
       - "8081:80"
     env_file:
-    - docker.env
+      - docker.env
     depends_on:
       - mysqldb
     networks:
@@ -28,5 +28,5 @@ services:
 networks:
   mysql:
     driver: bridge
-volumes: 
+volumes:
   db:
