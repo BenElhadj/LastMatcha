@@ -19,18 +19,23 @@
     }
     async function readAddressesFile() {
       try {
-        const response = await fetch('adresses.txt');
-        if (response.ok) {
-          const text = await response.text();
-          const addresses = text;
-          return addresses;
+        const response = await fetch("./adresses.txt");
+    
+        if (!response.ok) {
+          console.error("❌ Fichier adresses.txt introuvable (code:", response.status, ")");
+          return "";
+        }
+        const text = await response.text();
+    
+        if (text.trim().length > 0) {
+          return text;
         } else {
-          console.error('Échec de la récupération du fichier adresses.txt');
-          return [];
+          console.warn("⚠️ Fichier adresses.txt est vide.");
+          return "";
         }
       } catch (error) {
-        console.error('Erreur lors de la récupération du fichier adresses.txt :', error);
-        return [];
+        console.error("🚨 Erreur lors de la lecture du fichier :", error);
+        return "";
       }
     }
   </script>
@@ -123,151 +128,178 @@
 
       document.getElementById('userCreationForm').addEventListener('submit', async function(event) {
         event.preventDefault();
-
-        const salt = dcodeIO.bcrypt.genSaltSync(10);
-
-        const addressesData = await readAddressesFile();
-        const addressesLines = addressesData.split('\n');
-
-        const userCount = document.getElementById('userCount').value;
-
-        const imageCount = document.getElementById('imageCount').value;
-        const sqlFileName = document.getElementById('countrySelect').value + 'BDD';
-        const selectedCountry = document.getElementById('countrySelect').value;
-        const countryName = document.getElementById('countrySelect').options[document.getElementById('countrySelect').selectedIndex].getAttribute('countryName');
-
-        function cleanString(input) {
-          var output = input.replace(/[^\w\s]/gi, '');
-          return output;
-        }
-
-        const defaultTags = ['Ecole-42-Paris', 'Validate-at-125', 'RNCP-5', 'RNCP-7', 'Development', 'Front-end', 'Back-end', 'Sports', 'Cinema', 'Music', 'Vegan', 'Geek', 'Piercing', 'Tattoos'];
-        const defaultBiography = ['je suis timide', 'j aime la techno', 'Perdu mais aimant', 'J aime le tennis de table', 'Tendre, je cherche une relation serieuse', 'Ici pour vous faire rever',
-        'Je cherche mon ame soeur', 'je suis bavard', 'j adore la musique pop', 'je suis un peu fou', 'je suis un peu folle', 'je suis un peu foufou', 'je suis un peu folle dingue', 'je suis un peu foufou dingue',
-        'l amour est mon essentiel', 'j aime la vie', 'rugbymen et le physique qui va avec', 'je suis un rockeur', 'fan de johnny hallyday', 'j aime les danses de salon', 'je suis loyale', 'je suis fidele','je suis honnete',
-        'je suis sincere', 'je suis franc', 'fidele en amour et en amitie', 'je suis un peu jaloux', 'je suis un peu jalouse', 'je suis un peu jaloux jalouse possessif possessive', 'ici pour chercher l amour comme vous',
-        'je chercher un plaisir temporaire', 'je suis un peu coquin', 'je suis un peu coquine', 'parlez moi je reponds a tout le monde', 'je vous attends avec impatience', 'toujours au taquet', 'j aime la nature et les femmes',
-        'j aime la nature et les hommes', 'ma vie c est toi', 'sea sex and sun', 'je suis un peu timide mais je me soigne', 'je cherche le grand amour', 'je cherche l amour', 'je cherche l amitie', 'je cherche des amis',
-        'je cherche des amies', 'je cherche des amis et des amies', 'je cherche des amis et des amies pour sortir et plus si affinites', 'rappeur depuis dix ans, je mets l ambiance', 'je suis fetard', 'je suis fetarde',
-        'je suis calme et casanier', 'je suis calme et casaniere', 'je suis calme et casanier casaniere mais j aime sortir de temps en temps', 'geek mais sociable et j aime sortir','perfectionnsite mais facile a vivre',
-        'idealiste en depit de ce monde', 'je suis polygame et je cherche des femmes qui acceptent cela', 'je sors d une relation douloureuse', 'je prefere les femmes grandes', 'je prefere les femmes petites', 'j aime les hommes muscles',
-        'cherche une femme pleine de vie', 'cherche un homme plein de vie', 'je suis naturel', 'je suis naturel naturelle et je cherche une personne naturelle', 'je suis naturel naturelle et je cherche une personne naturelle et simple et qui aime la vie',];
-
-        function getRandomTags() {
-          const pickaxe = [...defaultTags];
-          const randomTags = [];
-          for (let i = 0; i < 4; i++) {
-            const randomIndex = Math.floor(Math.random() * pickaxe.length);
-            randomTags.push(pickaxe[randomIndex]);
-            pickaxe.splice(randomIndex, 1);
-          }
-          return randomTags.join(', ');
-        }
-
-        function getRandomBiography() {
-          const pickaxe = [...defaultBiography];
-          const randomTags = [];
-          for (let i = 0; i < 3; i++) {
-            const randomIndex = Math.floor(Math.random() * pickaxe.length);
-            randomTags.push(pickaxe[randomIndex]);
-            pickaxe.splice(randomIndex, 1);
-          }
-          return randomTags.join(', ');
-        }
-
-
-
-        function generatePhoneNumber() {
-          const firstDigit = '0';
-          const secondDigit = (Math.floor(Math.random() * 9) + 1).toString();
-          const randomDigits = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('');
-          return firstDigit + secondDigit + randomDigits;
-        }
-
-        let sql = 'INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `email`, `password`, `created_at`, `gender`, `looking`, `birthdate`, `biography`, `tags`, `address`, `city`, `country`, `postal_code`, `phone`, `status`, `lat`, `lng`, `vkey`, `rkey`, `verified`, `google_id`, `reports`) VALUES\n';
-  
-        const uniqueUsernames = new Set();
-        try {
-          let id = await getLastUserId() + 1;
-          for (let i = 0; i < userCount; i++) {
-
-            let firstName, lastName, username;
-            do {
-              username = cleanString(faker.internet.userName());
-            } while (uniqueUsernames.has(username));
-
-            do {
-              firstName = cleanString(faker.name.firstName());
-              lastName = cleanString(faker.name.lastName());
-            } while (!(/^[a-zA-Z \-]+$/).test(firstName) || !(/^[a-zA-Z \-]+$/).test(lastName) || firstName.length < 3 || firstName.length > 25 || lastName.length < 3 || lastName.length > 25);
-          
-            do {
-              username = cleanString(faker.internet.userName());
-            } while (uniqueUsernames.has(username) || !(/^[a-zA-Z0-9]+$/).test(username) || username.length < 7 || username.length > 25);
-          
-            uniqueUsernames.add(username);
-            const email = `${username}@matcha.com`;
-
-            const password = dcodeIO.bcrypt.hashSync('Motdepasse@123', salt);
-
-            const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
-            const gender = faker.random.arrayElement(['male', 'female', 'other']);
-            const looking = faker.random.arrayElement(['male', 'female', 'other', 'all']);
-            const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
-            const biography = getRandomBiography();
-            const tags = getRandomTags();
-
-            const [address, city, country, postal_code, lat, lng] = addressesLines[i % addressesLines.length].split(', ');
-
-            const phone = generatePhoneNumber();
-
-            const status = createdAt;
-            const vkey = faker.random.alphaNumeric(20);
-            const rkey = null;
-            const verified = 1;
-            const google_id = null;
-            const reports = 0;
-
-            sql += `('${id + i}', '${firstName}', '${lastName}', '${username}', '${email}', '${password}', '${createdAt}', '${gender}', '${looking}', '${birthdate}', '${biography}', '${tags}', '${address}', '${city}', '${country}', '${postal_code}', '${phone}', '${status}', '${lat}', '${lng}', '${vkey}', '${rkey}', '${verified}', '${google_id}', '${reports}'),\n`;
-          } 
-        } catch (error) {
-          console.error("INSERT INTO users ===> Échec de la récupération du dernier user_id :", error);
-        }
-
-        sql = sql.slice(0, -2) + ';\n\n';
-
-        sql += 'INSERT INTO `images` (`user_id`, `name`,`profile`,`cover`,`created_at`) VALUES\n';
+        showPopup(); // 👉 affiche le popup avant de commencer
 
         try {
-          let user_id = await getLastUserId();
-          let userId = user_id + 1;
-          for (let i = 0; i < userCount; i++) {
-            for (let j = 0; j < imageCount; j++) {
-              const width = (j === 0) ? 1584 : 400;
-              const height = (j === 0) ? 396 : 400;
-              const imageId = userId * imageCount + j + user_id + 1;
-              const url = `https://source.unsplash.com/${width}x${height}/?user-${imageId}`;
-              const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
-              const cover = (j === 0) ? '1' : '0';
-              const profile = (j === 1) ? '1' : '0';
-        
-              sql += `('${userId}', '${url}','${profile}','${cover}', '${createdAt}'),\n`;
+          const salt = dcodeIO.bcrypt.genSaltSync(10);
+
+          const addressesData = await readAddressesFile();
+          const addressesLines = addressesData.split('\n');
+
+          const userCount = document.getElementById('userCount').value;
+
+          const imageCount = document.getElementById('imageCount').value;
+          const sqlFileName = document.getElementById('countrySelect').value + 'BDD';
+          const selectedCountry = document.getElementById('countrySelect').value;
+          const countryName = document.getElementById('countrySelect').options[document.getElementById('countrySelect').selectedIndex].getAttribute('countryName');
+
+          function cleanString(input) {
+            var output = input.replace(/[^\w\s]/gi, '');
+            return output;
+          }
+
+          const defaultTags = ['Ecole-42-Paris', 'Validate-at-125', 'RNCP-5', 'RNCP-7', 'Development', 'Front-end', 'Back-end', 'Sports', 'Cinema', 'Music', 'Vegan', 'Geek', 'Piercing', 'Tattoos'];
+          const defaultBiography = ['je suis timide', 'j aime la techno', 'Perdu mais aimant', 'J aime le tennis de table', 'Tendre, je cherche une relation serieuse', 'Ici pour vous faire rever',
+          'Je cherche mon ame soeur', 'je suis bavard', 'j adore la musique pop', 'je suis un peu fou', 'je suis un peu folle', 'je suis un peu foufou', 'je suis un peu folle dingue', 'je suis un peu foufou dingue',
+          'l amour est mon essentiel', 'j aime la vie', 'rugbymen et le physique qui va avec', 'je suis un rockeur', 'fan de johnny hallyday', 'j aime les danses de salon', 'je suis loyale', 'je suis fidele','je suis honnete',
+          'je suis sincere', 'je suis franc', 'fidele en amour et en amitie', 'je suis un peu jaloux', 'je suis un peu jalouse', 'je suis un peu jaloux jalouse possessif possessive', 'ici pour chercher l amour comme vous',
+          'je chercher un plaisir temporaire', 'je suis un peu coquin', 'je suis un peu coquine', 'parlez moi je reponds a tout le monde', 'je vous attends avec impatience', 'toujours au taquet', 'j aime la nature et les femmes',
+          'j aime la nature et les hommes', 'ma vie c est toi', 'sea sex and sun', 'je suis un peu timide mais je me soigne', 'je cherche le grand amour', 'je cherche l amour', 'je cherche l amitie', 'je cherche des amis',
+          'je cherche des amies', 'je cherche des amis et des amies', 'je cherche des amis et des amies pour sortir et plus si affinites', 'rappeur depuis dix ans, je mets l ambiance', 'je suis fetard', 'je suis fetarde',
+          'je suis calme et casanier', 'je suis calme et casaniere', 'je suis calme et casanier casaniere mais j aime sortir de temps en temps', 'geek mais sociable et j aime sortir','perfectionnsite mais facile a vivre',
+          'idealiste en depit de ce monde', 'je suis polygame et je cherche des femmes qui acceptent cela', 'je sors d une relation douloureuse', 'je prefere les femmes grandes', 'je prefere les femmes petites', 'j aime les hommes muscles',
+          'cherche une femme pleine de vie', 'cherche un homme plein de vie', 'je suis naturel', 'je suis naturel naturelle et je cherche une personne naturelle', 'je suis naturel naturelle et je cherche une personne naturelle et simple et qui aime la vie',];
+
+          function getRandomTags() {
+            const pickaxe = [...defaultTags];
+            const randomTags = [];
+            for (let i = 0; i < 4; i++) {
+              const randomIndex = Math.floor(Math.random() * pickaxe.length);
+              randomTags.push(pickaxe[randomIndex]);
+              pickaxe.splice(randomIndex, 1);
             }
-            userId++;
+            return randomTags.join(', ');
           }
-        } catch (error) {
-          console.error("INSERT INTO images ===> Échec de la récupération du dernier user_id :", error);
-        }
 
-        sql = sql.slice(0, -2) + ';';
+          function getRandomBiography() {
+            const pickaxe = [...defaultBiography];
+            const randomTags = [];
+            for (let i = 0; i < 3; i++) {
+              const randomIndex = Math.floor(Math.random() * pickaxe.length);
+              randomTags.push(pickaxe[randomIndex]);
+              pickaxe.splice(randomIndex, 1);
+            }
+            return randomTags.join(', ');
+          }
 
-        const blob = new Blob([sql], {type: 'text/plain'});
 
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = sqlFileName + '.sql';
-        link.click();
+
+          function generatePhoneNumber() {
+            const firstDigit = '0';
+            const secondDigit = (Math.floor(Math.random() * 9) + 1).toString();
+            const randomDigits = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('');
+            return firstDigit + secondDigit + randomDigits;
+          }
+
+          let sql = 'INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `email`, `password`, `created_at`, `gender`, `looking`, `birthdate`, `biography`, `tags`, `address`, `city`, `country`, `postal_code`, `phone`, `status`, `lat`, `lng`, `vkey`, `rkey`, `verified`, `google_id`, `reports`) VALUES\n';
+    
+          const uniqueUsernames = new Set();
+          try {
+            let id = await getLastUserId() + 1;
+            for (let i = 0; i < userCount; i++) {
+
+              let firstName, lastName, username;
+              do {
+                username = cleanString(faker.internet.userName());
+              } while (uniqueUsernames.has(username));
+
+              do {
+                firstName = cleanString(faker.name.firstName());
+                lastName = cleanString(faker.name.lastName());
+              } while (!(/^[a-zA-Z \-]+$/).test(firstName) || !(/^[a-zA-Z \-]+$/).test(lastName) || firstName.length < 3 || firstName.length > 25 || lastName.length < 3 || lastName.length > 25);
+            
+              do {
+                username = cleanString(faker.internet.userName());
+              } while (uniqueUsernames.has(username) || !(/^[a-zA-Z0-9]+$/).test(username) || username.length < 7 || username.length > 25);
+            
+              uniqueUsernames.add(username);
+              const email = `${username}@matcha.com`;
+
+              const password = dcodeIO.bcrypt.hashSync('Motdepasse@123', salt);
+
+              const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
+              const gender = faker.random.arrayElement(['male', 'female', 'other']);
+              const looking = faker.random.arrayElement(['male', 'female', 'other', 'all']);
+              const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
+              const biography = getRandomBiography();
+              const tags = getRandomTags();
+
+              const [address, city, country, postal_code, lat, lng] = addressesLines[i % addressesLines.length].split(', ');
+
+              const phone = generatePhoneNumber();
+
+              const status = createdAt;
+              const vkey = faker.random.alphaNumeric(20);
+              const rkey = null;
+              const verified = 1;
+              const google_id = null;
+              const reports = 0;
+
+              sql += `('${id + i}', '${firstName}', '${lastName}', '${username}', '${email}', '${password}', '${createdAt}', '${gender}', '${looking}', '${birthdate}', '${biography}', '${tags}', '${address}', '${city}', '${country}', '${postal_code}', '${phone}', '${status}', '${lat}', '${lng}', '${vkey}', '${rkey}', '${verified}', '${google_id}', '${reports}'),\n`;
+            } 
+          } catch (error) {
+            console.error("INSERT INTO users ===> Échec de la récupération du dernier user_id :", error);
+          }
+
+          sql = sql.slice(0, -2) + ';\n\n';
+
+          sql += 'INSERT INTO `images` (`user_id`, `name`,`profile`,`cover`,`created_at`) VALUES\n';
+
+          try {
+            let user_id = await getLastUserId();
+            let userId = user_id + 1;
+            for (let i = 0; i < userCount; i++) {
+              for (let j = 0; j < imageCount; j++) {
+                const width = (j === 0) ? 1584 : 400;
+                const height = (j === 0) ? 396 : 400;
+                const imageId = userId * imageCount + j + user_id + 1;
+                const url = `https://source.unsplash.com/${width}x${height}/?user-${imageId}`;
+                const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
+                const cover = (j === 0) ? '1' : '0';
+                const profile = (j === 1) ? '1' : '0';
+          
+                sql += `('${userId}', '${url}','${profile}','${cover}', '${createdAt}'),\n`;
+              }
+              userId++;
+            }
+          } catch (error) {
+            console.error("INSERT INTO images ===> Échec de la récupération du dernier user_id :", error);
+          }
+
+          sql = sql.slice(0, -2) + ';';
+
+          const blob = new Blob([sql], {type: 'text/plain'});
+
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = sqlFileName + '.sql';
+          link.click();
+      } catch (error) {
+        console.error("🚨 Erreur lors de la création :", error);
+      } finally {
+        hidePopup(); // 👉 ferme le popup à la fin, même si erreur
+      }
       });
+      function showPopup() {
+        document.getElementById("loadingPopup").style.display = "flex";
+      }
+      
+      function hidePopup() {
+        document.getElementById("loadingPopup").style.display = "none";
+      }
     </script>
+    <div id="loadingPopup" style="
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 22px;
+      font-weight: bold;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;">
+      ⏳ Création des utilisateurs en cours... Merci de patienter
+    </div>
   </body>
 </html>
