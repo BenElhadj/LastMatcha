@@ -1,4 +1,3 @@
-
 require('dotenv').config()
 let bodyParser = require('body-parser')
 const mysql = require('mysql')
@@ -6,7 +5,7 @@ const express = require('express')
 const http = require('http')
 const app = express()
 const socketIo = require('socket.io')
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 10000  // ⚠️ Changé à 10000 pour Render
 const path = require('path')
 const pool = require('./src/utility/database')
 const cors = require('cors')
@@ -25,16 +24,20 @@ app.set('view engine', 'ejs')
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 
-app.use(express.static(`${path.dirname(path.dirname(__dirname))}/client/dist`))
+// ⚠️ NOUVELLE LIGNE - Servir le frontend build
+app.use(express.static(path.join(__dirname, '../public')));
+
 app.use('/api/users/', require('./src/routes/userRoutes'))
 app.use('/api/auth/', require('./src/routes/authRoutes'))
 app.use('/api/browse/', require('./src/routes/browsingRoutes'))
 app.use('/api/chat/', require('./src/routes/chatRoutes'))
 app.use('/api/notif/', require('./src/routes/notifRoutes'))
 app.use('/api/matching/', require('./src/routes/matchingRoutes'))
+
 app.get('/verified', (req, res) => {
     res.render('verified');
 });
+
 app.get('/get_last_user_id', (req, res) => {
     const connection = mysql.createConnection({
         host: process.env.DB_HOST,
@@ -54,7 +57,6 @@ app.get('/get_last_user_id', (req, res) => {
         }
     })
     connection.end()
-    // console.log('Connection closed')
 })
 
 app.get('/allTags', (req, res) => {
@@ -80,11 +82,16 @@ app.get('/allTags', (req, res) => {
     })
 })
 
-app.get('/', (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
+// ⚠️ NOUVELLE ROUTE - Servir l'application Vue.js pour toutes les routes non-API
+app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(__dirname, '../public/index.html'));
+    }
+});
 
 const io = socketIo(server, {
 	cors: {
-        origin: process.env.APP_URL,
+        origin: "*",  // ⚠️ Changé pour accepter toutes les origins en prod
         methods: ["GET", "POST"],
         credentials: true
 	}
@@ -188,8 +195,8 @@ app.get('/connectedUsers', (req, res) => {
     res.json(onlineUserList)
 })
 
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {  // ⚠️ Ajout de '0.0.0.0'
 	console.log(`\n\nServer Backend Matcha:`)
-	console.log(`\n-----> Operating locally at the port ${port}\n`)
-	console.log(`- Local:   \x1b[32mhttp://localhost:${port}\x1b[0m`)
+	console.log(`\n-----> Operating on port ${port}\n`)
+	console.log(`- URL:   \x1b[32mhttp://0.0.0.0:${port}\x1b[0m`)
 });
