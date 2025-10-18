@@ -16,35 +16,38 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies and build
+      - name: Install dependencies
         working-directory: frontend
         run: |
-          npm ci
+          npm install
+
+      - name: Build project
+        working-directory: frontend
+        run: |
+          # ✅ Test si le build fonctionne
+          echo "=== Test du build ==="
           npm run build
-
-          # ✅ FORCE la création de 404.html avec vérification
-          echo "=== Vérification avant création 404.html ==="
+          
+          # ✅ Vérification que le build a créé les fichiers
+          echo "=== Fichiers après build ==="
           ls -la dist/
-          
-          # ✅ Crée le 404.html avec une méthode plus robuste
-          cat dist/index.html > dist/404.html
-          
-          # ✅ Vérification que 404.html a été créé
-          echo "=== Vérification après création 404.html ==="
-          ls -la dist/404.html || echo "❌ 404.html n'a pas été créé"
-          
-          # ✅ Vérification du contenu
-          echo "=== Vérification du contenu de 404.html ==="
-          head -5 dist/404.html
 
-          # ✅ Désactive Jekyll
+      - name: Create 404.html for SPA
+        working-directory: frontend
+        run: |
+          # ✅ Crée 404.html à partir du index.html généré
+          echo "=== Création de 404.html ==="
+          cp dist/index.html dist/404.html
+          
+          # ✅ Vérification
+          echo "=== Vérification de 404.html ==="
+          ls -la dist/404.html
+          echo "✅ 404.html créé avec succès"
+
+          # ✅ Crée .nojekyll
           touch dist/.nojekyll
-
-          echo "✅ Contenu du dossier dist après modifications:"
-          ls -la dist/
+          echo "✅ .nojekyll créé"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
