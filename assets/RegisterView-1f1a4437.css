@@ -1,0 +1,1 @@
+.alert-enter-active,.alert-leave-active,.register{transition:all .5s}.alert-enter,.alert-leave-to{opacity:0}.register,.alert{width:100%;max-width:40rem;margin:auto}.alert{position:absolute;left:50%;top:1rem;transform:translate(-50%)}
