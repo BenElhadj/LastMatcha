@@ -1,3 +1,4 @@
+// Pour MySQL (à supprimer)
 const dbconf = {
 	connectionLimit: 10,
 	host: process.env.DB_HOST,
