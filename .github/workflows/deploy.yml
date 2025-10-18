@@ -3,97 +3,36 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Install dependencies
+      - name: Install dependencies and build
         working-directory: frontend
         run: |
-          echo "=== INSTALLATION DES DÉPENDANCES ==="
-          npm install
+          npm ci
+          npm run build
 
-      - name: Try to build (ignore errors)
-        working-directory: frontend
-        run: |
-          echo "=== TENTATIVE DE BUILD ==="
-          # ✅ Essaye de build mais ignore les erreurs
-          npm run build 2>&1 | tee build.log || echo "Build a échoué, mais on continue..."
-          
-          # ✅ Vérifie si dist/ existe
-          if [ -d "dist" ]; then
-            echo "✅ dist/ existe"
-            ls -la dist/
-          else
-            echo "❌ dist/ n'existe pas, création..."
-            mkdir -p dist
-          fi
-
-      - name: Create essential files
-        working-directory: frontend
-        run: |
-          echo "=== CRÉATION DES FICHIERS ESSENTIELS ==="
-          
-          # ✅ Crée index.html s'il n'existe pas
-          if [ ! -f "dist/index.html" ]; then
-            echo "Création de index.html de secours..."
-            cat > dist/index.html << 'HTML'
-              <!DOCTYPE html>
-              <html>
-              <head>
-                  <title>Matcha</title>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <link rel="icon" type="image/x-icon" href="/Matcha/favicon.ico">
-              </head>
-              <body>
-                  <div id="app">
-                      <h1>Matcha</h1>
-                      <p>Application en cours de chargement...</p>
-                  </div>
-                  <script>
-                      // Redirection pour le routing SPA
-                      if (window.location.pathname !== '/Matcha/' && !window.location.pathname.startsWith('/Matcha/')) {
-                          const path = window.location.pathname;
-                          sessionStorage.setItem('redirect-path', path);
-                          window.location.href = '/Matcha/';
-                      }
-                  </script>
-              </body>
-              </html>
-              HTML
-          fi
-
-          # ✅ CRÉATION FORCÉE DE 404.HTML
-          echo "Création de 404.html..."
+          # ✅ Crée le 404.html dans le bon dossier
           cp dist/index.html dist/404.html
-          
-          # ✅ Vérification
-          echo "Vérification des fichiers créés:"
-          ls -la dist/
-          [ -f "dist/404.html" ] && echo "✅ 404.html créé avec succès" || echo "❌ Échec création 404.html"
-          
-          # ✅ Crée .nojekyll
+
+          # ✅ Désactive Jekyll
           touch dist/.nojekyll
-          echo "✅ .nojekyll créé"
+
+          echo "=== Contenu du dossier dist ==="
+          ls -la dist/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -101,5 +40,4 @@ jobs:
           path: frontend/dist
 
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v4
