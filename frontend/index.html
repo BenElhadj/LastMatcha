@@ -8,25 +8,7 @@
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/Matcha/src/main.js"></script>
-    
-    <!-- ✅ Script de redirection SPA -->
-    <script>
-      // Redirection pour GitHub Pages SPA
-      (function() {
-        const currentPath = window.location.pathname;
-        if (currentPath.startsWith('/Matcha/') && currentPath !== '/Matcha/') {
-          // Si nous sommes sur une route spécifique, laissons Vue router gérer
-          return;
-        }
-        
-        // Si nous arrivons ici depuis une 404 GitHub, redirigeons
-        const savedPath = sessionStorage.getItem('gh-redirect');
-        if (savedPath) {
-          sessionStorage.removeItem('gh-redirect');
-          window.history.replaceState(null, null, savedPath);
-        }
-      })();
-    </script>
+    <!-- ✅ Chemin RELATIF pour le développement -->
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>
