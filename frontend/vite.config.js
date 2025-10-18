@@ -4,7 +4,7 @@ import vue from '@vitejs/plugin-vue';
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 
 export default defineConfig({
-  base: '/Matcha/', // ✅ Base path pour GitHub Pages
+  base: '/Matcha/',
   plugins: [
     vue({
       template: { transformAssetUrls }
@@ -20,6 +20,12 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    emptyOutDir: true
+    emptyOutDir: true,
+    // ✅ Assure que les assets ont les bons chemins
+    assetsDir: 'assets'
+  },
+  // ✅ Pour le développement
+  server: {
+    historyApiFallback: true
   }
 });

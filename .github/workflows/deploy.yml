@@ -28,9 +28,36 @@ jobs:
       run: |
         cd frontend
         npm run build
-        # ✅ Copie index.html vers 404.html pour le routing SPA
-        cp dist/index.html dist/404.html
-        # ✅ Crée .nojekyll pour désactiver le traitement Jekyll
+        
+        # ✅ Crée un 404.html personnalisé pour GitHub Pages SPA
+        cat > dist/404.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Matcha - Redirection</title>
+            <script type="text/javascript">
+                // Redirection SPA pour GitHub Pages
+                var segmentCount = 0;
+                var l = window.location;
+                l.replace(
+                    l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+                    '/Matcha/' +
+                    (segmentCount ? '../'.repeat(segmentCount - 1) : '') +
+                    '?p=/' +
+                    l.pathname.replace(/^\//, '').replace(/\\//g, '/').replace(/\/$/, '') +
+                    (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+                    l.hash
+                );
+            </script>
+        </head>
+        <body>
+            <p>Redirection vers Matcha...</p>
+        </body>
+        </html>
+        EOF
+        
+        # ✅ Crée .nojekyll
         touch dist/.nojekyll
       
     - name: Setup Pages

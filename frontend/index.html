@@ -4,14 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Matcha</title>
-    
-    <!-- ✅ Favicon avec chemin absolu -->
     <link rel="icon" type="image/x-icon" href="/Matcha/favicon.ico">
   </head>
   <body>
     <div id="app"></div>
-    
-    <!-- ✅ Script avec chemin relatif -->
     <script type="module" src="./src/main.js"></script>
+
+    <!-- ✅ Script de redirection SPA pour GitHub Pages -->
+    <script>
+      // Gestion du routing SPA pour GitHub Pages
+      (function() {
+        // Si nous sommes sur une page 404 de GitHub Pages
+        if (window.location.pathname !== '/Matcha/' && !window.location.pathname.startsWith('/Matcha/')) {
+          // Redirige vers l'application avec la route préservée
+          const path = window.location.pathname.replace('/Matcha', '');
+          sessionStorage.setItem('gh-pages-redirect', path);
+          window.location.href = '/Matcha/';
+        }
+        
+        // Restaure la route après redirection
+        const redirectPath = sessionStorage.getItem('gh-pages-redirect');
+        if (redirectPath) {
+          sessionStorage.removeItem('gh-pages-redirect');
+          if (redirectPath && redirectPath !== '/Matcha/') {
+            window.history.replaceState(null, null, redirectPath);
+          }
+        }
+      })();
+    </script>
   </body>
 </html>
