@@ -24,20 +24,34 @@ jobs:
         cd frontend
         npm install
         
-    - name: Build
+    - name: Build and Debug
       run: |
         cd frontend
+        
+        # ✅ Vérification avant build
+        echo "=== Fichiers avant build ==="
+        ls -la
+        
+        # Build
         npm run build
         
-        # ✅ Crée un 404.html qui est une COPIE EXACTE de index.html
-        # cp dist/index.html dist/404.html
+        # ✅ Vérification après build
+        echo "=== Fichiers après build dans dist/ ==="
+        ls -la dist/
+        
+        # ✅ Copie du 404.html
+        echo "=== Copie de 404.html ==="
         cp 404.html dist/404.html
         
-        # ✅ Crée .nojekyll
+        # ✅ Création de .nojekyll
+        echo "=== Création de .nojekyll ==="
         touch dist/.nojekyll
         
-        # ✅ Vérification : lister les fichiers dans dist pour debug
+        # ✅ Vérification finale
+        echo "=== Fichiers finaux dans dist/ ==="
         ls -la dist/
+        echo "=== Contenu de 404.html ==="
+        cat dist/404.html | head -20
       
     - name: Setup Pages
       uses: actions/configure-pages@v2

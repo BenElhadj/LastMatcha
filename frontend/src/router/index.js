@@ -67,12 +67,11 @@ const router = createRouter({
 
 // ✅ Gestion de la redirection depuis GitHub Pages 404
 router.beforeEach((to, from, next) => {
-  // Gère les paramètres de redirection de GitHub Pages
-  const urlParams = new URLSearchParams(window.location.search);
-  const redirectPath = urlParams.get('p');
-  
-  if (redirectPath && redirectPath !== to.path) {
-    next(redirectPath);
+  // Gère la redirection depuis GitHub Pages 404
+  const savedRoute = sessionStorage.getItem('gh-redirect');
+  if (savedRoute && savedRoute !== to.path) {
+    sessionStorage.removeItem('gh-redirect');
+    next(savedRoute);
     return;
   }
 
