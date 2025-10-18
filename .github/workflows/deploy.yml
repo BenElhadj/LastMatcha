@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
@@ -25,13 +25,25 @@ jobs:
           npm ci
           npm run build
 
-          # ✅ Crée le 404.html dans le bon dossier
-          cp dist/index.html dist/404.html
+          # ✅ FORCE la création de 404.html avec vérification
+          echo "=== Vérification avant création 404.html ==="
+          ls -la dist/
+          
+          # ✅ Crée le 404.html avec une méthode plus robuste
+          cat dist/index.html > dist/404.html
+          
+          # ✅ Vérification que 404.html a été créé
+          echo "=== Vérification après création 404.html ==="
+          ls -la dist/404.html || echo "❌ 404.html n'a pas été créé"
+          
+          # ✅ Vérification du contenu
+          echo "=== Vérification du contenu de 404.html ==="
+          head -5 dist/404.html
 
           # ✅ Désactive Jekyll
           touch dist/.nojekyll
 
-          echo "=== Contenu du dossier dist ==="
+          echo "✅ Contenu du dossier dist après modifications:"
           ls -la dist/
 
       - name: Upload artifact
