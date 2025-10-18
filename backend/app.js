@@ -13,7 +13,7 @@ const cors = require('cors')
 app.use(cors({
   origin: [
     'https://benelhadj.github.io',
-    'http://localhost:5173',
+    'https://benelhadj.github.io/Matcha/',
     'http://localhost:3000'
   ],
   credentials: true
@@ -93,7 +93,7 @@ const io = socketIo(server, {
   cors: {
     origin: [
       'https://benelhadj.github.io',
-      'http://localhost:5173',
+      'https://benelhadj.github.io/Matcha/',
       'http://localhost:3000'
     ],
     methods: ["GET", "POST"],
