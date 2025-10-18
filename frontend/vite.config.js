@@ -20,12 +20,6 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    emptyOutDir: true,
-    // ✅ Assure que les assets ont les bons chemins
-    assetsDir: 'assets'
-  },
-  // ✅ Pour le développement
-  server: {
-    historyApiFallback: true
+    emptyOutDir: true
   }
 });
