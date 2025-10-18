@@ -7,8 +7,10 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -17,23 +19,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies and build
+        working-directory: frontend
         run: |
-          cd frontend
-          npm install
-
-      - name: Build project
-        run: |
-          cd frontend
+          npm ci
           npm run build
 
-          # ✅ Crée le 404.html pour GitHub Pages (copie du index.html généré)
+          # ✅ Crée le 404.html dans le bon dossier
           cp dist/index.html dist/404.html
 
           # ✅ Désactive Jekyll
           touch dist/.nojekyll
 
-          echo "=== Fichiers générés ==="
+          echo "=== Contenu du dossier dist ==="
           ls -la dist/
 
       - name: Upload artifact
