@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # Permet de déclencher manuellement
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -34,13 +34,13 @@ jobs:
           npm run build
           
           # ✅ CRÉATION FORCÉE de 404.html
-          echo "Création de 404.html..."
+          echo "=== Création de 404.html ==="
           cp dist/index.html dist/404.html
           touch dist/.nojekyll
           
-          # Vérification
-          echo "Fichiers créés dans dist/:"
+          echo "=== Vérification ==="
           ls -la dist/
+          [ -f "dist/404.html" ] && echo "✅ 404.html créé avec succès" || echo "❌ 404.html manquant"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
