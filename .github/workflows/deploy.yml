@@ -28,7 +28,10 @@ jobs:
       run: |
         cd frontend
         npm run build
+        # ✅ Copie index.html vers 404.html pour le routing SPA
         cp dist/index.html dist/404.html
+        # ✅ Crée .nojekyll pour désactiver le traitement Jekyll
+        touch dist/.nojekyll
       
     - name: Setup Pages
       uses: actions/configure-pages@v2
