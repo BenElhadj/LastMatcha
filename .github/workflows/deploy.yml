@@ -14,33 +14,78 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          # ✅ RETIRE le cache pour éviter les erreurs
+          # cache: 'npm'
+          # cache-dependency-path: frontend/package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Install and build
+      - name: Debug structure
+        run: |
+          echo "=== STRUCTURE DU PROJET ==="
+          pwd
+          ls -la
+          echo "=== CONTENU FRONTEND ==="
+          ls -la frontend/
+
+      - name: Install dependencies
         working-directory: frontend
         run: |
-          npm ci
+          echo "=== INSTALLATION DEPENDANCES ==="
+          npm install
+          echo "✅ Dépendances installées"
+
+      - name: Build project
+        working-directory: frontend
+        run: |
+          echo "=== BUILD DU PROJET ==="
           npm run build
+          echo "✅ Build terminé"
           
-          # ✅ CRÉATION FORCÉE de 404.html
-          echo "=== Création de 404.html ==="
-          cp dist/index.html dist/404.html
+          echo "=== VERIFICATION DIST ==="
+          ls -la dist/ || echo "❌ dist n'existe pas"
+          [ -f "dist/index.html" ] && echo "✅ index.html existe" || echo "❌ index.html manquant"
+
+      - name: Create 404.html
+        working-directory: frontend
+        run: |
+          echo "=== CREATION 404.HTML ==="
+          pwd
+          ls -la
+          
+          # ✅ Méthode FORCÉE pour créer 404.html
+          if [ -f "dist/index.html" ]; then
+            echo "📄 Copie de index.html vers 404.html..."
+            cp -v dist/index.html dist/404.html
+            echo "✅ 404.html créé"
+          else
+            echo "❌ ERREUR: dist/index.html n'existe pas!"
+            exit 1
+          fi
+          
+          # ✅ Vérification
+          if [ -f "dist/404.html" ]; then
+            echo "✅ SUCCÈS: 404.html existe maintenant"
+            echo "Taille: $(wc -c < dist/404.html) bytes"
+          else
+            echo "❌ ÉCHEC: 404.html n'a pas été créé"
+            exit 1
+          fi
+          
+          # ✅ Crée .nojekyll
           touch dist/.nojekyll
+          echo "✅ .nojekyll créé"
           
-          echo "=== Vérification ==="
+          echo "=== CONTENU FINAL DIST ==="
           ls -la dist/
-          [ -f "dist/404.html" ] && echo "✅ 404.html créé avec succès" || echo "❌ 404.html manquant"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
