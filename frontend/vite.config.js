@@ -4,10 +4,9 @@ import vue from '@vitejs/plugin-vue';
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 
 export default defineConfig({
-  base: '/Matcha/', // 👈 IMPORTANT : le nom exact de ton repo GitHub
+  base: '/Matcha/', // 👈 le nom exact de ton dépôt GitHub
   plugins: [
     vue({
-      useRef: true,
       template: { transformAssetUrls }
     }),
     quasar({
@@ -18,5 +17,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src')
     }
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
   }
 });

@@ -1,13 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Matcha</title>
+
+    <!-- ✅ Favicon avec chemin relatif -->
+    <link rel="icon" href="./favicon.ico" />
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+
+    <!-- ✅ Script avec chemin relatif -->
+    <script type="module" src="./src/main.js"></script>
+
+    <!-- ✅ Correctif SPA pour GitHub Pages -->
+    <script>
+      (function () {
+        const path = window.location.pathname;
+        if (!path.startsWith('/Matcha/')) {
+          window.location.replace('/Matcha/' + path);
+        }
+      })();
+    </script>
   </body>
 </html>
