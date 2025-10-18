@@ -2,7 +2,6 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
-import ghPagesSpa from './plugins/gh-pages-spa';
 
 export default defineConfig({
   base: '/Matcha/',
@@ -12,8 +11,7 @@ export default defineConfig({
     }),
     quasar({
       sassVariables: 'src/quasar-variables.sass'
-    }),
-    ghPagesSpa()
+    })
   ],
   resolve: {
     alias: {

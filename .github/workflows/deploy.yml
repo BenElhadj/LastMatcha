@@ -3,52 +3,43 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-        
-    - name: Install dependencies
-      run: |
-        cd frontend
-        npm install
-        
-    - name: Build
-      run: |
-        cd frontend
-        npm run build
-        
-        # ✅ Copie le index.html GÉNÉRÉ (avec les bons chemins) vers 404.html
-        cp dist/index.html dist/404.html
-        
-        # ✅ Crée .nojekyll
-        touch dist/.nojekyll
-        
-        # ✅ Vérification
-        echo "=== Fichiers dans dist/ ==="
-        ls -la dist/
-        echo "=== Contenu de 404.html (premières lignes) ==="
-        head -20 dist/404.html
-      
-    - name: Setup Pages
-      uses: actions/configure-pages@v2
-      
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v1
-      with:
-        path: './frontend/dist'
-        
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v1
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build project
+        run: |
+          cd frontend
+          npm run build
+
+          # ✅ Crée le 404.html pour GitHub Pages (copie du index.html généré)
+          cp dist/index.html dist/404.html
+
+          # ✅ Désactive Jekyll
+          touch dist/.nojekyll
+
+          echo "=== Fichiers générés ==="
+          ls -la dist/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
