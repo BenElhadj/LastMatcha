@@ -182,11 +182,11 @@ onMounted(async () => {
     justify-content: center;
 }
 .icon-toEdit {
-  background-image: url('@/assets/edit/clicToEdit.png');
+  background-image: url('@/assets/Edit/clicToEdit.png');
   background-repeat: no-repeat;
 }
 .icon-edit {
-  background-image: url('@/assets/edit/writing.png');
+  background-image: url('@/assets/Edit/writing.png');
   background-repeat: no-repeat;
 }
 .edit {
