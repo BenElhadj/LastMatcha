@@ -4,27 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Matcha</title>
-
-    <!-- ✅ Favicon avec chemin relatif -->
-    <link rel="icon" href="./favicon.ico" />
+    
+    <!-- ✅ Favicon avec chemin absolu -->
+    <link rel="icon" type="image/x-icon" href="/Matcha/favicon.ico">
     <script type="module" crossorigin src="/Matcha/assets/index-68862572.js"></script>
     <link rel="stylesheet" href="/Matcha/assets/index-cf3e2e2a.css">
   </head>
   <body>
     <div id="app"></div>
-
+    
     <!-- ✅ Script avec chemin relatif -->
     
-
-  <!-- ✅ Correctif SPA GitHub Pages -->
-  <script>
-    // Redirige seulement si on arrive sur la racine sans /Matcha/
-    const repoName = "/Matcha";
-    if (!location.pathname.startsWith(repoName)) {
-      const newUrl = repoName + location.pathname + location.search + location.hash;
-      window.history.replaceState(null, "", newUrl);
-    }
-  </script>
-
   </body>
 </html>
