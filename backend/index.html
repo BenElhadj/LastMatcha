@@ -250,16 +250,23 @@
           try {
             let user_id = await getLastUserId();
             let userId = user_id + 1;
+
             for (let i = 0; i < userCount; i++) {
               for (let j = 0; j < imageCount; j++) {
+                // taille selon la position (cover ou avatar)
                 const width = (j === 0) ? 1584 : 400;
                 const height = (j === 0) ? 396 : 400;
-                const imageId = userId * imageCount + j + user_id + 1;
-                const url = `https://source.unsplash.com/${width}x${height}/?user-${imageId}`;
+
+                // identifiant unique d'image
+                const imageId = (userId * imageCount) + j + user_id + 1;
+
+                // 🔁 URL Pravatar (visages humains réalistes et stables)
+                const url = `https://i.pravatar.cc/${width}x${height}?u=user-${imageId}`;
+
                 const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
                 const cover = (j === 0) ? '1' : '0';
                 const profile = (j === 1) ? '1' : '0';
-          
+
                 sql += `('${userId}', '${url}','${profile}','${cover}', '${createdAt}'),\n`;
               }
               userId++;
@@ -267,6 +274,7 @@
           } catch (error) {
             console.error("INSERT INTO images ===> Échec de la récupération du dernier user_id :", error);
           }
+
 
           sql = sql.slice(0, -2) + ';';
 
