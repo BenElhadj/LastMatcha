@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <script>
-    // Vos fonctions existantes restent ici...
     function getLastUserId() {
       return new Promise((resolve, reject) => {
         var xhr = new XMLHttpRequest();
@@ -41,62 +40,321 @@
       }
     }
 
-    // NOUVELLE FONCTION : Import de base de données
-    async function importDatabase() {
-      showPopup("⏳ Importation de la base de données en cours...");
+    // Fonction pour générer du SQL compatible PostgreSQL/Neon
+    async function generateNeonSQL() {
+      showPopup("⏳ Génération du SQL PostgreSQL pour Neon...");
       
-      const fileInput = document.getElementById('sqlFile');
-      const importType = document.getElementById('importType').value;
-      const neonUrl = document.getElementById('neonUrl').value;
-      
-      if (!fileInput.files[0]) {
-        alert("Veuillez sélectionner un fichier SQL");
-        hidePopup();
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('sqlFile', fileInput.files[0]);
-      formData.append('importType', importType);
-      formData.append('neonUrl', neonUrl);
-
       try {
-        const response = await fetch('/api/import-database', {
-          method: 'POST',
-          body: formData
-        });
+        const userCount = parseInt(document.getElementById('neonUserCount').value) || 50;
+        const imageCount = parseInt(document.getElementById('neonImageCount').value) || 5;
+        const country = document.getElementById('neonCountry').value;
+        const includeTables = document.getElementById('includeTables').checked;
+        const includeData = document.getElementById('includeData').checked;
 
-        const result = await response.json();
-        
-        if (response.ok) {
-          document.getElementById('importStatus').innerHTML = 
-            `<p style="color: green;">✅ ${result.message}</p>`;
-          if (result.downloadUrl) {
-            document.getElementById('importStatus').innerHTML += 
-              `<p><a href="${result.downloadUrl}" download>Télécharger le fichier adapté</a></p>`;
-          }
-        } else {
-          document.getElementById('importStatus').innerHTML = 
-            `<p style="color: red;">❌ ${result.error}</p>`;
+        // Lire les adresses
+        const addressesData = await readAddressesFile();
+        const addressesLines = addressesData.split('\n').filter(line => line.trim().length > 0);
+
+        if (addressesLines.length === 0) {
+          throw new Error("Le fichier adresses.txt est vide ou introuvable");
         }
+
+        let sqlContent = `-- 🚀 Script SQL généré pour Neon.tech (PostgreSQL)
+-- 📅 Généré le: ${new Date().toLocaleString()}
+-- 👥 Utilisateurs: ${userCount} | 🖼️ Images: ${imageCount} par utilisateur
+-- 🌍 Pays: ${country}
+
+`;
+
+        // Section création des tables
+        if (includeTables) {
+          sqlContent += `-- =============================================
+-- CRÉATION DES TABLES
+-- =============================================
+
+-- Table des utilisateurs
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    username VARCHAR(25) UNIQUE,
+    email VARCHAR(255) UNIQUE,
+    password VARCHAR(255) NOT NULL DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    gender VARCHAR(20),
+    looking VARCHAR(20),
+    birthdate DATE,
+    biography TEXT,
+    tags TEXT,
+    address VARCHAR(255),
+    city VARCHAR(255),
+    country VARCHAR(255),
+    postal_code VARCHAR(50),
+    phone VARCHAR(255),
+    status TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    lat VARCHAR(30) DEFAULT '0',
+    lng VARCHAR(30) DEFAULT '0',
+    vkey VARCHAR(255) DEFAULT '',
+    rkey VARCHAR(255),
+    verified BOOLEAN DEFAULT false,
+    google_id VARCHAR(50),
+    reports INTEGER DEFAULT 0
+);
+
+-- Table des images
+CREATE TABLE IF NOT EXISTS images (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    name VARCHAR(255) NOT NULL,
+    profile BOOLEAN DEFAULT false,
+    cover BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table des matches
+CREATE TABLE IF NOT EXISTS matches (
+    id SERIAL PRIMARY KEY,
+    matcher INTEGER REFERENCES users(id),
+    matched INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table de l'historique des visites
+CREATE TABLE IF NOT EXISTS history (
+    id SERIAL PRIMARY KEY,
+    visitor INTEGER REFERENCES users(id),
+    visited INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table des utilisateurs bloqués
+CREATE TABLE IF NOT EXISTS blocked (
+    id SERIAL PRIMARY KEY,
+    blocker INTEGER REFERENCES users(id),
+    blocked INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table des conversations
+CREATE TABLE IF NOT EXISTS conversations (
+    id_conversation SERIAL PRIMARY KEY,
+    id_user1 INTEGER REFERENCES users(id),
+    id_user2 INTEGER REFERENCES users(id),
+    last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    allowed BOOLEAN DEFAULT true,
+    last_msg INTEGER
+);
+
+-- Table des messages
+CREATE TABLE IF NOT EXISTS chat (
+    id SERIAL PRIMARY KEY,
+    id_conversation INTEGER REFERENCES conversations(id_conversation),
+    id_from INTEGER REFERENCES users(id),
+    message VARCHAR(2048) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT false
+);
+
+-- Table des notifications
+CREATE TABLE IF NOT EXISTS notifications (
+    id SERIAL PRIMARY KEY,
+    type VARCHAR(20) NOT NULL,
+    id_from INTEGER REFERENCES users(id),
+    id_to INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT false,
+    id_conversation INTEGER DEFAULT -1
+);
+
+-- Table des tags
+CREATE TABLE IF NOT EXISTS tags (
+    id SERIAL PRIMARY KEY,
+    value VARCHAR(100) UNIQUE
+);
+
+`;
+        }
+
+        // Section insertion des données
+        if (includeData) {
+          sqlContent += `-- =============================================
+-- INSERTION DES DONNÉES
+-- =============================================
+
+`;
+          
+          // Génération des utilisateurs
+          const salt = dcodeIO.bcrypt.genSaltSync(10);
+          const hashedPassword = dcodeIO.bcrypt.hashSync('Motdepasse@123', salt);
+          
+          const defaultTags = ['Ecole-42-Paris', 'Validate-at-125', 'RNCP-5', 'RNCP-7', 'Development', 'Front-end', 'Back-end', 'Sports', 'Cinema', 'Music', 'Vegan', 'Geek', 'Piercing', 'Tattoos'];
+          const defaultBiography = [
+            'je suis timide', 'j aime la techno', 'Perdu mais aimant', 'J aime le tennis de table', 
+            'Tendre, je cherche une relation serieuse', 'Ici pour vous faire rever', 'Je cherche mon ame soeur',
+            'je suis bavard', 'j adore la musique pop', 'je suis un peu fou', 'je suis un peu folle',
+            'l amour est mon essentiel', 'j aime la vie', 'rugbymen et le physique qui va avec',
+            'je suis un rockeur', 'fan de johnny hallyday', 'j aime les danses de salon', 'je suis loyale',
+            'je suis fidele','je suis honnete', 'je suis sincere', 'je suis franc', 'fidele en amour et en amitie'
+          ];
+
+          function getRandomTags() {
+            const shuffled = [...defaultTags].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 4).join(', ');
+          }
+
+          function getRandomBiography() {
+            const shuffled = [...defaultBiography].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 3).join(', ');
+          }
+
+          function generatePhoneNumber() {
+            const firstDigit = '0';
+            const secondDigit = (Math.floor(Math.random() * 9) + 1).toString();
+            const randomDigits = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('');
+            return firstDigit + secondDigit + randomDigits;
+          }
+
+          function cleanString(input) {
+            return input.replace(/[^\w\s]/gi, '');
+          }
+
+          // Insertion des utilisateurs
+          sqlContent += `-- 👥 INSERTION DES UTILISATEURS
+INSERT INTO users (first_name, last_name, username, email, password, created_at, gender, looking, birthdate, biography, tags, address, city, country, postal_code, phone, status, lat, lng, vkey, verified, reports) VALUES
+`;
+
+          const uniqueUsernames = new Set();
+          const users = [];
+
+          for (let i = 1; i <= userCount; i++) {
+            let firstName, lastName, username;
+            
+            do {
+              firstName = cleanString(faker.name.firstName());
+              lastName = cleanString(faker.name.lastName());
+            } while (!(/^[a-zA-Z \-]+$/).test(firstName) || !(/^[a-zA-Z \-]+$/).test(lastName));
+            
+            do {
+              username = cleanString(faker.internet.userName());
+            } while (uniqueUsernames.has(username) || username.length < 3);
+            
+            uniqueUsernames.add(username);
+            
+            const email = `${username}@matcha.com`;
+            const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
+            const gender = faker.random.arrayElement(['male', 'female', 'other']);
+            const looking = faker.random.arrayElement(['male', 'female', 'other', 'all']);
+            const birthdate = faker.date.between('1960-01-01', '2005-12-31').toISOString().slice(0, 10);
+            const biography = getRandomBiography();
+            const tags = getRandomTags();
+            
+            const addressIndex = i % addressesLines.length;
+            const addressLine = addressesLines[addressIndex];
+            const addressParts = addressLine.split(', ');
+            
+            if (addressParts.length >= 6) {
+              const [address, city, countryName, postalCode, lat, lng] = addressParts;
+              
+              const phone = generatePhoneNumber();
+              const vkey = faker.random.alphaNumeric(20);
+
+              users.push({
+                id: i,
+                firstName, lastName, username, email, createdAt, gender, looking, 
+                birthdate, biography, tags, address, city, country: countryName, 
+                postalCode, phone, lat, lng, vkey
+              });
+
+              // Échapper les apostrophes pour PostgreSQL
+              const escapedBiography = biography.replace(/'/g, "''");
+              const escapedTags = tags.replace(/'/g, "''");
+              const escapedAddress = address.replace(/'/g, "''");
+              const escapedCity = city.replace(/'/g, "''");
+
+              sqlContent += `('${firstName}', '${lastName}', '${username}', '${email}', '${hashedPassword}', '${createdAt}', '${gender}', '${looking}', '${birthdate}', '${escapedBiography}', '${escapedTags}', '${escapedAddress}', '${escapedCity}', '${countryName}', '${postalCode}', '${phone}', '${createdAt}', '${lat}', '${lng}', '${vkey}', true, 0)`;
+              
+              if (i < userCount) {
+                sqlContent += ',\n';
+              } else {
+                sqlContent += ';\n\n';
+              }
+            }
+          }
+
+          // Insertion des images
+          sqlContent += `-- 🖼️ INSERTION DES IMAGES
+INSERT INTO images (user_id, name, profile, cover, created_at) VALUES
+`;
+
+          let imageCounter = 0;
+          const totalImages = userCount * imageCount;
+          
+          for (let i = 1; i <= userCount; i++) {
+            for (let j = 0; j < imageCount; j++) {
+              imageCounter++;
+              
+              const width = (j === 0) ? 1584 : 400;
+              const height = (j === 0) ? 396 : 400;
+              const imageId = (i * imageCount) + j + 1;
+              
+              const url = `https://i.pravatar.cc/${width}x${height}?u=user-${imageId}`;
+              const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
+              const cover = (j === 0) ? 'true' : 'false';
+              const profile = (j === 1) ? 'true' : 'false';
+
+              sqlContent += `(${i}, '${url}', ${profile}, ${cover}, '${createdAt}')`;
+              
+              if (imageCounter < totalImages) {
+                sqlContent += ',\n';
+              } else {
+                sqlContent += ';\n\n';
+              }
+            }
+          }
+
+          // Insertion des tags par défaut
+          sqlContent += `-- 🏷️ INSERTION DES TAGS
+INSERT INTO tags (value) VALUES
+`;
+          
+          const tagValues = defaultTags.map(tag => `('${tag}')`).join(',\n');
+          sqlContent += tagValues + ';\n\n';
+
+          sqlContent += `-- ✅ SCRIPT TERMINÉ AVEC SUCCÈS !
+-- 📊 Résumé: ${userCount} utilisateurs, ${imageCounter} images, ${defaultTags.length} tags
+-- 🎯 Prêt pour l'import dans Neon.tech !`;
+        }
+
+        // Créer et télécharger le fichier
+        const blob = new Blob([sqlContent], { type: 'text/plain; charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `neon_database_${country}_${userCount}users_${new Date().toISOString().split('T')[0]}.sql`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        // Afficher le statut
+        document.getElementById('neonStatus').innerHTML = 
+          `<div style="color: green; padding: 10px; border: 1px solid green; border-radius: 5px;">
+            <strong>✅ Fichier généré avec succès !</strong><br>
+            <strong>📦 ${userCount} utilisateurs</strong> avec <strong>${imageCount} images</strong> chacun<br>
+            <strong>🌍 Pays:</strong> ${country}<br>
+            <strong>💾 Taille:</strong> ${Math.round(sqlContent.length / 1024)} KB<br><br>
+            <strong>📥 Le téléchargement a démarré automatiquement.</strong><br>
+            <strong>🚀 Allez maintenant sur <a href="https://console.neon.tech/app/projects/twilight-truth-83884370" target="_blank">Neon.tech</a> et importez le fichier !</strong>
+          </div>`;
+
       } catch (error) {
-        console.error('Erreur lors de l\'import:', error);
-        document.getElementById('importStatus').innerHTML = 
-          `<p style="color: red;">❌ Erreur de connexion: ${error.message}</p>`;
+        console.error('Erreur lors de la génération:', error);
+        document.getElementById('neonStatus').innerHTML = 
+          `<div style="color: red; padding: 10px; border: 1px solid red; border-radius: 5px;">
+            <strong>❌ Erreur lors de la génération:</strong> ${error.message}
+          </div>`;
       } finally {
         hidePopup();
-      }
-    }
-
-    // NOUVELLE FONCTION : Toggle des champs Neon
-    function toggleNeonFields() {
-      const importType = document.getElementById('importType').value;
-      const neonFields = document.getElementById('neonFields');
-      
-      if (importType === 'neon') {
-        neonFields.style.display = 'block';
-      } else {
-        neonFields.style.display = 'none';
       }
     }
 
@@ -116,148 +374,311 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="icon" href="./matcha_icon.ico" type="image/x-icon" />
     <title>Matcha-42</title>
-    <link rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      h1, h2, h3 {
+        color: #2c3e50;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #3498db;
+      }
+      h2 {
+        margin-top: 40px;
+        padding-left: 15px;
+        border-left: 4px solid #3498db;
+      }
+      .form-section {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+      }
+      .neon-section {
+        border: 3px solid #4CAF50;
+        background: linear-gradient(135deg, #f9fff9 0%, #e8f5e8 100%);
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      input, select {
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+      input:focus, select:focus {
+        outline: none;
+        border-color: #3498db;
+      }
+      button {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      .neon-button {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      }
+      .instructions {
+        background: #e8f4f8;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+        border-left: 4px solid #3498db;
+      }
+      .status-box {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        border: 2px solid;
+      }
+      .success {
+        background: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+      }
+      .download-link {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #4CAF50;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        margin-top: 10px;
+        transition: background 0.3s;
+      }
+      .download-link:hover {
+        background: #45a049;
+      }
+      pre {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 20px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+        align-items: center;
+      }
+      .form-group {
+        flex: 1;
+      }
+      .checkbox-group {
+        display: flex;
+        gap: 15px;
+        margin: 15px 0;
+      }
+      .checkbox-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: normal;
+      }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js"></script>
   </head>
   <body>
     <div id="app"></div>
-    <h1>Bienvenue à la partie Back-End de Matcha</h1>
-    <h2>Vous pouvez accéder à la partie Front-End en cliquant <a href="https://benelhadj.github.io/Matcha/">ici</a></h2>
+    <h1>🚀 Bienvenue à la partie Back-End de Matcha</h1>
+    
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h2>🔗 Liens importants</h2>
+      <p>
+        <a href="https://benelhadj.github.io/Matcha/" target="_blank" style="margin: 0 15px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">
+          🌐 Front-End Matcha
+        </a>
+        <a href="https://console.neon.tech/app/projects/twilight-truth-83884370" target="_blank" style="margin: 0 15px; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+          🗄️ Base de données Neon
+        </a>
+      </p>
+    </div>
 
-    <!-- VOTRE CONTENU EXISTANT RESTE ICI -->
-    <h2>Les routes</h2>
-    <pre style="font-weight: bold;">
-      *  (POST): http://localhost:3000/login ============> Connectez-vous avec les informations d'identification fournies dans le corps de la requête.
-      *  (GET) : http://localhost:3000/logout ===========> Déconnectez-vous de votre session utilisateur.
-      *  (GET) : http://localhost:3000/isLoggedin =======> Vérifiez si l'utilisateur est connecté.
-      *  (POST): http://localhost:3000/forget_password ==> Envoyez une demande de réinitialisation de mot de passe avec les informations fournies dans le corps de la requête.
-      *  (GET) : http://localhost:3000/recover/:key =====> Récupérez la page de récupération de mot de passe avec la clé fournie dans l'URL.
-      *  (POST): http://localhost:3000/rkeycheck ========> Vérifiez si la clé de récupération de mot de passe fournie dans le corps de la requête est valide.
-      *  (GET) : http://localhost:3000/destroykey =======> Détruisez la clé de récupération de mot de passe.
-      *  (GET) : http://localhost:3000/history ==========> Obtenez l'historique de navigation de l'utilisateur connecté.
-      *  (GET) : http://localhost:3000/tags =============> Obtenez les tags de l'utilisateur connecté
-      *  (GET) : http://localhost:3000/allTags ==========> Obtenez les toutes les tags disponibles.
-      *  (GET) : http://localhost:3000/all ==============> Obtenez toutes les conversations de chat de l'utilisateur connecté.
-      *  (POST): http://localhost:3000/messages =========> Obtenez les messages d'une conversation spécifique avec l'identifiant de conversation fourni dans le corps de la requête.
-      *  (POST): http://localhost:3000/update ===========> Mettez à jour les informations d'une conversation spécifique avec l'identifiant de conversation et les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/send =============> Envoyez un message dans une conversation spécifique avec l'identifiant de conversation et le message fournis dans le corps de la requête.
-      *  (POST): http://localhost:3000/match ============> Effectuez un matching entre l'utilisateur connecté et d'autres utilisateurs.
-      *  (GET) : http://localhost:3000/getmatches =======> Obtenez les correspondances de l'utilisateur connecté.
-      *  (POST): http://localhost:3000/add ==============> Ajoutez une notification de chat avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/update ===========> Mettez à jour une notification avec les informations fournies dans le corps de la requête.
-      *  (GET) : http://localhost:3000/all ==============> Obtenez toutes les notifications de l'utilisateur connecté.
-      *  (POST): http://localhost:3000/add ==============> Ajoutez un utilisateur avec les informations fournies dans le corps de la requête.
-      *  (GET) : http://localhost:3000/verify/:key ======> Vérifiez l'adresse e-mail de l'utilisateur avec la clé fournie dans l'URL.
-      *  (POST): http://localhost:3000/updateprofile ====> Mettez à jour le profil de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/changeemail ======> Changez l'adresse e-mail de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/changepassword ===> Changez le mot de passe de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/show =============> Obtenez la liste des utilisateurs correspondant aux critères de recherche fournis dans le corps de la requête.
-      *  (GET) : http://localhost:3000/show/:id =========> Obtenez les informations d'un utilisateur spécifique avec l'identifiant d'utilisateur fourni dans l'URL.
-      *  (POST): http://localhost:3000/report ===========> Signalez un utilisateur avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/block ============> Bloquez un utilisateur avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/unblock ==========> Débloquez un utilisateur avec les informations fournies dans le corps de la requête.
-      *  (GET) : http://localhost:3000/getblocked =======> Obtenez la liste des utilisateurs bloqués par l'utilisateur connecté.
-      *  (POST): http://localhost:3000/blacklisted ======> Ajoutez un utilisateur à la liste noire de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/location =========> Mettez à jour la localisation de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/image ============> Ajoutez une image à la galerie de l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
-      *  (POST): http://localhost:3000/image/cover ======> Ajoutez une image de couverture à l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
-      *  (POST): http://localhost:3000/image/del ========> Supprimez une image de la galerie de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-      *  (POST): http://localhost:3000/get_last_user_id => récupérer la dernier Id d'utilisateur.
-    </pre>
+    <div class="form-section">
+      <h2>📋 Documentation des Routes API</h2>
+      <pre style="font-weight: bold;">
+*  (POST): http://localhost:3000/login ============> Connectez-vous avec les informations d'identification fournies dans le corps de la requête.
+*  (GET) : http://localhost:3000/logout ===========> Déconnectez-vous de votre session utilisateur.
+*  (GET) : http://localhost:3000/isLoggedin =======> Vérifiez si l'utilisateur est connecté.
+*  (POST): http://localhost:3000/forget_password ==> Envoyez une demande de réinitialisation de mot de passe avec les informations fournies dans le corps de la requête.
+*  (GET) : http://localhost:3000/recover/:key =====> Récupérez la page de récupération de mot de passe avec la clé fournie dans l'URL.
+*  (POST): http://localhost:3000/rkeycheck ========> Vérifiez si la clé de récupération de mot de passe fournie dans le corps de la requête est valide.
+*  (GET) : http://localhost:3000/destroykey =======> Détruisez la clé de récupération de mot de passe.
+*  (GET) : http://localhost:3000/history ==========> Obtenez l'historique de navigation de l'utilisateur connecté.
+*  (GET) : http://localhost:3000/tags =============> Obtenez les tags de l'utilisateur connecté
+*  (GET) : http://localhost:3000/allTags ==========> Obtenez les toutes les tags disponibles.
+*  (GET) : http://localhost:3000/all ==============> Obtenez toutes les conversations de chat de l'utilisateur connecté.
+*  (POST): http://localhost:3000/messages =========> Obtenez les messages d'une conversation spécifique avec l'identifiant de conversation fourni dans le corps de la requête.
+*  (POST): http://localhost:3000/update ===========> Mettez à jour les informations d'une conversation spécifique avec l'identifiant de conversation et les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/send =============> Envoyez un message dans une conversation spécifique avec l'identifiant de conversation et le message fournis dans le corps de la requête.
+*  (POST): http://localhost:3000/match ============> Effectuez un matching entre l'utilisateur connecté et d'autres utilisateurs.
+*  (GET) : http://localhost:3000/getmatches =======> Obtenez les correspondances de l'utilisateur connecté.
+*  (POST): http://localhost:3000/add ==============> Ajoutez une notification de chat avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/update ===========> Mettez à jour une notification avec les informations fournies dans le corps de la requête.
+*  (GET) : http://localhost:3000/all ==============> Obtenez toutes les notifications de l'utilisateur connecté.
+*  (POST): http://localhost:3000/add ==============> Ajoutez un utilisateur avec les informations fournies dans le corps de la requête.
+*  (GET) : http://localhost:3000/verify/:key ======> Vérifiez l'adresse e-mail de l'utilisateur avec la clé fournie dans l'URL.
+*  (POST): http://localhost:3000/updateprofile ====> Mettez à jour le profil de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/changeemail ======> Changez l'adresse e-mail de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/changepassword ===> Changez le mot de passe de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/show =============> Obtenez la liste des utilisateurs correspondant aux critères de recherche fournis dans le corps de la requête.
+*  (GET) : http://localhost:3000/show/:id =========> Obtenez les informations d'un utilisateur spécifique avec l'identifiant d'utilisateur fourni dans l'URL.
+*  (POST): http://localhost:3000/report ===========> Signalez un utilisateur avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/block ============> Bloquez un utilisateur avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/unblock ==========> Débloquez un utilisateur avec les informations fournies dans le corps de la requête.
+*  (GET) : http://localhost:3000/getblocked =======> Obtenez la liste des utilisateurs bloqués par l'utilisateur connecté.
+*  (POST): http://localhost:3000/blacklisted ======> Ajoutez un utilisateur à la liste noire de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/location =========> Mettez à jour la localisation de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/image ============> Ajoutez une image à la galerie de l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
+*  (POST): http://localhost:3000/image/cover ======> Ajoutez une image de couverture à l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
+*  (POST): http://localhost:3000/image/del ========> Supprimez une image de la galerie de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): http://localhost:3000/get_last_user_id => récupérer la dernier Id d'utilisateur.
+      </pre>
+    </div>
 
-    <h2>Création d'utilisateurs et d'images aléatoires</h2>
-    <form id="userCreationForm" style="display: flex; flex-direction: column; align-items: flex-start; align-items: flex-start;">
+    <!-- SECTION ORIGINALE : Création d'utilisateurs pour MySQL -->
+    <div class="form-section">
+      <h2>👥 Création d'utilisateurs et d'images aléatoires (MySQL)</h2>
+      <form id="userCreationForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="userCount">Nombre d'utilisateurs à créer (max 500) :</label>
+            <input type="number" id="userCount" name="userCount" min="1" max="500" value="50" required>
+          </div>
 
-      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-        <label for="userCount" style="margin-right: 77px;">Nombre d'utilisateurs à créer (max 500) :</label>
-        <input type="number" id="userCount" name="userCount" min="1" max="500" value="500" style="width: 185px;" required>
-      </div>
+          <div class="form-group">
+            <label for="imageCount">Nombre d'images par utilisateur (max 5) :</label>
+            <input type="number" id="imageCount" name="imageCount" min="1" max="5" value="5" required>
+          </div>
 
-      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-        <label for="imageCount" style="margin-right: 25px;">Nombre d'images à créer par utilisateur (max 5) :</label>
-        <input type="number" id="imageCount" name="imageCount" min="1" max="5" value="5" style="width: 185px;" required>
-      </div>
+          <div class="form-group">
+            <label for="countrySelect">Sélectionnez un pays :</label>
+            <select id="countrySelect" name="countrySelect">
+              <option value="France" countryName="fr">France</option>
+              <option value="Italie" countryName="it">Italie</option>
+              <option value="Germany" countryName="de">Allemagne</option>
+              <option value="Pays-Bas" countryName="nl">Pays-Bas</option>
+              <option value="Espagne" countryName="es">Espagne</option>
+            </select>
+          </div>
+        </div>
 
-      <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-        <label for="countrySelect" style="margin-right: 197px;">Sélectionnez un pays :</label>
-        <select id="countrySelect" name="countrySelect" style="width: 190px;">
-          <option value="France" countryName="fr">France</option>
-          <option value="Italie" countryName="it">Italie</option>
-          <option value="Germany" countryName="de">Germany</option>
-          <option value="Pays-Bas" countryName="nl">Pays-Bas</option>
-          <option value="Espagne" countryName="es">Espagne</option>
-        </select>
-      </div>
+        <button type="submit" style="display: block; margin: 20px auto;">Créer des utilisateurs et des images</button>
+      </form>
 
-      <button type="submit" id="createUsersButton" style="margin-left: 137px;">Créer des utilisateurs et des images</button>
-    </form>
+      <p id="status"></p>
+    </div>
 
-<h2>Import de Base de Données</h2>
-    <div style="border: 2px solid #ccc; padding: 20px; border-radius: 10px; margin: 20px 0;">
-      <h3>Importer un fichier SQL vers la base de données</h3>
+    <!-- NOUVELLE SECTION : Génération pour Neon.tech -->
+    <div class="form-section neon-section">
+      <h2>🚀 Génération de Base de Données pour Neon.tech</h2>
+      <h3>Générer un fichier SQL compatible PostgreSQL (Neon)</h3>
       
-      <div style="display: flex; flex-direction: column; gap: 15px;">
-        <div>
-          <label for="sqlFile" style="display: block; margin-bottom: 5px; font-weight: bold;">
-            Fichier SQL à importer :
-          </label>
-          <input type="file" id="sqlFile" name="sqlFile" accept=".sql" style="width: 300px;">
+      <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 20px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="neonUserCount">Nombre d'utilisateurs à créer :</label>
+            <input type="number" id="neonUserCount" name="neonUserCount" min="1" max="1000" value="50" style="width: 120px;">
+          </div>
+
+          <div class="form-group">
+            <label for="neonImageCount">Images par utilisateur :</label>
+            <input type="number" id="neonImageCount" name="neonImageCount" min="1" max="5" value="5" style="width: 120px;">
+          </div>
+
+          <div class="form-group">
+            <label for="neonCountry">Pays pour les adresses :</label>
+            <select id="neonCountry" name="neonCountry" style="width: 200px;">
+              <option value="France">France</option>
+              <option value="Italy">Italie</option>
+              <option value="Germany">Allemagne</option>
+              <option value="Spain">Espagne</option>
+              <option value="Netherlands">Pays-Bas</option>
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label for="importType" style="display: block; margin-bottom: 5px; font-weight: bold;">
-            Destination :
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" id="includeTables" name="includeTables" checked>
+            Inclure la création des tables
           </label>
-          <select id="importType" name="importType" onchange="toggleNeonFields()" style="width: 300px;">
-            <option value="local">Base de données locale</option>
-            <option value="neon">Neon.tech PostgreSQL</option>
-            <option value="both">Les deux (local + Neon)</option>
-            <option value="convert">Convertir seulement (télécharger)</option>
-          </select>
+          <label>
+            <input type="checkbox" id="includeData" name="includeData" checked>
+            Inclure les données (utilisateurs + images)
+          </label>
         </div>
 
-        <div id="neonFields" style="display: none;">
-          <label for="neonUrl" style="display: block; margin-bottom: 5px; font-weight: bold;">
-            URL de connexion Neon.tech :
-          </label>
-          <input type="text" id="neonUrl" name="neonUrl" 
-                 placeholder="postgresql://user:pass@host/db" 
-                 style="width: 500px; padding: 5px;">
-          <small style="color: #666;">
-            Format: postgresql://username:password@host/database<br>
-            Trouvez cette URL dans votre dashboard Neon.tech
-          </small>
-        </div>
-
-        <button type="button" onclick="importDatabase()" 
-                style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-          🚀 Importer la Base de Données
+        <button type="button" onclick="generateNeonSQL()" class="neon-button" style="padding: 15px 30px; font-size: 18px;">
+          🎯 Générer le SQL pour Neon
         </button>
       </div>
 
-      <div id="importStatus" style="margin-top: 20px; padding: 10px; border-radius: 5px;"></div>
+      <div id="neonStatus" style="margin-top: 20px;"></div>
 
-      <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
-        <h4>📋 Instructions :</h4>
+      <div class="instructions">
+        <h4>📋 Instructions pour Neon.tech :</h4>
+        <ol>
+          <li>Cliquez sur <strong>"Générer le SQL pour Neon"</strong></li>
+          <li>Téléchargez le fichier <strong>.sql généré</strong></li>
+          <li>Allez sur <a href="https://console.neon.tech/app/projects/twilight-truth-83884370" target="_blank" style="color: #4CAF50; font-weight: bold;">votre projet Neon</a></li>
+          <li>Cliquez sur <strong>"SQL Editor"</strong> dans la sidebar</li>
+          <li>Copiez-collez le <strong>contenu du fichier SQL</strong></li>
+          <li>Exécutez le script ! 🎉</li>
+        </ol>
+        <p><strong>✨ Le fichier inclut automatiquement :</strong></p>
         <ul>
-          <li><strong>Base de données locale</strong> : Importe dans votre MySQL local</li>
-          <li><strong>Neon.tech PostgreSQL</strong> : Importe dans votre base Neon (nécessite l'URL)</li>
-          <li><strong>Les deux</strong> : Importe dans les deux bases simultanément</li>
-          <li><strong>Convertir seulement</strong> : Convertit le SQL MySQL vers PostgreSQL et le télécharge</li>
+          <li>Création des tables (si coché)</li>
+          <li>Insertion des utilisateurs avec données réalistes</li>
+          <li>Insertion des images avec URLs Pravatar</li>
+          <li>Formatage PostgreSQL 100% compatible</li>
+          <li>Relations et contraintes de clés étrangères</li>
         </ul>
-        <p><strong>Note :</strong> Le système détecte automatiquement le format (MySQL/PostgreSQL) et adapte la conversion si nécessaire.</p>
       </div>
     </div>
 
-    <p id="status"></p>
-
     <script>
-
+      // Script original pour la génération MySQL
       document.getElementById('userCreationForm').addEventListener('submit', async function(event) {
         event.preventDefault();
-        showPopup(); // 👉 affiche le popup avant de commencer
+        showPopup("⏳ Création des utilisateurs MySQL en cours...");
 
         try {
           const salt = dcodeIO.bcrypt.genSaltSync(10);
@@ -266,11 +687,9 @@
           const addressesLines = addressesData.split('\n');
 
           const userCount = document.getElementById('userCount').value;
-
           const imageCount = document.getElementById('imageCount').value;
           const sqlFileName = document.getElementById('countrySelect').value + 'BDD';
           const selectedCountry = document.getElementById('countrySelect').value;
-          const countryName = document.getElementById('countrySelect').options[document.getElementById('countrySelect').selectedIndex].getAttribute('countryName');
 
           function cleanString(input) {
             var output = input.replace(/[^\w\s]/gi, '');
@@ -310,8 +729,6 @@
             }
             return randomTags.join(', ');
           }
-
-
 
           function generatePhoneNumber() {
             const firstDigit = '0';
@@ -380,16 +797,10 @@
 
             for (let i = 0; i < userCount; i++) {
               for (let j = 0; j < imageCount; j++) {
-                // taille selon la position (cover ou avatar)
                 const width = (j === 0) ? 1584 : 400;
                 const height = (j === 0) ? 396 : 400;
-
-                // identifiant unique d'image
                 const imageId = (userId * imageCount) + j + user_id + 1;
-
-                // 🔁 URL Pravatar (visages humains réalistes et stables)
                 const url = `https://i.pravatar.cc/${width}x${height}?u=user-${imageId}`;
-
                 const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
                 const cover = (j === 0) ? '1' : '0';
                 const profile = (j === 1) ? '1' : '0';
@@ -402,41 +813,46 @@
             console.error("INSERT INTO images ===> Échec de la récupération du dernier user_id :", error);
           }
 
-
           sql = sql.slice(0, -2) + ';';
 
           const blob = new Blob([sql], {type: 'text/plain'});
-
           const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
           link.download = sqlFileName + '.sql';
           link.click();
+          
+          document.getElementById('status').innerHTML = 
+            `<div class="status-box success">
+              ✅ Fichier ${sqlFileName}.sql généré avec succès !
+            </div>`;
+            
       } catch (error) {
         console.error("🚨 Erreur lors de la création :", error);
+        document.getElementById('status').innerHTML = 
+          `<div class="status-box error">
+            ❌ Erreur: ${error.message}
+          </div>`;
       } finally {
-        hidePopup(); // 👉 ferme le popup à la fin, même si erreur
+        hidePopup();
       }
       });
-      function showPopup() {
-        document.getElementById("loadingPopup").style.display = "flex";
-      }
-      
-      function hidePopup() {
-        document.getElementById("loadingPopup").style.display = "none";
-      }
     </script>
+
     <div id="loadingPopup" style="
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.8);
       color: #fff;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
       align-items: center;
       justify-content: center;
-      z-index: 9999;">
-      ⏳ Création des utilisateurs en cours... Merci de patienter
+      z-index: 9999;
+      flex-direction: column;
+      gap: 20px;">
+      <div>⏳ Opération en cours...</div>
+      <div style="font-size: 16px; color: #ccc;">Veuillez patienter</div>
     </div>
   </body>
 </html>
