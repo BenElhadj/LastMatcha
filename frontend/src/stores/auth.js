@@ -1,3 +1,5 @@
+import { api } from '../boot/axios'
+
 export const auth = {
   state () {
     return {
@@ -49,24 +51,35 @@ export const auth = {
     }
   },
   actions: {
-    login ({ commit, dispatch }, user) {
-      if (user.id) {
-        localStorage.setItem('token', user.token)
-        const { lat, lng } = user
-        commit('locate', { lat, lng })
-        dispatch('locate')
-        dispatch('getTags')
-        dispatch('getAllTags')
-        dispatch('getConnectedUsers')
-        dispatch('getNotif')
-        dispatch('syncHistory')
-        dispatch('syncMatches')
-        dispatch('syncConvoAll')
-        dispatch('syncBlocked', user.id)
-        commit('login', user)
+    async login({ commit, dispatch }, user) {
+      try {
+        if (user.id) {
+          localStorage.setItem('token', user.token)
+          const { lat, lng } = user
+          commit('locate', { lat, lng })
+          
+          // Dispatch toutes les actions nécessaires
+          await Promise.all([
+            dispatch('getTags'),
+            dispatch('getAllTags'),
+            dispatch('getConnectedUsers'),
+            dispatch('getNotif'),
+            dispatch('syncHistory'),
+            dispatch('syncMatches'),
+            dispatch('syncConvoAll'),
+            dispatch('syncBlocked', user.id)
+          ])
+          
+          commit('login', user)
+          return true
+        }
+      } catch (error) {
+        console.error('Login error:', error)
+        return false
       }
     },
-    logout ({ commit }, id) {
+    
+    logout({ commit }, id) {
       localStorage.removeItem('token')
       commit('logout')
     }

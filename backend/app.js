@@ -6,17 +6,20 @@ const app = express()
 const socketIo = require('socket.io')
 const port = process.env.PORT || 3000
 const path = require('path')
-const { pool } = require('./src/utility/database')
+const { pool } = require('./src/config/database')
 const cors = require('cors')
 
 // Configuration CORS pour la production
 app.use(cors({
   origin: [
     'https://benelhadj.github.io',
-    'https://benelhadj.github.io/Matcha/',
+    'https://benelhadj.github.io/Matcha',
+    'http://localhost:5173',
     'http://localhost:3000'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }))
 
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
@@ -94,6 +97,7 @@ const io = socketIo(server, {
     origin: [
       'https://benelhadj.github.io',
       'https://benelhadj.github.io/Matcha/',
+      'http://localhost:5173',
       'http://localhost:3000'
     ],
     methods: ["GET", "POST"],
