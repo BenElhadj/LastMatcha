@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <script>
+    // Vos fonctions existantes restent ici...
     function getLastUserId() {
       return new Promise((resolve, reject) => {
         var xhr = new XMLHttpRequest();
@@ -17,6 +18,7 @@
         xhr.send();
       });
     }
+
     async function readAddressesFile() {
       try {
         const response = await fetch("./adresses.txt");
@@ -38,6 +40,75 @@
         return "";
       }
     }
+
+    // NOUVELLE FONCTION : Import de base de données
+    async function importDatabase() {
+      showPopup("⏳ Importation de la base de données en cours...");
+      
+      const fileInput = document.getElementById('sqlFile');
+      const importType = document.getElementById('importType').value;
+      const neonUrl = document.getElementById('neonUrl').value;
+      
+      if (!fileInput.files[0]) {
+        alert("Veuillez sélectionner un fichier SQL");
+        hidePopup();
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('sqlFile', fileInput.files[0]);
+      formData.append('importType', importType);
+      formData.append('neonUrl', neonUrl);
+
+      try {
+        const response = await fetch('/api/import-database', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+          document.getElementById('importStatus').innerHTML = 
+            `<p style="color: green;">✅ ${result.message}</p>`;
+          if (result.downloadUrl) {
+            document.getElementById('importStatus').innerHTML += 
+              `<p><a href="${result.downloadUrl}" download>Télécharger le fichier adapté</a></p>`;
+          }
+        } else {
+          document.getElementById('importStatus').innerHTML = 
+            `<p style="color: red;">❌ ${result.error}</p>`;
+        }
+      } catch (error) {
+        console.error('Erreur lors de l\'import:', error);
+        document.getElementById('importStatus').innerHTML = 
+          `<p style="color: red;">❌ Erreur de connexion: ${error.message}</p>`;
+      } finally {
+        hidePopup();
+      }
+    }
+
+    // NOUVELLE FONCTION : Toggle des champs Neon
+    function toggleNeonFields() {
+      const importType = document.getElementById('importType').value;
+      const neonFields = document.getElementById('neonFields');
+      
+      if (importType === 'neon') {
+        neonFields.style.display = 'block';
+      } else {
+        neonFields.style.display = 'none';
+      }
+    }
+
+    function showPopup(message = "⏳ Opération en cours...") {
+      const popup = document.getElementById("loadingPopup");
+      popup.innerHTML = message;
+      popup.style.display = "flex";
+    }
+    
+    function hidePopup() {
+      document.getElementById("loadingPopup").style.display = "none";
+    }
   </script>
 
   <head>
@@ -54,9 +125,8 @@
     <div id="app"></div>
     <h1>Bienvenue à la partie Back-End de Matcha</h1>
     <h2>Vous pouvez accéder à la partie Front-End en cliquant <a href="https://benelhadj.github.io/Matcha/">ici</a></h2>
-    <h2>Vous pouvez accéder à la gestion de la BDD avec phpMyAdmin <a href="http://localhost:8081">ici</a></h2>
 
-
+    <!-- VOTRE CONTENU EXISTANT RESTE ICI -->
     <h2>Les routes</h2>
     <pre style="font-weight: bold;">
       *  (POST): http://localhost:3000/login ============> Connectez-vous avec les informations d'identification fournies dans le corps de la requête.
@@ -123,6 +193,63 @@
 
       <button type="submit" id="createUsersButton" style="margin-left: 137px;">Créer des utilisateurs et des images</button>
     </form>
+
+<h2>Import de Base de Données</h2>
+    <div style="border: 2px solid #ccc; padding: 20px; border-radius: 10px; margin: 20px 0;">
+      <h3>Importer un fichier SQL vers la base de données</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 15px;">
+        <div>
+          <label for="sqlFile" style="display: block; margin-bottom: 5px; font-weight: bold;">
+            Fichier SQL à importer :
+          </label>
+          <input type="file" id="sqlFile" name="sqlFile" accept=".sql" style="width: 300px;">
+        </div>
+
+        <div>
+          <label for="importType" style="display: block; margin-bottom: 5px; font-weight: bold;">
+            Destination :
+          </label>
+          <select id="importType" name="importType" onchange="toggleNeonFields()" style="width: 300px;">
+            <option value="local">Base de données locale</option>
+            <option value="neon">Neon.tech PostgreSQL</option>
+            <option value="both">Les deux (local + Neon)</option>
+            <option value="convert">Convertir seulement (télécharger)</option>
+          </select>
+        </div>
+
+        <div id="neonFields" style="display: none;">
+          <label for="neonUrl" style="display: block; margin-bottom: 5px; font-weight: bold;">
+            URL de connexion Neon.tech :
+          </label>
+          <input type="text" id="neonUrl" name="neonUrl" 
+                 placeholder="postgresql://user:pass@host/db" 
+                 style="width: 500px; padding: 5px;">
+          <small style="color: #666;">
+            Format: postgresql://username:password@host/database<br>
+            Trouvez cette URL dans votre dashboard Neon.tech
+          </small>
+        </div>
+
+        <button type="button" onclick="importDatabase()" 
+                style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+          🚀 Importer la Base de Données
+        </button>
+      </div>
+
+      <div id="importStatus" style="margin-top: 20px; padding: 10px; border-radius: 5px;"></div>
+
+      <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+        <h4>📋 Instructions :</h4>
+        <ul>
+          <li><strong>Base de données locale</strong> : Importe dans votre MySQL local</li>
+          <li><strong>Neon.tech PostgreSQL</strong> : Importe dans votre base Neon (nécessite l'URL)</li>
+          <li><strong>Les deux</strong> : Importe dans les deux bases simultanément</li>
+          <li><strong>Convertir seulement</strong> : Convertit le SQL MySQL vers PostgreSQL et le télécharge</li>
+        </ul>
+        <p><strong>Note :</strong> Le système détecte automatiquement le format (MySQL/PostgreSQL) et adapte la conversion si nécessaire.</p>
+      </div>
+    </div>
 
     <p id="status"></p>
 
