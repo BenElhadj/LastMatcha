@@ -41,6 +41,72 @@ app.use('/api/chat/', require('./src/routes/chatRoutes'))
 app.use('/api/notif/', require('./src/routes/notifRoutes'))
 app.use('/api/matching/', require('./src/routes/matchingRoutes'))
 
+
+
+
+
+// Route de test de connexion BDD
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW() as current_time, version() as postgres_version');
+    res.json({ 
+      success: true, 
+      message: '✅ Database connection successful',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Database test error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: '❌ Database connection failed',
+      error: error.message 
+    });
+  }
+});
+
+// Route pour voir toutes les tables
+app.get('/api/tables', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `);
+    res.json({ 
+      success: true, 
+      tables: result.rows.map(row => row.table_name)
+    });
+  } catch (error) {
+    console.error('Tables query error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Route pour voir les utilisateurs
+app.get('/api/users-list', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email, username FROM users LIMIT 5');
+    res.json({ 
+      success: true, 
+      users: result.rows
+    });
+  } catch (error) {
+    console.error('Users query error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+// 🔼 FIN DES ROUTES DE TEST 🔼
+
+
+
+
+
 // Routes de vue
 app.get('/verified', (req, res) => {
     res.render('verified');
