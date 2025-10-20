@@ -68,11 +68,11 @@
 
         // Section création des tables
         if (includeTables) {
-          sqlContent += `-- =============================================
--- CRÉATION DES TABLES
--- =============================================
+          sqlContent += `-- 🚀 Script PostgreSQL pour Neon.tech
+-- 🧩 Création automatique des tables du projet Matcha
+-- ✅ Compatible avec Neon (pas de blocs DO $$)
 
--- Table des utilisateurs
+-- TABLE UTILISATEURS
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(255),
@@ -96,83 +96,81 @@ CREATE TABLE IF NOT EXISTS users (
     lng VARCHAR(30) DEFAULT '0',
     vkey VARCHAR(255) DEFAULT '',
     rkey VARCHAR(255),
-    verified BOOLEAN DEFAULT false,
+    verified BOOLEAN DEFAULT FALSE,
     google_id VARCHAR(50),
     reports INTEGER DEFAULT 0
 );
 
--- Table des images
+-- TABLE IMAGES
 CREATE TABLE IF NOT EXISTS images (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    profile BOOLEAN DEFAULT false,
-    cover BOOLEAN DEFAULT false,
+    profile BOOLEAN DEFAULT FALSE,
+    cover BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table des matches
+-- TABLE MATCHES
 CREATE TABLE IF NOT EXISTS matches (
     id SERIAL PRIMARY KEY,
-    matcher INTEGER REFERENCES users(id),
-    matched INTEGER REFERENCES users(id),
+    matcher INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    matched INTEGER REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table de l'historique des visites
+-- TABLE HISTORIQUE
 CREATE TABLE IF NOT EXISTS history (
     id SERIAL PRIMARY KEY,
-    visitor INTEGER REFERENCES users(id),
-    visited INTEGER REFERENCES users(id),
+    visitor INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    visited INTEGER REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table des utilisateurs bloqués
+-- TABLE BLOQUÉS
 CREATE TABLE IF NOT EXISTS blocked (
     id SERIAL PRIMARY KEY,
-    blocker INTEGER REFERENCES users(id),
-    blocked INTEGER REFERENCES users(id),
+    blocker INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    blocked INTEGER REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table des conversations
+-- TABLE CONVERSATIONS
 CREATE TABLE IF NOT EXISTS conversations (
     id_conversation SERIAL PRIMARY KEY,
-    id_user1 INTEGER REFERENCES users(id),
-    id_user2 INTEGER REFERENCES users(id),
+    id_user1 INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    id_user2 INTEGER REFERENCES users(id) ON DELETE CASCADE,
     last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    allowed BOOLEAN DEFAULT true,
+    allowed BOOLEAN DEFAULT TRUE,
     last_msg INTEGER
 );
 
--- Table des messages
+-- TABLE CHAT / MESSAGES
 CREATE TABLE IF NOT EXISTS chat (
     id SERIAL PRIMARY KEY,
-    id_conversation INTEGER REFERENCES conversations(id_conversation),
-    id_from INTEGER REFERENCES users(id),
+    id_conversation INTEGER REFERENCES conversations(id_conversation) ON DELETE CASCADE,
+    id_from INTEGER REFERENCES users(id) ON DELETE CASCADE,
     message VARCHAR(2048) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_read BOOLEAN DEFAULT false
+    is_read BOOLEAN DEFAULT FALSE
 );
 
--- Table des notifications
+-- TABLE NOTIFICATIONS
 CREATE TABLE IF NOT EXISTS notifications (
     id SERIAL PRIMARY KEY,
     type VARCHAR(20) NOT NULL,
-    id_from INTEGER REFERENCES users(id),
-    id_to INTEGER REFERENCES users(id),
+    id_from INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    id_to INTEGER REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_read BOOLEAN DEFAULT false,
+    is_read BOOLEAN DEFAULT FALSE,
     id_conversation INTEGER DEFAULT -1
 );
 
--- Table des tags
+-- TABLE TAGS
 CREATE TABLE IF NOT EXISTS tags (
     id SERIAL PRIMARY KEY,
     value VARCHAR(100) UNIQUE
-);
-
-`;
+);`;
         }
 
         // Section insertion des données
