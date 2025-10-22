@@ -47,7 +47,7 @@ const getVkey = async (vkey) => {
 const addRkey = async (user) => {
     const query = `UPDATE users SET rkey = $1 WHERE email = $2`;
     const result = await db.query(query, [user.rkey, user.email]);
-    return result.rowCount;
+    return result.rowCount > 0;
 }
 
 // Check Reset password key [rkey]

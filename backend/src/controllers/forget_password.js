@@ -15,23 +15,21 @@ localStorage = new LocalStorage('./scratch');
 
 const forget_password = async (req, res) => {
 	if (!validator(req.body.email, 'email'))
-		return res.json({ msg: 'Email is invalid' })
+		return res.json({ msg: 'Email is invalid' });
 	try {
-		const key = randomHex()
+		const key = randomHex();
 		const user = {
 			rkey: key,
 			email: req.body.email
+		};
+		const affectedRows = await userModel.addRkey(user);
+		if (!affectedRows) {
+			return res.json({ msg: 'Email not found' });
 		}
-		await userModel.addRkey(user, (results) => {
-			if (!results.affectedRows)
-				return res.json({ msg: 'Email not found' })
-			else {
-				mailer.sendMail(req.body.email, key, 'auth/recover')
-				return res.json({ ok: true })
-			}
-		})
+		await mailer.sendMail(req.body.email, key, 'auth/recover');
+		return res.json({ ok: true });
 	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
+		return res.json({ msg: 'Fatal error', err });
 	}
 }
 
