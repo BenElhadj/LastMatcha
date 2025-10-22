@@ -26,7 +26,8 @@ const login = async (req, res) => {
 			if (result.length === 0) {
 				return res.json({ msg: 'User not found' });
 			}
-			if (result[0].verified === 0) {
+			// Compatible PostgreSQL (true/false) et MySQL (0/1)
+			if (!result[0].verified) {
 				return res.json({ msg: 'Unverified user. Please verify your account' });
 			}
 			const user = result[0];
