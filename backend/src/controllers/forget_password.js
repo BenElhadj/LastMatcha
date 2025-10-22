@@ -14,21 +14,30 @@ localStorage = new LocalStorage('./scratch');
 // Sending  forget password email 
 
 const forget_password = async (req, res) => {
-	if (!validator(req.body.email, 'email'))
+	console.log('[forget_password] Received request for:', req.body.email);
+	if (!validator(req.body.email, 'email')) {
+		console.log('[forget_password] Invalid email format:', req.body.email);
 		return res.json({ msg: 'Email is invalid' });
+	}
 	try {
 		const key = randomHex();
+		console.log('[forget_password] Generated key:', key);
 		const user = {
 			rkey: key,
 			email: req.body.email
 		};
 		const affectedRows = await userModel.addRkey(user);
+		console.log('[forget_password] addRkey result:', affectedRows);
 		if (!affectedRows) {
+			console.log('[forget_password] Email not found in DB:', req.body.email);
 			return res.json({ msg: 'Email not found' });
 		}
+		console.log('[forget_password] Sending recovery email...');
 		await mailer.sendMail(req.body.email, key, 'auth/recover');
+		console.log('[forget_password] Email sent (no error thrown)');
 		return res.json({ ok: true });
 	} catch (err) {
+		console.error('[forget_password] Fatal error:', err);
 		return res.json({ msg: 'Fatal error', err });
 	}
 }
