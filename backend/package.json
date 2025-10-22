@@ -6,7 +6,8 @@
 	"scripts": {
 		"start": "node ./app.js",
 		"dev": " nodemon app.js",
-		"build": " nodemon app.js"
+		"build": " nodemon app.js",
+		"smtp-test": "node smtp-test.js"
 	},
 	"author": "mbouzaie",
 	"license": "ISC",

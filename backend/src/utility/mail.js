@@ -1,5 +1,6 @@
+
 const nodemailer = require('nodemailer')
-const conf = require('../config/smtp')
+const smtpConf = require('../config/smtp')
 const ejs = require('ejs')
 const { readFile } = require('fs')
 const { resolve, dirname } = require('path')
@@ -17,13 +18,7 @@ const sendMail = async (to, key, type) => {
 			url: `${process.env.API_URL}/api/${type}/${key}`
 		}
 		const html = ejs.render(raw, data)
-		let transporter = nodemailer.createTransport({
-			service: "gmail",
-			auth: {
-				user: process.env.MAIL_USER,
-				pass: process.env.MAIL_PASS
-			}
-		})
+			let transporter = nodemailer.createTransport(smtpConf)
 		await transporter.sendMail({
 			from: 'Matcha team',
 			subject: data.title,
