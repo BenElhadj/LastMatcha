@@ -15,7 +15,7 @@ app.use(cors({
     'https://benelhadj.github.io',
     'https://benelhadj.github.io/Matcha',
     'http://localhost:5173',
-    'http://localhost:3000'
+    'https://matcha-backend-t6dr.onrender.com/'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -101,6 +101,82 @@ app.get('/api/users-list', async (req, res) => {
     });
   }
 });
+// --- Admin helper endpoints (protected by x-admin-token header matching process.env.SECRET)
+const adminAuth = (req, res, next) => {
+  const token = req.headers['x-admin-token'] || req.headers['x_admin_token'] || req.query.admin_token;
+  if (!token || token !== process.env.SECRET) {
+    return res.status(403).json({ success: false, msg: 'Forbidden' });
+  }
+  next();
+};
+
+// Count users
+app.get('/api/admin/count/users', adminAuth, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT COUNT(*)::int AS count FROM users');
+    res.json({ success: true, count: result.rows[0].count });
+  } catch (err) {
+    console.error('admin count users error', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Count photos
+app.get('/api/admin/count/photos', adminAuth, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT COUNT(*)::int AS count FROM images');
+    res.json({ success: true, count: result.rows[0].count });
+  } catch (err) {
+    console.error('admin count photos error', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get user by username
+app.get('/api/admin/user/username/:username', adminAuth, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const result = await pool.query('SELECT * FROM users WHERE username = $1 LIMIT 1', [username]);
+    if (!result.rows.length) return res.status(404).json({ success: false, msg: 'User not found' });
+    const user = result.rows[0];
+    delete user.password; delete user.vkey; delete user.rkey;
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error('admin get user by username error', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get user by login (username or email)
+app.get('/api/admin/user/login/:identifier', adminAuth, async (req, res) => {
+  try {
+    const { identifier } = req.params;
+    const result = await pool.query('SELECT * FROM users WHERE username = $1 OR email = $1 LIMIT 1', [identifier]);
+    if (!result.rows.length) return res.status(404).json({ success: false, msg: 'User not found' });
+    const user = result.rows[0];
+    delete user.password; delete user.vkey; delete user.rkey;
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error('admin get user by login error', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get user by id
+app.get('/api/admin/user/id/:id', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (isNaN(id)) return res.status(400).json({ success: false, msg: 'Invalid id' });
+    const result = await pool.query('SELECT * FROM users WHERE id = $1 LIMIT 1', [id]);
+    if (!result.rows.length) return res.status(404).json({ success: false, msg: 'User not found' });
+    const user = result.rows[0];
+    delete user.password; delete user.vkey; delete user.rkey;
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error('admin get user by id error', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 // 🔼 FIN DES ROUTES DE TEST 🔼
 
 
@@ -164,7 +240,7 @@ const io = socketIo(server, {
       'https://benelhadj.github.io',
       'https://benelhadj.github.io/Matcha/',
       'http://localhost:5173',
-      'http://localhost:3000'
+      'https://matcha-backend-t6dr.onrender.com/'
     ],
     methods: ["GET", "POST"],
     credentials: true

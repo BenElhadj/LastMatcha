@@ -3,7 +3,7 @@ const notifModel = require('../models/notificationsModel')
 const chatModel = require('../models/chatModel')
 const matchModel = require('../models/matchingModel')
 
-const pool = require('../utility/database')
+const { pool } = require('../config/database')
 
 // Match action 
 

@@ -1,43 +1,25 @@
-const db = require('../utility/database')
+const db = require('../config/database')
 
-// GET ALL TAGS
-
-const getAllTags = (callback) => {
-	let request = `SELECT value FROM tags`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getAllTags = async () => {
+    const query = `SELECT value FROM tags`
+    const result = await db.query(query)
+    return result.rows
 }
 
-// GET TAGS
-
-const getTags = (callback) => {
-	let request = `SELECT value FROM tags`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getTags = async () => {
+    const query = `SELECT value FROM tags`
+    const result = await db.query(query)
+    return result.rows
 }
 
-// INSERT TAGS 
-
-
-const insertTags = (tag, callback) => {
-	let request = `INSERT IGNORE INTO tags (value) VALUES (?)`
-	db.query(request, [tag], (error, results) => {
-	  if (error) throw error;
-	  if (results.affectedRows > 0) {
-		callback(true);
-	  } else {
-		callback(false);
-	  }
-	});
-  };
-
+const insertTags = async (tag) => {
+    const query = `INSERT INTO tags (value) VALUES ($1) ON CONFLICT DO NOTHING`
+    const result = await db.query(query, [tag])
+    return result.rowCount > 0
+}
 
 module.exports = {
-	getTags,
-	getAllTags,
-	insertTags
+    getTags,
+    getAllTags,
+    insertTags
 }

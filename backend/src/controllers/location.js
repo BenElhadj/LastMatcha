@@ -9,9 +9,9 @@ const updatePosition = async (req, res) => {
 		return res.json({ msg: 'Invalid request' })
 	try {
 		const result = await userModel.updateLocation(req.body.lat, req.body.lng, req.user.id)
-		if (!result.affectedRows)
+		if (!result)
 			return res.json({ msg: 'Oups something went wrong' })
-		res.json({ ok: true })
+		return res.json({ ok: true })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}

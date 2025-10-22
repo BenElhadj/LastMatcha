@@ -49,53 +49,46 @@ const updateProfile = async (req, res) => {
 			return res.json({ msg: 'Tags are invalid' })
 	}
 	try {
-		await userModel.getUserById(req.user.id, async (result) => {
-			if (result.length) {
-				const user = {
-					first_name: req.body.first_name,
-					last_name: req.body.last_name,
-					username: req.body.username,
-					email: req.body.email,
-					gender: req.body.gender,
-					looking: req.body.looking,
-					birthdate: req.body.birthdate,
-					biography: req.body.biography,
-					tags: req.body.tags,
-					address: req.body.address,
-					city: req.body.city,
-					country: req.body.country,
-					postal_code: req.body.postal_code,
-					phone: req.body.phone,
-					id: req.user.id
-				}
-				await userModel.updateProfile(user, async (results) => {
-					if (results.affectedRows) {
-						res.json({ ok: true, status: 'User Updated' })
-					}
-					await tagsModel.getTags((result) => {
-						const tags = result.map(cur => cur.value)
-						if (user.tags) {
-							user.tags.split(', ').forEach(async element => {
-								if (!tags.includes(element)) {
-									try {
-										await tagsModel.insertTags(element, (isInserted) => {
-											if (!isInserted) {
-											  // La valeur existe déjà dans la table
-											}
-										  })
-									} catch (err) {
-										return res.json({ msg: 'Fatal error', err })
-									}
-								}
-							})
-						}
-					})
-
-				})
-			} else {
-				res.json({ ok: false, status: 'User not found' })
+		const result = await userModel.getUserById(req.user.id)
+		if (result.length) {
+			const user = {
+				first_name: req.body.first_name,
+				last_name: req.body.last_name,
+				username: req.body.username,
+				email: req.body.email,
+				gender: req.body.gender,
+				looking: req.body.looking,
+				birthdate: req.body.birthdate,
+				biography: req.body.biography,
+				tags: req.body.tags,
+				address: req.body.address,
+				city: req.body.city,
+				country: req.body.country,
+				postal_code: req.body.postal_code,
+				phone: req.body.phone,
+				id: req.user.id
 			}
-		})
+			const updateRes = await userModel.updateProfile(user)
+			if (updateRes) {
+				const tagsList = await tagsModel.getTags()
+				const tags = tagsList.map(cur => cur.value)
+				if (user.tags) {
+					for (const element of user.tags.split(', ')) {
+						if (!tags.includes(element)) {
+							try {
+								await tagsModel.insertTags(element)
+							} catch (err) {
+								return res.json({ msg: 'Fatal error', err })
+							}
+						}
+					}
+				}
+				return res.json({ ok: true, status: 'User Updated' })
+			}
+			return res.json({ ok: false, status: 'User not updated' })
+		} else {
+			return res.json({ ok: false, status: 'User not found' })
+		}
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}
@@ -116,20 +109,18 @@ const changeEmail = async (req, res) => {
 	try {
 		let hash = await bcrypt.compare(req.body.password, req.user.password)
 		if (!hash)
-			res.json({ msg: 'Wrong password' })
-		await userModel.getUserByemail(req.body.email, async (result) => {
-			if (result.length)
-				return res.json({ msg: 'Email already exists' })
-			let user = {
-				id: req.user.id,
-				email: req.body.email
-			}
-			await userModel.changeEmail(user, (result) => {
-				if (!result.affectedRows)
-					return res.json({ msg: 'Oups something went wrong' })
-				res.json({ ok: true })
-			})
-		})
+			return res.json({ msg: 'Wrong password' })
+		const result = await userModel.getUserByemail(req.body.email)
+		if (result.length)
+			return res.json({ msg: 'Email already exists' })
+		let user = {
+			id: req.user.id,
+			email: req.body.email
+		}
+		const updateRes = await userModel.changeEmail(user)
+		if (!updateRes)
+			return res.json({ msg: 'Oups something went wrong' })
+		return res.json({ ok: true })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}
@@ -156,11 +147,10 @@ const changePassword = async (req, res) => {
 			password: password,
 			id: req.user.id
 		}
-		await userModel.changePassword(user, (result) => {
-			if (!result.affectedRows)
-				return res.json({ msg: 'Oups something went wrong' })
-			res.json({ ok: true })
-		})
+		const updateRes = await userModel.changePassword(user)
+		if (!updateRes)
+			return res.json({ msg: 'Oups something went wrong' })
+		return res.json({ ok: true })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}
@@ -175,23 +165,20 @@ const uploadImages = async (req, res) => {
 		const base64Data = req.body.image.replace(/^data:image\/\w+;base64,/, '')
 		const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
 		const imgName = `${req.user.id}-${randomHex()}.png`
-
-		userModel.getImages(req.user.id, async (result) => {
-			if (result.length < 5) {
-				await writeFileAsync(uploadDir + imgName, base64Data, 'base64')
-				let user = {
-					id: req.user.id,
-					imgName: imgName
-				}
-				userModel.updateProfilePic(req.user.id)
-				userModel.insertImages(user, (result) => {
-					userModel.setImages(req.user.id)
-					res.json({ ok: true, status: 'Image Updated', name: imgName, id: result.insertId, user_id: req.user.id })
-				})
-			} else {
-				res.json({ msg: 'User already has 5 photos' })
+		const images = await userModel.getImages(req.user.id)
+		if (images.length < 5) {
+			await writeFileAsync(uploadDir + imgName, base64Data, 'base64')
+			let user = {
+				id: req.user.id,
+				imgName: imgName
 			}
-		})
+			await userModel.updateProfilePic(req.user.id)
+			const insertRes = await userModel.insertImages(user)
+			await userModel.setImages(req.user.id)
+			return res.json({ ok: true, status: 'Image Updated', name: imgName, user_id: req.user.id })
+		} else {
+			return res.json({ msg: 'User already has 5 photos' })
+		}
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}
@@ -203,26 +190,24 @@ const uploadCover = async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
 	try {
-		await userModel.getCover(req.user.id, async (result) => {
-			if (result.length) {
-				if (!isExternal(result[0].name)) {
-					try {
-						unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
-					} catch (err) {
-						return res.json({ msg: 'Fatal error', err })
-					}
+		const result = await userModel.getCover(req.user.id)
+		if (result.length) {
+			if (!isExternal(result[0].name)) {
+				try {
+					await unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
+				} catch (err) {
+					return res.json({ msg: 'Fatal error', err })
 				}
-				await userModel.delCover(result[0].id, req.user.id)
 			}
-			const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
-			const imgName = `${req.user.id}-${randomHex()}.png`
-			await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
-			await userModel.insertCover(req.user.id, imgName, (result) => {
-				if (!result.affectedRows)
-					return res.json({ msg: 'Oups.. Something went wrong!' })
-				res.json({ ok: true, status: 'Image Updated', name: imgName, id: result.insertId, user_id: req.user.id })
-			})
-		})
+			await userModel.delCover(result[0].id, req.user.id)
+		}
+		const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
+		const imgName = `${req.user.id}-${randomHex()}.png`
+		await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
+		const insertRes = await userModel.insertCover(req.user.id, imgName)
+		if (!insertRes)
+			return res.json({ msg: 'Oups.. Something went wrong!' })
+		return res.json({ ok: true, status: 'Image Updated', name: imgName, user_id: req.user.id })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}
@@ -236,28 +221,25 @@ const deleteImage = async (req, res) => {
 	if (!req.body.id || isNaN(req.body.id))
 		return res.json({ msg: 'Invalid request' })
 	try {
-		await userModel.getImagesById(req.body.id, req.user.id, async (result) => {
-			if (result.length) {
-				
-				if (!isExternal(result[0].name)) {
-					try {
-						await unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
-					} catch (err) {
-						return res.json({ msg: 'Fatal error', err })
-					}
+		const result = await userModel.getImagesById(req.body.id, req.user.id)
+		if (result.length) {
+			if (!isExternal(result[0].name)) {
+				try {
+					await unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
+				} catch (err) {
+					return res.json({ msg: 'Fatal error', err })
 				}
-				await userModel.delImage(req.body.id, req.user.id, async (result) => {
-					if (!req.body.profile) {
-						userModel.setImages(req.user.id)
-					}
-					if (result.affectedRows)
-						return res.json({ ok: true })
-				})
 			}
-			else {
-				res.json({ msg: 'Oups something went wrong' })
+			const delRes = await userModel.delImage(req.body.id, req.user.id)
+			if (!req.body.profile) {
+				await userModel.setImages(req.user.id)
 			}
-		})
+			if (delRes)
+				return res.json({ ok: true })
+			return res.json({ msg: 'Oups something went wrong' })
+		} else {
+			return res.json({ msg: 'Oups something went wrong' })
+		}
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}

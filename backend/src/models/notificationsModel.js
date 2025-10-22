@@ -1,89 +1,53 @@
-const db = require('../utility/database')
+const db = require('../config/database')
 
-// INSERT INTO Notif [visit]
-
-const insertNotifVis = (user_id, id) => {
-	let request = `INSERT INTO notifications (type, id_from, id_to) VALUES ('visit', ?, ?)`
-	return db.query(request, [user_id, id])
+const insertNotifVis = async (user_id, id) => {
+    const query = `INSERT INTO notifications (type, id_from, id_to) VALUES ('visit', $1, $2)`
+    await db.query(query, [user_id, id])
 }
 
-// Inset notif (variable type)
-
-const insertNotif = (type, user_id, id) => {
-	let request = `INSERT INTO notifications (type, id_from, id_to) VALUES (?, ?, ?)`
-	return db.query(request, [type, user_id, id])
+const insertNotif = async (type, user_id, id) => {
+    const query = `INSERT INTO notifications (type, id_from, id_to) VALUES ($1, $2, $3)`
+    await db.query(query, [type, user_id, id])
 }
 
-// Delete notificaton 
-
-const delNotif = (id, user_id) => {
-	let request = `DELETE FROM notifications WHERE (id_from = ? AND id_to = ?) OR (id_from = ? AND id_to = ?)`
-	return db.query(request, [id, user_id, user_id, id])
+const delNotif = async (id, user_id) => {
+    const query = `DELETE FROM notifications WHERE (id_from = $1 AND id_to = $2) OR (id_from = $2 AND id_to = $1)`
+    await db.query(query, [id, user_id])
 }
 
-// Inset notif (variable type)
-
-const insertNotifConv = (type, id_from, id_to, id_conversation) => {
-	let request = `INSERT INTO notifications (type, id_from, id_to, id_conversation) VALUES (?, ?, ?, ?)`
-	return db.query(request, [type, id_from, id_to, id_conversation])
+const insertNotifConv = async (type, id_from, id_to, id_conversation) => {
+    const query = `INSERT INTO notifications (type, id_from, id_to, id_conversation) VALUES ($1, $2, $3, $4)`
+    await db.query(query, [type, id_from, id_to, id_conversation])
 }
 
-// Get all 
-
-const getNotif = (id) => {
-	let request = `SELECT
-				notifications.id,
-				notifications.id_from as id_from,
-				notifications.created_at as date,
-				notifications.is_read as is_read,
-				notifications.type as type,
-				users.username as username,
-				images.name as profile_image,
-				images.profile as profile,
-				images.cover as cover
-		FROM notifications
-			INNER JOIN users
-			ON 
-				notifications.id_from = users.id
-			LEFT JOIN images
-			ON 
-				notifications.id_from = images.user_id
-			where 
-				notifications.id_to = ?
-			AND users.id NOT IN (
-					SELECT blocker FROM blocked WHERE blocked = ? 
-				UNION 
-					SELECT blocked FROM blocked WHERE blocker = ?)`
-	return db.query(request, [id, id, id])
+const getNotif = async (id) => {
+    const query = `SELECT notifications.id, notifications.id_from as id_from, notifications.created_at as date, notifications.is_read as is_read, notifications.type as type, users.username as username, images.name as profile_image, images.profile as profile, images.cover as cover FROM notifications INNER JOIN users ON notifications.id_from = users.id LEFT JOIN images ON notifications.id_from = images.user_id WHERE notifications.id_to = $1 AND users.id NOT IN (SELECT blocker FROM blocked WHERE blocked = $1 UNION SELECT blocked FROM blocked WHERE blocker = $1)`
+    const result = await db.query(query, [id])
+    return result.rows
 }
 
-// Update Seen √ Notif 
-
-const seenOneNotif = (id_from, id_to) => {
-	let request = `UPDATE notifications SET is_read = 1 WHERE id_to = ? AND id_from = ?`
-	return db.query(request, [id_to, id_from])
+const seenOneNotif = async (id_from, id_to) => {
+    const query = `UPDATE notifications SET is_read = 1 WHERE id_to = $1 AND id_from = $2`
+    await db.query(query, [id_to, id_from])
 }
 
-const seenNotif  = (id) => {
-	let request = `UPDATE notifications SET is_read = 1 WHERE type != 'chat' AND id_to = ?`
-	return db.query(request, [id])
+const seenNotif = async (id) => {
+    const query = `UPDATE notifications SET is_read = 1 WHERE type != 'chat' AND id_to = $1`
+    await db.query(query, [id])
 }
 
-// Seen Message notif
-
-const seenMsgNotif = (conv_id, id_from) => {
-	let request = `UPDATE notifications SET is_read = 1 WHERE type = 'chat' AND id_conversation = ? AND id_from != ?`
-	return db.query(request, [conv_id, id_from])
+const seenMsgNotif = async (conv_id, id_from) => {
+    const query = `UPDATE notifications SET is_read = 1 WHERE type = 'chat' AND id_conversation = $1 AND id_from != $2`
+    await db.query(query, [conv_id, id_from])
 }
-
 
 module.exports = {
-	insertNotifVis,
-	insertNotif,
-	delNotif,
-	insertNotifConv,
-	getNotif,
-	seenOneNotif,
-	seenNotif,
-	seenMsgNotif
+    insertNotifVis,
+    insertNotif,
+    delNotif,
+    insertNotifConv,
+    getNotif,
+    seenOneNotif,
+    seenNotif,
+    seenMsgNotif
 }

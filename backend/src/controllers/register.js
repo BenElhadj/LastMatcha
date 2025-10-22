@@ -44,22 +44,18 @@ const register = async (req, res) => {
 			password: await bcrypt.hash(req.body.password, 10),
 			vkey: randomHex()
 		}
-		await userModel.getUser(user, (results) => {
-			if (results.length === 0) {
-				userModel.addUser(user, (result) => {
-					if (result.affectedRows) {
-						mailer.sendMail(user.email, user.vkey, 'users/verify')
-						
-						return res.json({ ok: true, status: 'You have been successfully registered, please verify your email' })
-
-					}
-				})
+		const existing = await userModel.getUser(user)
+		if (existing.length === 0) {
+			const created = await userModel.addUser(user)
+			if (created) {
+				await mailer.sendMail(user.email, user.vkey, 'users/verify')
+				return res.json({ ok: true, status: 'You have been successfully registered, please verify your email' })
 			}
-			else
-				return res.json({ msg: 'Username or Email already in use' })
-		})
-	}
-	catch (err) {
+			return res.json({ msg: 'Registration failed' })
+		} else {
+			return res.json({ msg: 'Username or Email already in use' })
+		}
+	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}
 }
@@ -70,17 +66,15 @@ const verifyEmail = async (req, res) => {
 	const vkey = htmlspecialchars(req.params.key)
 	if (!vkey) return res.json({ msg: 'Cant validate' })
 	try {
-		await userModel.getVkey(vkey, (result) => {
-			if (result.length === 0)
-				return res.json({ msg: 'Invalid key' })
-			if (result[0].verified)
-				return res.json({ msg: 'User already verified' })
-			else userModel.validateEmail(vkey, async () => {
-				const payload = { id: result[0].id }
-				const token = await sign(payload, process.env.SECRET, tokenExp)
-				res.render('verify', { token })
-			})
-		})
+		const result = await userModel.getVkey(vkey)
+		if (result.length === 0)
+			return res.json({ msg: 'Invalid key' })
+		if (result[0].verified)
+			return res.json({ msg: 'User already verified' })
+		await userModel.validateEmail(vkey)
+		const payload = { id: result[0].id }
+		const token = await sign(payload, process.env.SECRET, tokenExp)
+		return res.render('verify', { token })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}

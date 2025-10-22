@@ -1,388 +1,274 @@
-const db = require('../utility/database')
+const db = require('../config/database')
 
 // add user
-
-const addUser = (user, callback) => {
-	let request = `INSERT INTO users (first_name, last_name, username, email, password, vkey) VALUES
-		('${user.first_name}',
-		'${user.last_name}',
-		'${user.username}',
-		'${user.email}',
-		'${user.password}',
-		'${user.vkey}')`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const addUser = async (user) => {
+    const query = `INSERT INTO users (first_name, last_name, username, email, password, vkey) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+    const values = [user.first_name, user.last_name, user.username, user.email, user.password, user.vkey];
+    const result = await db.query(query, values);
+    return result.rows[0];
 }
 
 // Get user by Username / email 
-
-const getUser = (user, callback) => {
-	let request = `SELECT email, username FROM users WHERE username = '${user.username}' OR email = '${user.email}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getUser = async (user) => {
+    const query = `SELECT email, username FROM users WHERE username = $1 OR email = $2`;
+    const values = [user.username, user.email];
+    const result = await db.query(query, values);
+    return result.rows;
 }
 
-// Get user by Username / email 
-
-const getUserByemail = (email, callback) => {
-	let request = `SELECT email, username FROM users WHERE email = '${email}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getUserByemail = async (email) => {
+    const query = `SELECT email, username FROM users WHERE email = $1`;
+    const result = await db.query(query, [email]);
+    return result.rows;
 }
 
-// GET USERS FOR Browsing 
-
-const getUserBrow = () => {
-	let request = `SELECT *, GET_RATING(users.id) AS rating FROM users, images
-		WHERE users.id = images.user_id
-		AND images.profile = 1 ORDER BY rating DESC`
-	return db.query(request)
+// GET USERS FOR Browsing
+const getUserBrow = async () => {
+    const query = `SELECT users.*, images.*, 0 AS rating FROM users JOIN images ON users.id = images.user_id WHERE images.profile = 1 ORDER BY users.id DESC`;
+    const result = await db.query(query);
+    return result.rows;
 }
 
 // GET User by id (browsing)
-
-const getUserbyIdBrow = (id, user_id) => {
-	let request = `SELECT *, GET_RATING(users.id) AS rating FROM users WHERE id = ?
-		AND id NOT IN (SELECT blocked FROM blocked WHERE blocker = ?)
-		AND ? NOT IN (SELECT blocked FROM blocked WHERE blocker = ?)`
-	return db.query(request, [id, user_id, user_id, id])
+const getUserbyIdBrow = async (id, user_id) => {
+    const query = `SELECT *, 0 AS rating FROM users WHERE id = $1 AND id NOT IN (SELECT blocked FROM blocked WHERE blocker = $2) AND $2 NOT IN (SELECT blocked FROM blocked WHERE blocker = $1)`;
+    const result = await db.query(query, [id, user_id]);
+    return result.rows;
 }
 
 // Check Verif key 
-
-const getVkey = (vkey, callback) => {
-	let request = `SELECT verified, id FROM users WHERE vkey = '${vkey}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getVkey = async (vkey) => {
+    const query = `SELECT verified, id FROM users WHERE vkey = $1`;
+    const result = await db.query(query, [vkey]);
+    return result.rows;
 }
 
-// Add Reset password  key  [rkey] ---- Using Email 
-
-const addRkey = (user, callback) => {
-	let request = `UPDATE users SET rkey = '${user.rkey}' where email = '${user.email}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+// Add Reset password key [rkey] ---- Using Email
+const addRkey = async (user) => {
+    const query = `UPDATE users SET rkey = $1 WHERE email = $2`;
+    const result = await db.query(query, [user.rkey, user.email]);
+    return result.rowCount;
 }
 
-// Check Reset password  key  [rkey]
-
-const getRkey = (rkey, callback) => {
-	let request = `SELECT id FROM users WHERE rkey = '${rkey}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+// Check Reset password key [rkey]
+const getRkey = async (rkey) => {
+    const query = `SELECT id FROM users WHERE rkey = $1`;
+    const result = await db.query(query, [rkey]);
+    return result.rows;
 }
 
 // Update password [After forgotten Email]
-
-const changeFrogottenPassword = (user, callback) => {
-	let request = `UPDATE users SET password = '${user.password}', rkey = '' WHERE id = '${user.id}' AND rkey = '${user.rkey}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const changeFrogottenPassword = async (user) => {
+    const query = `UPDATE users SET password = $1, rkey = '' WHERE id = $2 AND rkey = $3`;
+    const result = await db.query(query, [user.password, user.id, user.rkey]);
+    return result.rowCount;
 }
 
-// Destroy password  key  [rkey] ---- Using Email 
-
-const destroyRkey = (id, callback) => {
-	let request = `UPDATE users SET rkey = '' where id = '${id}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+// Destroy password key [rkey] ---- Using Email
+const destroyRkey = async (id) => {
+    const query = `UPDATE users SET rkey = '' WHERE id = $1`;
+    const result = await db.query(query, [id]);
+    return result.rowCount;
 }
 
-// Validate an Email 
-
-const validateEmail = (vkey, callback) => {
-	let request = `UPDATE users SET verified = 1 WHERE vkey = '${vkey}' AND verified = 0`
-	db.query(request, (error) => {
-		if (error) throw error
-		callback()
-	})
+// Validate an Email
+const validateEmail = async (vkey) => {
+    const query = `UPDATE users SET verified = 1 WHERE vkey = $1 AND verified = 0`;
+    await db.query(query, [vkey]);
 }
 
 // Get user data by ID
-
-const getUserById = (id, callback) => {
-	let request = `SELECT * from users WHERE id = ? `
-	db.query(request, [id], (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getUserById = async (id) => {
+    const query = `SELECT * FROM users WHERE id = $1`;
+    const result = await db.query(query, [id]);
+    return result.rows;
 }
 
-const getUserByIdD = (id) => {
-	let request = `SELECT * from users WHERE id = ? `
-	return db.query(request, [id])
+const getUserByIdD = async (id) => {
+    const query = `SELECT * FROM users WHERE id = $1`;
+    const result = await db.query(query, [id]);
+    return result.rows;
 }
-
 
 // Get user data by Username 
-
-const getUserByUsername = (username, callback) => {
-	let request = `SELECT * from users WHERE username ='${username}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getUserByUsername = async (username) => {
+    const query = `SELECT * FROM users WHERE username = $1`;
+    const result = await db.query(query, [username]);
+    return result.rows;
 }
 
 // Get user by Username / email 
-
-const getUserByIdentifier = (identifier, callback) => {
-	let request = `SELECT * FROM users WHERE username = '${identifier}' OR email = '${identifier}'`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getUserByIdentifier = async (identifier) => {
+    const query = `SELECT * FROM users WHERE username = $1 OR email = $1`;
+    const result = await db.query(query, [identifier]);
+    return result.rows;
 }
 
 // Filling information for the 1st time 
-
-const updateProfile = (user, callback) => {
-	let request = ` UPDATE users SET 
-		first_name = ?,
-		last_name = ?,
-		username = ?,
-		email = ?,
-		gender = ?,
-		looking = ?,
-		birthdate = ?,
-		biography = ?, 
-		tags = ?,
-		\`address\` = ?,
-		city = ?,
-		country = ?,
-		postal_code = ?,
-		phone = ?
-		WHERE id = ?
-	`
-		db.query(request, Object.values(user), (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const updateProfile = async (user) => {
+    const query = `UPDATE users SET first_name = $1, last_name = $2, username = $3, email = $4, gender = $5, looking = $6, birthdate = $7, biography = $8, tags = $9, address = $10, city = $11, country = $12, postal_code = $13, phone = $14 WHERE id = $15`;
+    const values = [user.first_name, user.last_name, user.username, user.email, user.gender, user.looking, user.birthdate, user.biography, user.tags, user.address, user.city, user.country, user.postal_code, user.phone, user.id];
+    const result = await db.query(query, values);
+    return result.rowCount;
 }
 
 // Update user Email 
-
-const changeEmail = (user, callback) => {
-	let request = `UPDATE users SET email = '${user.email}' WHERE id = '${user.id}'`
-	db.query(request, (error, result) => {
-		if (error) throw error
-		callback(result)
-	})
+const changeEmail = async (user) => {
+    const query = `UPDATE users SET email = $1 WHERE id = $2`;
+    const result = await db.query(query, [user.email, user.id]);
+    return result.rowCount;
 }
 
 // Update Password 
-
-const changePassword = (user, callback) => {
-	let request = `UPDATE users SET password = '${user.password}' WHERE id = '${user.id}'`
-	db.query(request, (error, result) => {
-		if (error) throw error
-		callback(result)
-	})
+const changePassword = async (user) => {
+    const query = `UPDATE users SET password = $1 WHERE id = $2`;
+    const result = await db.query(query, [user.password, user.id]);
+    return result.rowCount;
 }
 
 // Get images
-
-const getImages = (id, callback) => {
-	let request = `SELECT * FROM images WHERE user_id = ${id} AND cover = 0`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getImages = async (id) => {
+    const query = `SELECT * FROM images WHERE user_id = $1 AND cover = 0`;
+    const result = await db.query(query, [id]);
+    return result.rows;
 }
 
 // Get image By Id
-
-const getImagesById = (id, user_id, callback) => {
-	let request = `SELECT * FROM images WHERE id = ${id} AND user_id = ${user_id} `
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getImagesById = async (id, user_id) => {
+    const query = `SELECT * FROM images WHERE id = $1 AND user_id = $2`;
+    const result = await db.query(query, [id, user_id]);
+    return result.rows;
 }
 
 // Get image by userid
-
-const getImagesByUid = (user_id) => {
-	let request = `SELECT * FROM images WHERE user_id = ?`
-	return db.query(request, [user_id])
+const getImagesByUid = async (user_id) => {
+    const query = `SELECT * FROM images WHERE user_id = $1`;
+    const result = await db.query(query, [user_id]);
+    return result.rows;
 }
 
 // Add images 
-
-const insertImages = (user, callback) => {
-	let request = `INSERT INTO images (user_id, name, profile) VALUES (${user.id}, '${user.imgName}', '1')`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const insertImages = async (user) => {
+    const query = `INSERT INTO images (user_id, name, profile) VALUES ($1, $2, 1) RETURNING *`;
+    const result = await db.query(query, [user.id, user.imgName]);
+    return result.rows[0];
 }
 
 // Update profile pic to 0
-
-const updateProfilePic = (id) => {
-	let request = `UPDATE images SET profile = 0 WHERE user_id = ${id}`
-	db.query(request, (error) => {
-		if (error) throw error
-	})
+const updateProfilePic = async (id) => {
+    const query = `UPDATE images SET profile = 0 WHERE user_id = $1`;
+    await db.query(query, [id]);
 }
 
 // Get cover photo
-
-const getCover = (id, callback) => {
-	let request = `SELECT * FROM images WHERE cover = 1 AND user_id = ${id}`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const getCover = async (id) => {
+    const query = `SELECT * FROM images WHERE cover = 1 AND user_id = $1`;
+    const result = await db.query(query, [id]);
+    return result.rows;
 }
 
 // Delete cover photo 
-
-const delCover = (id, user_id) => {
-	let request = `DELETE FROM images WHERE id = ${id} AND user_id = ${user_id}`
-	db.query(request, (error) => {
-		if (error) throw error
-	})
+const delCover = async (id, user_id) => {
+    const query = `DELETE FROM images WHERE id = $1 AND user_id = $2`;
+    await db.query(query, [id, user_id]);
 }
 
 // INSERT Cover photo
-
-const insertCover = (user_id, imgName, callback) => {
-	let request = `INSERT INTO images (user_id, name, cover) VALUES (${user_id}, '${imgName}', 1)`
-	db.query(request, (error, results) => {
-		if (error) throw error
-		callback(results)
-	})
+const insertCover = async (user_id, imgName) => {
+    const query = `INSERT INTO images (user_id, name, cover) VALUES ($1, $2, 1) RETURNING *`;
+    const result = await db.query(query, [user_id, imgName]);
+    return result.rows[0];
 }
 
 // DELETE images 
-
-const delImage = (id, user_id, callback) => {
-	let request = `DELETE FROM images WHERE id = ${id} AND user_id = ${user_id}`
-	db.query(request, (error, result) => {
-		if (error) throw error
-		callback(result)
-	})
+const delImage = async (id, user_id) => {
+    const query = `DELETE FROM images WHERE id = $1 AND user_id = $2`;
+    const result = await db.query(query, [id, user_id]);
+    return result.rowCount;
 }
 
 // Set profile pic To 1 and Cover to 0
-
-const setImages = (user_id) => {
-	let request = `UPDATE images SET profile = 1 WHERE user_id = ${user_id} AND cover = 0 ORDER BY created_at DESC LIMIT 1`
-	db.query(request, (error) => {
-		if (error) throw error
-	})
+const setImages = async (user_id) => {
+    const query = `UPDATE images SET profile = 1 WHERE user_id = $1 AND cover = 0`;
+    await db.query(query, [user_id]);
 }
 
 // get Blocked  users 
-
-const getBlocked = (id) => {
-	let request = `
-	SELECT
-		blocked.blocked AS blocked_id,
-		users.username AS username,
-		users.first_name AS first_name,
-		users.last_name AS last_name,
-		users.gender AS gender,
-		users.birthdate AS birthdate,
-		images.name AS avatar,
-		blocked.created_at AS blocked_at
-	FROM blocked
-	JOIN users ON blocked.blocked = users.id
-	LEFT JOIN images ON users.id = images.user_id AND images.profile = 1
-	WHERE blocked.blocker = ${id}
-	`;
-	return db.query(request);
-  }
+const getBlocked = async (id) => {
+    const query = `SELECT blocked.blocked AS blocked_id, users.username AS username, users.first_name AS first_name, users.last_name AS last_name, users.gender AS gender, users.birthdate AS birthdate, images.name AS avatar, blocked.created_at AS blocked_at FROM blocked JOIN users ON blocked.blocked = users.id LEFT JOIN images ON users.id = images.user_id AND images.profile = 1 WHERE blocked.blocker = $1`;
+    const result = await db.query(query, [id]);
+    return result.rows;
+}
 
 //  Block user 
-
-const blockUser = (user_id , id) => {
-	let request = `INSERT INTO blocked (blocker, blocked) VALUES (?, ?)`
-	return db.query(request, [user_id , id])
+const blockUser = async (user_id, id) => {
+    const query = `INSERT INTO blocked (blocker, blocked) VALUES ($1, $2)`;
+    await db.query(query, [user_id, id]);
 }
 
 // Unblock user 
-
-const unblockUser = (user_id, id) => {
-	let request = `DELETE FROM blocked WHERE blocker = ? AND blocked = ?`
-	return db.query(request, [user_id, id])
+const unblockUser = async (user_id, id) => {
+    const query = `DELETE FROM blocked WHERE blocker = $1 AND blocked = $2`;
+    await db.query(query, [user_id, id]);
 }
 
 // Report User 
-
-const reportUser = (id) => {
-	let request = `UPDATE users SET reports = reports + 1 WHERE id = ?`
-	return db.query(request, [id])
+const reportUser = async (id) => {
+    const query = `UPDATE users SET reports = reports + 1 WHERE id = $1`;
+    await db.query(query, [id]);
 }
 
 // User update location 
-
-const updateLocation = (lat, long, id) => {
-	let request = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
-	return db.query(request, [lat, long, id])
+const updateLocation = async (lat, long, id) => {
+    const query = `UPDATE users SET lat = $1, lng = $2 WHERE id = $3`;
+    await db.query(query, [lat, long, id]);
 }
 
-const blacklist = (blacklist ,placehoder) => {
-	let request = `SELECT id, username, first_name, last_name FROM users WHERE id IN ${placehoder}`
-	return db.query(request, blacklist)
+const blacklist = async (ids) => {
+    const query = `SELECT id, username, first_name, last_name FROM users WHERE id = ANY($1)`;
+    const result = await db.query(query, [ids]);
+    return result.rows;
 }
 
-const updateStatus = (id, status) => {
-	let request = `UPDATE users SET status = ? WHERE id = ?`
-	return db.query(request, [status, id])
+const updateStatus = async (id, status) => {
+    const query = `UPDATE users SET status = $2 WHERE id = $1`;
+    await db.query(query, [id, status]);
 }
-  
+
 module.exports = {
-	addUser,
-	getUser,
-	getVkey,
-	validateEmail,
-	getUserByIdentifier,
-	getUserById,
-	getUserByUsername,
-	getUserByemail,
-	getRkey,
-	addRkey,
-	destroyRkey,
-	changeFrogottenPassword,
-	updateProfile,
-	changeEmail,
-	getUserByIdD,
-	changePassword,
-	insertImages,
-	getImages,
-	updateProfilePic,
-	getCover,
-	delCover,
-	insertCover,
-	getImagesById,
-	delImage,
-	setImages,
-	getImagesByUid,
-	getUserBrow,
-	getUserbyIdBrow,
-	getBlocked,
-	blockUser,
-	unblockUser,
-	reportUser,
-	updateLocation,
-	updateStatus,
-	blacklist
+    addUser,
+    getUser,
+    getVkey,
+    validateEmail,
+    getUserByIdentifier,
+    getUserById,
+    getUserByUsername,
+    getUserByemail,
+    getRkey,
+    addRkey,
+    destroyRkey,
+    changeFrogottenPassword,
+    updateProfile,
+    changeEmail,
+    getUserByIdD,
+    changePassword,
+    insertImages,
+    getImages,
+    updateProfilePic,
+    getCover,
+    delCover,
+    insertCover,
+    getImagesById,
+    delImage,
+    setImages,
+    getImagesByUid,
+    getUserBrow,
+    getUserbyIdBrow,
+    getBlocked,
+    blockUser,
+    unblockUser,
+    reportUser,
+    updateLocation,
+    updateStatus,
+    blacklist
 }

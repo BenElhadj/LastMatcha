@@ -532,42 +532,42 @@ INSERT INTO tags (value) VALUES
     <div class="form-section">
       <h2>📋 Documentation des Routes API</h2>
       <pre style="font-weight: bold;">
-*  (POST): http://localhost:3000/login ============> Connectez-vous avec les informations d'identification fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/logout ===========> Déconnectez-vous de votre session utilisateur.
-*  (GET) : http://localhost:3000/isLoggedin =======> Vérifiez si l'utilisateur est connecté.
-*  (POST): http://localhost:3000/forget_password ==> Envoyez une demande de réinitialisation de mot de passe avec les informations fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/recover/:key =====> Récupérez la page de récupération de mot de passe avec la clé fournie dans l'URL.
-*  (POST): http://localhost:3000/rkeycheck ========> Vérifiez si la clé de récupération de mot de passe fournie dans le corps de la requête est valide.
-*  (GET) : http://localhost:3000/destroykey =======> Détruisez la clé de récupération de mot de passe.
-*  (GET) : http://localhost:3000/history ==========> Obtenez l'historique de navigation de l'utilisateur connecté.
-*  (GET) : http://localhost:3000/tags =============> Obtenez les tags de l'utilisateur connecté
-*  (GET) : http://localhost:3000/allTags ==========> Obtenez les toutes les tags disponibles.
-*  (GET) : http://localhost:3000/all ==============> Obtenez toutes les conversations de chat de l'utilisateur connecté.
-*  (POST): http://localhost:3000/messages =========> Obtenez les messages d'une conversation spécifique avec l'identifiant de conversation fourni dans le corps de la requête.
-*  (POST): http://localhost:3000/update ===========> Mettez à jour les informations d'une conversation spécifique avec l'identifiant de conversation et les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/send =============> Envoyez un message dans une conversation spécifique avec l'identifiant de conversation et le message fournis dans le corps de la requête.
-*  (POST): http://localhost:3000/match ============> Effectuez un matching entre l'utilisateur connecté et d'autres utilisateurs.
-*  (GET) : http://localhost:3000/getmatches =======> Obtenez les correspondances de l'utilisateur connecté.
-*  (POST): http://localhost:3000/add ==============> Ajoutez une notification de chat avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/update ===========> Mettez à jour une notification avec les informations fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/all ==============> Obtenez toutes les notifications de l'utilisateur connecté.
-*  (POST): http://localhost:3000/add ==============> Ajoutez un utilisateur avec les informations fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/verify/:key ======> Vérifiez l'adresse e-mail de l'utilisateur avec la clé fournie dans l'URL.
-*  (POST): http://localhost:3000/updateprofile ====> Mettez à jour le profil de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/changeemail ======> Changez l'adresse e-mail de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/changepassword ===> Changez le mot de passe de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/show =============> Obtenez la liste des utilisateurs correspondant aux critères de recherche fournis dans le corps de la requête.
-*  (GET) : http://localhost:3000/show/:id =========> Obtenez les informations d'un utilisateur spécifique avec l'identifiant d'utilisateur fourni dans l'URL.
-*  (POST): http://localhost:3000/report ===========> Signalez un utilisateur avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/block ============> Bloquez un utilisateur avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/unblock ==========> Débloquez un utilisateur avec les informations fournies dans le corps de la requête.
-*  (GET) : http://localhost:3000/getblocked =======> Obtenez la liste des utilisateurs bloqués par l'utilisateur connecté.
-*  (POST): http://localhost:3000/blacklisted ======> Ajoutez un utilisateur à la liste noire de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/location =========> Mettez à jour la localisation de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/image ============> Ajoutez une image à la galerie de l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
-*  (POST): http://localhost:3000/image/cover ======> Ajoutez une image de couverture à l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
-*  (POST): http://localhost:3000/image/del ========> Supprimez une image de la galerie de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
-*  (POST): http://localhost:3000/get_last_user_id => récupérer la dernier Id d'utilisateur.
+*  (POST): https://matcha-backend-t6dr.onrender.com//login ============> Connectez-vous avec les informations d'identification fournies dans le corps de la requête.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//logout ===========> Déconnectez-vous de votre session utilisateur.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//isLoggedin =======> Vérifiez si l'utilisateur est connecté.
+*  (POST): https://matcha-backend-t6dr.onrender.com//forget_password ==> Envoyez une demande de réinitialisation de mot de passe avec les informations fournies dans le corps de la requête.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//recover/:key =====> Récupérez la page de récupération de mot de passe avec la clé fournie dans l'URL.
+*  (POST): https://matcha-backend-t6dr.onrender.com//rkeycheck ========> Vérifiez si la clé de récupération de mot de passe fournie dans le corps de la requête est valide.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//destroykey =======> Détruisez la clé de récupération de mot de passe.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//history ==========> Obtenez l'historique de navigation de l'utilisateur connecté.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//tags =============> Obtenez les tags de l'utilisateur connecté
+*  (GET) : https://matcha-backend-t6dr.onrender.com//allTags ==========> Obtenez les toutes les tags disponibles.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//all ==============> Obtenez toutes les conversations de chat de l'utilisateur connecté.
+*  (POST): https://matcha-backend-t6dr.onrender.com//messages =========> Obtenez les messages d'une conversation spécifique avec l'identifiant de conversation fourni dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//update ===========> Mettez à jour les informations d'une conversation spécifique avec l'identifiant de conversation et les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//send =============> Envoyez un message dans une conversation spécifique avec l'identifiant de conversation et le message fournis dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//match ============> Effectuez un matching entre l'utilisateur connecté et d'autres utilisateurs.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//getmatches =======> Obtenez les correspondances de l'utilisateur connecté.
+*  (POST): https://matcha-backend-t6dr.onrender.com//add ==============> Ajoutez une notification de chat avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//update ===========> Mettez à jour une notification avec les informations fournies dans le corps de la requête.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//all ==============> Obtenez toutes les notifications de l'utilisateur connecté.
+*  (POST): https://matcha-backend-t6dr.onrender.com//add ==============> Ajoutez un utilisateur avec les informations fournies dans le corps de la requête.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//verify/:key ======> Vérifiez l'adresse e-mail de l'utilisateur avec la clé fournie dans l'URL.
+*  (POST): https://matcha-backend-t6dr.onrender.com//updateprofile ====> Mettez à jour le profil de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//changeemail ======> Changez l'adresse e-mail de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//changepassword ===> Changez le mot de passe de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//show =============> Obtenez la liste des utilisateurs correspondant aux critères de recherche fournis dans le corps de la requête.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//show/:id =========> Obtenez les informations d'un utilisateur spécifique avec l'identifiant d'utilisateur fourni dans l'URL.
+*  (POST): https://matcha-backend-t6dr.onrender.com//report ===========> Signalez un utilisateur avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//block ============> Bloquez un utilisateur avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//unblock ==========> Débloquez un utilisateur avec les informations fournies dans le corps de la requête.
+*  (GET) : https://matcha-backend-t6dr.onrender.com//getblocked =======> Obtenez la liste des utilisateurs bloqués par l'utilisateur connecté.
+*  (POST): https://matcha-backend-t6dr.onrender.com//blacklisted ======> Ajoutez un utilisateur à la liste noire de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//location =========> Mettez à jour la localisation de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//image ============> Ajoutez une image à la galerie de l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//image/cover ======> Ajoutez une image de couverture à l'utilisateur connecté avec le fichier image fourni dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//image/del ========> Supprimez une image de la galerie de l'utilisateur connecté avec les informations fournies dans le corps de la requête.
+*  (POST): https://matcha-backend-t6dr.onrender.com//get_last_user_id => récupérer la dernier Id d'utilisateur.
       </pre>
     </div>
 

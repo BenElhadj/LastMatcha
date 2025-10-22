@@ -1,70 +1,37 @@
-const db = require('../utility/database')
+const db = require('../config/database')
 
-
-///  get Matches
-
-const getFollowing = (user_id) => {
-	let request = `SELECT
-			matches.matched as matched_id,
-			matches.created_at as match_date,
-			users.username as username,
-			images.name as profile_image,
-			images.profile as profile
-		FROM matches
-		INNER JOIN users
-		ON 
-			matches.matched = users.id
-		LEFT JOIN images
-		ON 
-			matches.matched = images.user_id
-		WHERE 
-			matches.matcher = ?`
-	return db.query(request, [user_id])
+const getFollowing = async (user_id) => {
+    const query = `SELECT matches.matched as matched_id, matches.created_at as match_date, users.username as username, images.name as profile_image, images.profile as profile FROM matches INNER JOIN users ON matches.matched = users.id LEFT JOIN images ON matches.matched = images.user_id WHERE matches.matcher = $1`
+    const result = await db.query(query, [user_id])
+    return result.rows
 }
 
-const getFollowers = (user_id) => {
-	let request = `SELECT
-				matches.matcher as matcher_id,
-				matches.created_at as match_date,
-				users.username as username,
-				images.name as profile_image,
-				images.profile as profile
-		FROM matches
-		INNER JOIN users
-		ON 
-			matches.matcher = users.id
-		LEFT JOIN images
-		ON 
-			matches.matcher = images.user_id
-		WHERE matches.matched = ?`
-	return db.query(request, [user_id])
+const getFollowers = async (user_id) => {
+    const query = `SELECT matches.matcher as matcher_id, matches.created_at as match_date, users.username as username, images.name as profile_image, images.profile as profile FROM matches INNER JOIN users ON matches.matcher = users.id LEFT JOIN images ON matches.matcher = images.user_id WHERE matches.matched = $1`
+    const result = await db.query(query, [user_id])
+    return result.rows
 }
 
-// Make matching 
-
-const insertMatche = (user1, user2) => {
-	let request = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
-	return db.query(request, [user1, user2])
+const insertMatche = async (user1, user2) => {
+    const query = `INSERT INTO matches (matcher, matched) VALUES ($1, $2)`
+    await db.query(query, [user1, user2])
 }
 
-// Delete matche 
-
-const delMatche = (user_id, id) => {
-	let request = `DELETE FROM matches where (matcher = ? AND matched = ?) OR (matcher = ? AND matched = ?)`
-	return db.query(request, [user_id, id, id, user_id])
+const delMatche = async (user_id, id) => {
+    const query = `DELETE FROM matches WHERE (matcher = $1 AND matched = $2) OR (matcher = $2 AND matched = $1)`
+    await db.query(query, [user_id, id])
 }
 
-// Get match 
-
-const getMatche = (user_id, id) => {
-	let request = `SELECT * FROM matches where matcher = ? AND matched = ?`
-	return db.query(request, [user_id, id])
+const getMatche = async (user_id, id) => {
+    const query = `SELECT * FROM matches WHERE matcher = $1 AND matched = $2`
+    const result = await db.query(query, [user_id, id])
+    return result.rows
 }
 
 module.exports = {
-	getFollowing,
-	getFollowers,
-	insertMatche,
-	delMatche,
-	getMatche
+    getFollowing,
+    getFollowers,
+    insertMatche,
+    delMatche,
+    getMatche
 }
