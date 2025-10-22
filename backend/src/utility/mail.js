@@ -1,12 +1,13 @@
 
 
-const nodemailer = require('nodemailer');
-const smtpConf = require('../config/smtp');
+const sgMail = require('@sendgrid/mail');
 const ejs = require('ejs');
 const { readFile } = require('fs');
 const { resolve, dirname } = require('path');
 const { promisify } = require('util');
 const readFileAsync = promisify(readFile);
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 const sendMail = async (to, key, type) => {
@@ -23,15 +24,14 @@ const sendMail = async (to, key, type) => {
 		};
 		console.log('[sendMail] Render data:', data);
 		const html = ejs.render(raw, data);
-		console.log('[sendMail] HTML rendered, creating transporter...');
-		const transporter = nodemailer.createTransport(smtpConf);
-		console.log('[sendMail] Transporter created, sending email...');
-		await transporter.sendMail({
-			from: process.env.SENDGRID_FROM || 'noreply@matcha.com',
+		console.log('[sendMail] HTML rendered, sending with SendGrid API...');
+		const msg = {
 			to,
+			from: process.env.SENDGRID_FROM || 'noreply@matcha.com',
 			subject: data.title,
 			html
-		});
+		};
+		await sgMail.send(msg);
 		console.log('[sendMail] Email sent successfully to:', to);
 	} catch (err) {
 		console.error('[sendMail] Error sending mail:', err);
