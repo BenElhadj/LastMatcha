@@ -62,12 +62,15 @@ const login = async (req, res) => {
 // Logout 
 
 const logout = async (req, res) => {
-	if (!req.user.id)
-		return res.json({ msg: 'Not logged in' })
-	delete connectedUsers[req.user.id]
-	console.log('---> ', connectedUsers)
-	await userModel.updateStatus(req.user.id, new Date())
-	res.json({ ok: true })
+	if (!req.user || !req.user.id)
+		return res.json({ msg: 'Not logged in' });
+	if (!connectedUsers[req.user.id]) {
+		return res.json({ msg: 'Already logged out' });
+	}
+	delete connectedUsers[req.user.id];
+	console.log('---> ', connectedUsers);
+	await userModel.updateStatus(req.user.id, new Date());
+	res.json({ ok: true });
 }
 
 // isLoggedIn 

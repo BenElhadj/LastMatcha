@@ -7,9 +7,14 @@ const getAllTags = async () => {
 }
 
 const getTags = async () => {
-    const query = `SELECT value FROM tags`
-    const result = await db.query(query)
-    return result.rows
+    const query = `SELECT value FROM tags`;
+    try {
+        const result = await db.query(query);
+        return result.rows;
+    } catch (err) {
+        console.error('[tagsModel.getTags] SQL error:', err);
+        throw err;
+    }
 }
 
 const insertTags = async (tag) => {

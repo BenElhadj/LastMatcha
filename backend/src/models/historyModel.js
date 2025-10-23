@@ -11,7 +11,7 @@ const insertHistory = async (user_id, id) => {
 /// Get Visitore History 
 
 const getVisitors = async (user_id) => {
-    const query = `SELECT
+	const query = `SELECT
 			history.visitor as visitor_id,
 			history.created_at as visit_date,
 			users.username as username,
@@ -26,7 +26,7 @@ const getVisitors = async (user_id) => {
 			WHERE 
 				history.visited = $1
 			AND
-				images.profile = 1`;
+				images.profile = TRUE`;
     const result = await db.query(query, [user_id]);
     return result.rows;
 }
@@ -34,7 +34,7 @@ const getVisitors = async (user_id) => {
 // Get visited History 
 
 const getVisited = async (user_id) => {
-    const query = `SELECT
+	const query = `SELECT
 			history.visited as visited_id,
 			history.created_at as visit_date,
 			users.username as username,
@@ -49,7 +49,7 @@ const getVisited = async (user_id) => {
 			WHERE 
 				history.visitor = $1
 			AND 
-				images.profile = 1`;
+				images.profile = TRUE`;
     const result = await db.query(query, [user_id]);
     return result.rows;
 }

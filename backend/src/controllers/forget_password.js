@@ -100,16 +100,15 @@ const check_key = async (req, res) => {
 /// Key destroy 
 
 const destroy_key = async (req, res) => {
-	if (!req.user.id)
-		return res.json({ msg: 'Not logged in' })
+	if (!req.user || !req.user.id)
+		return res.json({ msg: 'Not logged in' });
 	try {
-		await userModel.destroyRkey(id, (result) => {
-			if (!result.affectedRows)
-				return res.json({ msg: 'Error' })
-			res.json({ ok: true })
-		})
+		await userModel.destroyRkey(req.user.id);
+		// Même si aucune ligne n'est modifiée (clé déjà vide), on considère l'opération comme un succès
+		res.json({ ok: true });
 	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
+		console.error('[destroy_key] Fatal error:', err);
+		return res.json({ msg: 'Fatal error', err });
 	}
 }
 

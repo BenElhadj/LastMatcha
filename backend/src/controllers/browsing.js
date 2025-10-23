@@ -128,14 +128,18 @@ const getAllHistory = async (req, res) => {
 // Get tags 
 
 const getTags = async (req, res) => {
-	if (!req.user.id) 
-		res.json({ msg: 'not logged in' })
+	console.log('[getTags] called, user:', req.user && req.user.id);
+	if (!req.user || !req.user.id) {
+		console.warn('[getTags] not logged in');
+		return res.json({ msg: 'not logged in' });
+	}
 	try {
-		await tagsModel.getTags((result) => {
-			res.json(result.map(cur => cur.value))
-		})
+		const result = await tagsModel.getTags();
+		console.log('[getTags] tags found:', result.length);
+		return res.json(result.map(cur => cur.value));
 	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
+		console.error('[getTags] Fatal error:', err);
+		return res.json({ msg: 'Fatal error', err });
 	}
 }
 
