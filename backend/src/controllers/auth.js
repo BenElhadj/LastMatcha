@@ -77,19 +77,18 @@ const isLoggedIn = async (req, res) => {
 		return res.json({ msg: 'Not logged in' });
 	}
 	try {
-		userModel.getUserById(req.user.id, async (result) => {
-			if (!result.length) {
-				return res.json({ msg: 'Not logged in' });
-			}
-			const user = result[0];
-			delete user.password;
-			delete user.verified;
-			delete user.tokenExpiration;
-			user.images = await userModel.getImagesByUid(user.id);
-			const payload = { id: user.id };
-			user.token = await sign(payload, process.env.SECRET, tokenExp);
-			res.json(user);
-		});
+		const result = await userModel.getUserById(req.user.id);
+		if (!result || result.length === 0) {
+			return res.json({ msg: 'Not logged in' });
+		}
+		const user = result[0];
+		delete user.password;
+		delete user.verified;
+		delete user.tokenExpiration;
+		user.images = await userModel.getImagesByUid(user.id);
+		const payload = { id: user.id };
+		user.token = await sign(payload, process.env.SECRET, tokenExp);
+		return res.json(user);
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err });
 	}
