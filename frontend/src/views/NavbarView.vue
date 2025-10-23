@@ -1,7 +1,6 @@
 <template>
   <q-header class="black-text">
     <q-toolbar>
-
       <div v-if="connected" @click="drawer = true">
         <q-item>
           <q-btn flat round dense>
@@ -22,39 +21,59 @@
       </div>
 
       <q-space></q-space>
-      
-      <div v-if="connected" justify-end class="search-notif-msg">
 
+      <div v-if="connected" justify-end class="search-notif-msg">
         <div>
           <q-btn ripple flat round dense class="icon-size">
-            <img src="@/assets/Navbar/notification.png" :nudge-width="250" alt="notifMenu" class="icon-size">
+            <img
+              src="@/assets/Navbar/notification.png"
+              :nudge-width="250"
+              alt="notifMenu"
+              class="icon-size"
+            />
             <q-badge v-if="notifNum" :value="!!notifNum" color="primary" floating>
               <span>{{ notifNum }}</span>
             </q-badge>
           </q-btn>
-          <q-menu v-model="notifMenu" style="font-family: 'Elliane' !important; font-size:16px !important;">
+          <q-menu
+            v-model="notifMenu"
+            style="font-family: 'Elliane' !important; font-size: 16px !important"
+          >
             <q-list padding class="notif-msg">
-              <q-item v-for="(item, i) in notifs" :key="i" clickable @click="toUserProfile(item.id_from)" style="align-items: initial !important;">
+              <q-item
+                v-for="(item, i) in notifs"
+                :key="i"
+                clickable
+                @click="toUserProfile(item.id_from)"
+                style="align-items: initial !important"
+              >
                 <q-item-section avatar>
                   <q-avatar>
-                    <img :src="getFullPath(item.profile_image)">
+                    <img :src="getFullPath(item.profile_image)" />
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="notif_msg">
-                    <strong class="notif_username" style="font-size:16px !important;">{{ item.username }}</strong>&nbsp;
-                    <span class="ml-auto chat_time" style="font-size:16px !important;">{{ getNotifMsg(item) }}</span>
+                    <strong class="notif_username" style="font-size: 16px !important">{{
+                      item.username
+                    }}</strong
+                    >&nbsp;
+                    <span class="ml-auto chat_time" style="font-size: 16px !important">{{
+                      getNotifMsg(item)
+                    }}</span>
                   </q-item-label>
                   <q-item-label>
-                    <q-icon small style="font-size:16px !important;" class="mr-2 q-ml-xl">
+                    <q-icon small style="font-size: 16px !important" class="mr-2 q-ml-xl">
                       <span :class="getNotifIcon(item.type)"></span>&nbsp;
                     </q-icon>
-                    &nbsp;<span class="ml-auto chat_time" style="font-size:16px !important;">{{ formatNotifDate(item.last_update) }}</span>
+                    &nbsp;<span class="ml-auto chat_time" style="font-size: 16px !important">{{
+                      formatNotifDate(item.last_update)
+                    }}</span>
                   </q-item-label>
                 </q-item-section>
               </q-item>
               <q-item class="flex justify-center" clickable @click="$router.push('/notifications')">
-                <q-item-label class="see_all" style="font-size:24px !important;">
+                <q-item-label class="see_all" style="font-size: 24px !important">
                   Show all notifications
                 </q-item-label>
               </q-item>
@@ -64,17 +83,31 @@
 
         <div>
           <q-btn ripple flat round dense class="icon-size">
-            <img src="@/assets/Navbar/chat.png" :nudge-width="250" alt="Messages" class="icon-size">
+            <img
+              src="@/assets/Navbar/chat.png"
+              :nudge-width="250"
+              alt="Messages"
+              class="icon-size"
+            />
             <q-badge v-if="newMsgNum" :value="!!newMsgNum" color="primary" floating>
               <span>{{ newMsgNum }}</span>
             </q-badge>
           </q-btn>
-          <q-menu v-model="msgMenu" style="font-family: 'Elliane' !important; font-size:16px !important;">
-            <q-list padding class="notif-msg" >
-              <q-item v-for="(item, i) in menuConvos" :key="i" clickable @click="toUserChat(item)" style="align-items: initial !important;">
+          <q-menu
+            v-model="msgMenu"
+            style="font-family: 'Elliane' !important; font-size: 16px !important"
+          >
+            <q-list padding class="notif-msg">
+              <q-item
+                v-for="(item, i) in menuConvos"
+                :key="i"
+                clickable
+                @click="toUserChat(item)"
+                style="align-items: initial !important"
+              >
                 <q-item-section avatar>
                   <q-avatar>
-                    <img :src="getFullPath(item.profile_image)">
+                    <img :src="getFullPath(item.profile_image)" />
                   </q-avatar>
                 </q-item-section>
                 <div>
@@ -82,31 +115,42 @@
                 </div>
                 <q-item-section>
                   <q-item-label class="notif_msg">
-                    <strong class="notif_username" style="font-size:16px !important;">{{ item.first_name }} {{ item.last_name }}</strong>&nbsp;
-                    <span class="ml-auto chat_time" style="font-size:16px !important;">{{ formatNotifDate(item.last_update) }}</span>
+                    <strong class="notif_username" style="font-size: 16px !important"
+                      >{{ item.first_name }} {{ item.last_name }}</strong
+                    >&nbsp;
+                    <span class="ml-auto chat_time" style="font-size: 16px !important">{{
+                      formatNotifDate(item.last_update)
+                    }}</span>
                   </q-item-label>
                   <q-item-label>
-                    <span v-if="item.message_from === user.id" class="notif_username" style="font-size:16px !important;">You: </span>
-                    <span class="ml-auto chat_time text-truncate" style="font-size:16px !important;">{{ item.message }}</span>
+                    <span
+                      v-if="item.message_from === user.id"
+                      class="notif_username"
+                      style="font-size: 16px !important"
+                      >You:
+                    </span>
+                    <span
+                      class="ml-auto chat_time text-truncate"
+                      style="font-size: 16px !important"
+                      >{{ item.message }}</span
+                    >
                   </q-item-label>
                 </q-item-section>
               </q-item>
               <q-item class="justify-center" clickable @click="$router.push('/chat')">
-                <q-item-label class="see_all" style="font-size:24px !important;">
+                <q-item-label class="see_all" style="font-size: 24px !important">
                   Show all discussions
                 </q-item-label>
               </q-item>
             </q-list>
           </q-menu>
         </div>
-
       </div>
 
       <div v-else>
         <span class="text-link q-ml-xl" @click="$router.push('/login')">Connection</span>
         <span class="text-link q-ml-xl" @click="$router.push('/register')">Registration</span>
       </div>
-      
     </q-toolbar>
 
     <q-drawer v-if="connected" v-model="drawer" overlay>
@@ -127,21 +171,20 @@
         <q-separator></q-separator>
         <div v-for="link in links" :key="link.text">
           <q-item v-if="link.public || connected" clickable @click="$router.push(link.route)">
-            <img :src="link.image" alt="Icon" class="icon-size">
+            <img :src="link.image" alt="Icon" class="icon-size" />
             <q-item-section>
               <q-item-label>{{ link.text }}</q-item-label>
             </q-item-section>
           </q-item>
         </div>
         <q-item clickable @click="logout">
-          <img src="@/assets/Navbar/deconnexion.png" alt="Déconnexion" class="icon-size">
+          <img src="@/assets/Navbar/deconnexion.png" alt="Déconnexion" class="icon-size" />
           <q-item-section>
             <q-item-label>Sign out</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
     </q-drawer>
-
   </q-header>
 </template>
 
@@ -208,12 +251,14 @@ notif.value = store.getters.notif
 let convos = ref([])
 convos.value = store.getters.convos
 let notifs = ref([])
-notifs.value = notif.value.sort((a, b) => {
-  if (a.is_read !== b.is_read) {
-    return a.is_read - b.is_read
-  }
-  return new Date(b.date) - new Date(a.date)
-}).slice(0, 5)
+notifs.value = notif.value
+  .sort((a, b) => {
+    if (a.is_read !== b.is_read) {
+      return a.is_read - b.is_read
+    }
+    return new Date(b.date) - new Date(a.date)
+  })
+  .slice(0, 5)
 
 let menuConvos = ref([])
 let newMessage = ref([])
@@ -278,7 +323,7 @@ onMounted(async () => {
 const syncConvo = async (convo) => {
   try {
     store.dispatch('syncConvo', convo)
-    router.push('/chat').catch(err => {
+    router.push('/chat').catch((err) => {
       console.error('err syncConvo router.push in frontend/NavbarView.view ===> ', err)
     })
   } catch (err) {
@@ -293,10 +338,14 @@ const logout = async (userId) => {
     const res = await axios.get(url, { headers })
     if (res.data.ok) {
       store.dispatch('logout', user.value.id)
+      router.push('/login').catch((err) => {
+        console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
+      })
+    } else {
+      router.push('/login').catch((err) => {
+        console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
+      })
     }
-    router.push('/').catch(err => {
-      console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
-    })
   } catch (err) {
     console.error('err logout in frontend/NavbarView.view ===> ', err)
   }
@@ -346,18 +395,20 @@ const updateNotifAndMsg = async () => {
   if (connected.value !== null) {
     convos.value = store.getters.convos
     notif.value = store.getters.notif
-    notifs.value = notif.value.sort((a, b) => {
-      if (a.is_read !== b.is_read) {
-        return a.is_read - b.is_read
-      }
-      return new Date(b.date) - new Date(a.date)
-    }).slice(0, 5)
+    notifs.value = notif.value
+      .sort((a, b) => {
+        if (a.is_read !== b.is_read) {
+          return a.is_read - b.is_read
+        }
+        return new Date(b.date) - new Date(a.date)
+      })
+      .slice(0, 5)
     newMessage.value = await getNewMsg()
     if (newMessage.value) {
       menuConvos.value = sortAndFilterMessages(newMessage.value)
-      newMsgNum.value = newMessage.value.filter(cur => !cur.is_read).length
+      newMsgNum.value = newMessage.value.filter((cur) => !cur.is_read).length
       const newNotif = computed(() => store.getters.notif)
-      notifNum.value = newNotif.value.filter(cur => !cur.is_read).length
+      notifNum.value = newNotif.value.filter((cur) => !cur.is_read).length
     }
   }
 }
@@ -371,7 +422,6 @@ const refreshInterval = setInterval(refreshMethods, 2000)
 onBeforeUnmount(() => {
   clearInterval(refreshInterval)
 })
-
 </script>
 
 <style scoped>
@@ -417,7 +467,6 @@ q-drawer {
 .icon-size {
   width: 42px;
   margin: 7px;
-
 }
 
 .q-header {
@@ -451,5 +500,4 @@ q-drawer {
   max-width: 330px;
   overflow: hidden;
 }
-
 </style>
