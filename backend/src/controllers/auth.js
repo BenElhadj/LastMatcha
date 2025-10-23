@@ -15,44 +15,46 @@ const login = async (req, res) => {
 	const identifier = htmlspecialchars(req.body.identifier);
 	const password = htmlspecialchars(req.body.password);
 
+	console.log('[LOGIN] Tentative avec identifier:', identifier);
+
 	if (!validator(identifier, 'identifier')) {
+		console.log('[LOGIN] Identifiant invalide');
 		return res.json({ msg: 'Username or email is invalid' });
 	}
 	if (!validator(password, 'password')) {
+		console.log('[LOGIN] Mot de passe invalide');
 		return res.json({ msg: 'Password is invalid' });
 	}
 	try {
-		await userModel.getUserByIdentifier(identifier, async (result) => {
-			if (result.length === 0) {
-				return res.json({ msg: 'User not found' });
-			}
-			console.log('USER LOGIN RESULT:', result[0]);
-			// Compatible PostgreSQL (true/false) et MySQL (0/1)
-			if (!result[0].verified) {
-				return res.json({ msg: 'Unverified user. Please verify your account' });
-			}
-			const user = result[0];
-			try {
-				const decoded = await bcrypt.compare(password, user.password);
-				if (!decoded) {
-					return res.json({ msg: 'Wrong password' });
-				}
-				delete user.password;
-				delete user.verified;
-				delete user.tokenExpiration;
-				user.images = await userModel.getImagesByUid(user.id);
-				userModel.getUserById(user.id, async () => {
-					const payload = { id: user.id };
-					user.token = await sign(payload, process.env.SECRET, tokenExp);
-					return res.json(user);
-				});
-				connectedUsers[user.id] = user.id;
-				console.log('+++> ', connectedUsers);
-			} catch (err) {
-				return res.json({ msg: 'Fatal error', err });
-			}
-		});
+		const result = await userModel.getUserByIdentifier(identifier);
+		if (!result || result.length === 0) {
+			console.log('[LOGIN] Utilisateur non trouvé');
+			return res.json({ msg: 'User not found' });
+		}
+		const user = result[0];
+		console.log('[LOGIN] Utilisateur trouvé:', user.username, '| verified:', user.verified);
+		if (!user.verified && user.verified !== true) {
+			// Pour compatibilité : accepte 0/1 ou true/false
+			console.log('[LOGIN] Utilisateur non vérifié');
+			return res.json({ msg: 'Unverified user. Please verify your account' });
+		}
+		const passwordMatch = await bcrypt.compare(password, user.password);
+		if (!passwordMatch) {
+			console.log('[LOGIN] Mauvais mot de passe');
+			return res.json({ msg: 'Wrong password' });
+		}
+		// Nettoyage des champs sensibles
+		delete user.password;
+		delete user.verified;
+		delete user.tokenExpiration;
+		user.images = await userModel.getImagesByUid(user.id);
+		const payload = { id: user.id };
+		user.token = await sign(payload, process.env.SECRET, tokenExp);
+		connectedUsers[user.id] = user.id;
+		console.log('[LOGIN] Connexion réussie pour:', user.username);
+		return res.json(user);
 	} catch (err) {
+		console.error('[LOGIN] Fatal error:', err);
 		return res.json({ msg: 'Fatal error', err });
 	}
 }

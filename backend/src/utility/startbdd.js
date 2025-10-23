@@ -762,6 +762,7 @@ const createChatTable = async () => {
   }
 };
 
+
 const createConversationsTable = async () => {
   try {
     console.log('🔄 Creating ConversationsTable...');
@@ -775,16 +776,12 @@ const createConversationsTable = async () => {
         last_msg INTEGER DEFAULT NULL
       );
     `;
-    
     await pool.query(createTableQuery);
-    console.log('Conversation table created successfully!');
-    
+    console.log('Conversations table created successfully!');
     const countQuery = 'SELECT COUNT(*) AS count FROM conversations';
     const countResult = await pool.query(countQuery);
     const rowCount = parseInt(countResult.rows[0].count);
-    
     console.log(`Conversations table currently has ${rowCount} rows`);
-
     if (rowCount === 0) {
       console.log('Inserting sample data into conversations table...');
       const insertTableQuery = `
@@ -815,7 +812,6 @@ const createConversationsTable = async () => {
       `;
       await pool.query(insertTableQuery);
       console.log('Sample data inserted into conversations table');
-      
       await resetSequence('conversations', 'id_conversation');
     } else {
       console.log('Conversations table already contains data.');
@@ -837,16 +833,12 @@ const createHistoryTable = async () => {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `;
-
     await pool.query(createTableQuery);
     console.log('History table created successfully!');
-    
     const countQuery = 'SELECT COUNT(*) AS count FROM history';
     const countResult = await pool.query(countQuery);
     const rowCount = parseInt(countResult.rows[0].count);
-    
     console.log(`History table currently has ${rowCount} rows`);
-
     if (rowCount === 0) {
       console.log('Inserting sample data into history table...');
       const insertTableQuery = `
@@ -1977,7 +1969,6 @@ const createHistoryTable = async () => {
       `;
       await pool.query(insertTableQuery);
       console.log('Sample data inserted into history table');
-      
       await resetSequence('history', 'id');
     } else {
       console.log('History table already contains data.');
@@ -4553,6 +4544,113 @@ const createMatchesTable = async () => {
       const insertTableQuery = `
         INSERT INTO matches (matcher, matched, created_at) VALUES
         (1, 61, '2023-08-03 15:50:33'),
+        (1, 59, '2023-08-04 01:12:23'),
+        (1, 392, '2023-08-07 05:13:03'),
+        (1, 429, '2023-08-07 05:13:17'),
+        (1, 211, '2023-08-07 05:13:29'),
+        (1, 313, '2023-08-07 05:13:52'),
+        (1, 478, '2023-08-07 05:14:02'),
+        (1, 148, '2023-08-07 05:14:23'),
+        (1, 267, '2023-08-07 05:14:29'),
+        (1, 168, '2023-08-07 05:14:42'),
+        (1, 449, '2023-08-07 05:15:26'),
+        (1, 232, '2023-08-07 05:15:32'),
+        (1, 281, '2023-08-07 05:15:40'),
+        (1, 418, '2023-08-07 05:15:51'),
+        (1, 54, '2023-08-07 05:16:02'),
+        (1, 187, '2023-08-07 05:16:11'),
+        (2, 8, '2023-08-07 07:12:30'),
+        (2, 25, '2023-08-07 07:12:37'),
+        (2, 429, '2023-08-07 07:12:50'),
+        (2, 200, '2023-08-07 07:13:01'),
+        (429, 1, '2023-08-10 05:48:22'),
+        (429, 2, '2023-08-10 05:48:37'),
+        (186, 1, '2023-08-10 05:55:52'),
+        (186, 2, '2023-08-10 05:56:02'),
+        (392, 1, '2023-08-10 05:57:02'),
+        (392, 2, '2023-08-10 05:57:17'),
+        (281, 1, '2023-08-10 05:58:44'),
+        (281, 2, '2023-08-10 05:59:09'),
+        (340, 1, '2023-08-10 06:04:40'),
+        (340, 2, '2023-08-10 06:04:50'),
+        (497, 2, '2023-08-10 06:06:07'),
+        (114, 1, '2023-08-10 06:08:38'),
+        (114, 2, '2023-08-10 06:08:45'),
+        (1, 114, '2023-08-10 06:22:46'),
+        (1, 340, '2023-08-10 06:24:58'),
+        (1, 186, '2023-08-10 06:25:47'),
+        (1, 25, '2023-08-10 06:26:02'),
+        (1, 200, '2023-08-10 06:26:27'),
+        (1, 294, '2023-08-10 06:27:33'),
+        (1, 121, '2023-08-10 06:27:43'),
+        (1, 397, '2023-08-10 06:27:53'),
+        (1, 215, '2023-08-10 06:28:04'),
+        (1, 443, '2023-08-10 06:28:39'),
+        (1, 376, '2023-08-10 06:29:46'),
+        (3, 2, '2023-09-27 21:42:36'),
+        (478, 1, '2023-10-14 03:43:47'),
+        (43, 2, '2023-10-17 23:40:51'),
+        (299, 2, '2023-10-17 23:41:31'),
+        (44, 1, '2023-10-17 23:41:59'),
+        (300, 1, '2023-10-17 23:43:49'),
+        (43, 1, '2023-10-17 23:47:05'),
+        (299, 1, '2023-10-17 23:59:32'),
+        (1, 416, '2023-10-19 14:07:00'),
+        (416, 1, '2023-10-19 14:08:45'),
+        (1, 2, '2023-10-21 00:48:41'),
+        (2, 1, '2023-10-21 00:49:08'),
+        (2, 475, '2023-10-21 01:04:11'),
+        (475, 2, '2023-10-21 01:04:32'),
+        (475, 1, '2023-10-21 03:11:13'),
+        (1, 475, '2023-10-21 03:11:42'),
+        (323, 1, '2023-10-21 03:13:03'),
+        (1, 323, '2023-10-21 03:13:30'),
+        (17, 22, '2023-10-21 03:18:26'),
+        (17, 1, '2023-10-21 03:19:30'),
+        (1, 17, '2023-10-21 03:19:40'),
+        (16, 1, '2023-10-21 03:20:46'),
+        (1, 16, '2023-10-21 03:21:01'),
+        (410, 1, '2023-10-21 03:21:56'),
+        (1, 410, '2023-10-21 03:22:14'),
+        (140, 1, '2023-10-21 03:23:06'),
+        (1, 140, '2023-10-21 03:23:37'),
+        (140, 2, '2023-10-21 03:23:41'),
+        (431, 2, '2023-10-21 03:25:26'),
+        (1, 23, '2023-10-21 03:27:55'),
+        (23, 2, '2023-10-21 03:27:58'),
+        (23, 1, '2023-10-21 03:28:02'),
+        (8, 1, '2023-10-21 03:29:15'),
+        (1, 8, '2023-10-21 03:29:28'),
+        (12, 1, '2023-10-21 03:31:29'),
+        (1, 12, '2023-10-21 03:31:45'),
+        (12, 2, '2023-10-21 03:31:48'),
+        (18, 1, '2023-10-21 03:36:56'),
+        (1, 18, '2023-10-21 03:37:12'),
+        (29, 1, '2023-10-21 03:39:06'),
+        (1, 29, '2023-10-21 03:39:22'),
+        (29, 2, '2023-10-21 03:39:42'),
+        (216, 1, '2023-10-21 03:40:50'),
+        (1, 216, '2023-10-21 03:41:01'),
+        (216, 2, '2023-10-21 03:41:14'),
+        (22, 2, '2023-10-21 03:43:04'),
+        (22, 1, '2023-10-21 03:43:15'),
+        (1, 22, '2023-10-21 03:43:20'),
+        (426, 1, '2023-10-21 03:44:23'),
+        (1, 426, '2023-10-21 03:44:41'),
+        (426, 2, '2023-10-21 03:44:47'),
+        (21, 1, '2023-10-21 03:46:46'),
+        (1, 21, '2023-10-21 03:46:54'),
+        (21, 2, '2023-10-21 03:47:41'),
+        (19, 1, '2023-10-21 03:48:13'),
+        (1, 19, '2023-10-21 03:48:30'),
+        (19, 2, '2023-10-21 03:50:25'),
+        (4, 475, '2023-10-21 03:11:42'),
+        (1, 4, '2023-08-07 05:14:02'),
+        (4, 497, '2023-08-10 06:25:26'),
+        (4, 1, '2023-10-21 04:03:58'),
+        (1, 43, '2023-10-22 19:36:14'),
+        (126, 1, '2023-10-23 01:59:47'),
+        (1, 299, '2023-10-24 23:36:49'),
         (1, 5, '2023-10-25 04:35:53');
       `;
       await pool.query(insertTableQuery);
@@ -4597,7 +4695,7 @@ const createNotificationsTable = async () => {
       const insertTableQuery = `
         INSERT INTO notifications (type, id_from, id_to, created_at, is_read, id_conversation) VALUES
         ('visit', 1, 67, '2023-08-02 01:59:53', false, -1),
-        ('visit', 1, 61, '2023-08-03 02:18:46', false, -1),
+         ('visit', 1, 61, '2023-08-03 02:18:46', false, -1),
         ('visit', 1, 61, '2023-08-03 02:25:00', false, -1),
         ('visit', 1, 74, '2023-08-03 04:05:02', false, -1),
         ('visit', 1, 74, '2023-08-03 04:05:33', false, -1),
@@ -6051,16 +6149,16 @@ const procedures = async () => {
 const initializeDatabase = async () => {
   try {
     console.log('🔄 Initializing database...');
-    await createUserTable();
-    await createImagesTable();
-    await createBlockedTable();
-    await createConversationsTable();
-    await createChatTable();
-    await createHistoryTable();
-    await createMatchesTable();
-    await createNotificationsTable();
-    await createTagsTable();
-    await procedures();
+  await createUserTable();
+  await createImagesTable();
+  await createBlockedTable();
+  await createConversationsTable();
+  await createHistoryTable();
+  await createChatTable();
+  await createMatchesTable();
+  await createNotificationsTable();
+  await createTagsTable();
+  await procedures();
     console.log('✅ All database tables initialized successfully!');
   } catch (error) {
     console.error('Error initializing database:', error);
@@ -6082,8 +6180,8 @@ module.exports = {
   createImagesTable,
   createBlockedTable,
   createConversationsTable,
-  createChatTable,
   createHistoryTable,
+  createChatTable,
   createMatchesTable,
   createNotificationsTable,
   createTagsTable,
