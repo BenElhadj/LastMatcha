@@ -25,9 +25,14 @@ const sendMail = async (to, key, type) => {
 		console.log('[sendMail] Render data:', data);
 		const html = ejs.render(raw, data);
 		console.log('[sendMail] HTML rendered, sending with SendGrid API...');
+		// Préparer l'expéditeur avec nom si défini
+		let from = process.env.SENDGRID_FROM || 'noreply@matcha.com';
+		if (process.env.SENDGRID_FROM_NAME) {
+			from = { email: process.env.SENDGRID_FROM, name: process.env.SENDGRID_FROM_NAME };
+		}
 		const msg = {
 			to,
-			from: process.env.SENDGRID_FROM || 'noreply@matcha.com',
+			from,
 			subject: data.title,
 			html
 		};

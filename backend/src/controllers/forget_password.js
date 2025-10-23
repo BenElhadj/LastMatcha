@@ -33,9 +33,14 @@ const forget_password = async (req, res) => {
 			return res.json({ msg: 'Email not found' });
 		}
 		console.log('[forget_password] Sending recovery email...');
-		await mailer.sendMail(req.body.email, key, 'auth/recover');
-		console.log('[forget_password] Email sent (no error thrown)');
-		return res.json({ ok: true });
+		try {
+			await mailer.sendMail(req.body.email, key, 'auth/recover');
+			console.log('[forget_password] Email sent successfully to:', req.body.email);
+			return res.json({ ok: true });
+		} catch (err) {
+			console.error('[forget_password] Error sending mail:', err);
+			return res.json({ msg: 'Error sending email', err });
+		}
 	} catch (err) {
 		console.error('[forget_password] Fatal error:', err);
 		return res.json({ msg: 'Fatal error', err });
