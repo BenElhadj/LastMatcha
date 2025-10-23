@@ -54,17 +54,15 @@ const recover_password = async (req, res) => {
 		return res.json({ msg: 'Invalid request' });
 	try {
 		const rkey = req.params.key;
-		userModel.getRkey(rkey, async (result) => {
-			if (!result.length)
-				return res.json({ msg: 'Invalid key' });
-			else {
-				const payload = { id: result[0].id };
-				const token = await sign(payload, process.env.SECRET, tokenExp);
-				return res.redirect(`${process.env.APP_URL}/recover?key=${rkey}&token=${token}`);
-			}
-		});
+		const result = await userModel.getRkey(rkey);
+		if (!result || result.length === 0) {
+			return res.json({ msg: 'Invalid key' });
+		}
+		const payload = { id: result[0].id };
+		const token = await sign(payload, process.env.SECRET, tokenExp);
+		return res.redirect(`${process.env.APP_URL}/recover?key=${rkey}&token=${token}`);
 	} catch (err) {
-	  return res.json({ msg: 'Fatal error', err });
+		return res.json({ msg: 'Fatal error', err });
 	}
 }
 
