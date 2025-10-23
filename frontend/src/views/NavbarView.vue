@@ -243,7 +243,7 @@ let msgMenu = ref(false)
 let notifNum = ref(0)
 let newMsgNum = ref(0)
 const user = computed(() => store.getters.user)
-const connected = computed(() => store.getters.status || localStorage.getItem('token'))
+const connected = computed(() => store.getters.status)
 const profileImage = computed(() => store.getters.profileImage)
 
 let notif = ref([])
@@ -335,19 +335,14 @@ const logout = async (userId) => {
   try {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
     const headers = { 'x-auth-token': user.value.token }
-    const res = await axios.get(url, { headers })
-    if (res.data.ok) {
-      store.dispatch('logout', user.value.id)
-      router.push('/login').catch((err) => {
-        console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
-      })
-    } else {
-      router.push('/login').catch((err) => {
-        console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
-      })
-    }
+    await axios.get(url, { headers })
   } catch (err) {
     console.error('err logout in frontend/NavbarView.view ===> ', err)
+  } finally {
+    await store.dispatch('logout', user.value.id)
+    router.push('/login').catch((err) => {
+      console.error('err logout router.push in frontend/NavbarView.view ===> ', err)
+    })
   }
 }
 
