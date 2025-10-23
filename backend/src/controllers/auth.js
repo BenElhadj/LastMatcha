@@ -8,6 +8,7 @@ const userModel = require('../models/userModel')
 
 const tokenExp = { expiresIn: 7 * 24 * 60 * 60 }
 const connectedUsers = {}
+const jwtBlacklist = new Set();
 
 // Login
 
@@ -62,12 +63,16 @@ const login = async (req, res) => {
 // Logout 
 
 const logout = async (req, res) => {
+	const token = req.header('x-auth-token');
 	if (!req.user || !req.user.id)
 		return res.json({ msg: 'Not logged in' });
 	if (!connectedUsers[req.user.id]) {
 		return res.json({ msg: 'Already logged out' });
 	}
 	delete connectedUsers[req.user.id];
+	if (token) {
+		jwtBlacklist.add(token);
+	}
 	console.log('---> ', connectedUsers);
 	await userModel.updateStatus(req.user.id, new Date());
 	res.json({ ok: true });
@@ -101,5 +106,6 @@ module.exports = {
 	login,
 	logout,
 	connectedUsers,
-	isLoggedIn
+	isLoggedIn,
+	jwtBlacklist
 }

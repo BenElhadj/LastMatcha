@@ -1,25 +1,30 @@
 const jwt = require('jsonwebtoken')
+
+const { jwtBlacklist } = require('../controllers/auth')
 const userModel = require('../models/userModel')
 
 const auth = async (req, res, next) => {
-	const token = req.header('x-auth-token')
+	const token = req.header('x-auth-token');
 	if (!token)
-		return res.json({ msg: 'No token, authorizaton denied' })
+		return res.json({ msg: 'No token, authorizaton denied' });
+	if (jwtBlacklist && jwtBlacklist.has(token)) {
+		return res.json({ msg: 'Token is not valid' });
+	}
 	try {
-		const decoded = jwt.verify(token, process.env.SECRET)
-		req.user = decoded
+		const decoded = jwt.verify(token, process.env.SECRET);
+		req.user = decoded;
 		if (decoded.id) {
-			let user = {}
+			let user = {};
 			try {
-				user = await userModel.getUserByIdD(decoded.id)
+				user = await userModel.getUserByIdD(decoded.id);
 			} catch (err) {
-				console.error('err auth in backend/auth.js ===> ', err)
+				console.error('err auth in backend/auth.js ===> ', err);
 			}
-			req.user = user[0]
+			req.user = user[0];
 		}
-		next()
+		next();
 	} catch (e) {
-		res.json({ msg: 'Token is not valid' })
+		res.json({ msg: 'Token is not valid' });
 	}
 }
 
