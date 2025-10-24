@@ -70,30 +70,28 @@ const recover_password = async (req, res) => {
 
 const check_key = async (req, res) => {
 	if (!req.user.id)
-		return res.json({ msg: 'Not logged in' })
+		return res.json({ msg: 'Not logged in' });
 	if (!req.body.key)
-		return res.json({ msg: 'Invalid request' })
+		return res.json({ msg: 'Invalid request' });
 	if (!validator(req.body.password, 'password'))
-		return res.json({ msg: 'Password is invalid' })
+		return res.json({ msg: 'Password is invalid' });
 	try {
-		const hashed = await bcrypt.hash(req.body.password, 10)
-		let user = {
+		const hashed = await bcrypt.hash(req.body.password, 10);
+		const user = {
 			id: req.user.id,
 			rkey: req.body.key,
 			password: hashed,
-		}
-		const key = req.body.key
-		await userModel.getRkey(key, async (result) => {
-			if (!result.length)
-				return res.json({ msg: 'Invalid key' })
-			await userModel.changeFrogottenPassword(user, (result) => {
-				if (!result.affectedRows)
-					return res.json({ msg: 'Oups something went wrong' })
-				res.json({ ok: true })
-			})
-		})
+		};
+		const key = req.body.key;
+		const result = await userModel.getRkey(key);
+		if (!result.length)
+			return res.json({ msg: 'Invalid key' });
+		const affectedRows = await userModel.changeFrogottenPassword(user);
+		if (!affectedRows)
+			return res.json({ msg: 'Oups something went wrong' });
+		res.json({ ok: true });
 	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
+		return res.json({ msg: 'Fatal error', err });
 	}
 }
 
