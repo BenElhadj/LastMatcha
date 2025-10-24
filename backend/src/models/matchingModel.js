@@ -13,8 +13,8 @@ const getFollowers = async (user_id) => {
 }
 
 const insertMatche = async (user1, user2) => {
-    const query = `INSERT INTO matches (matcher, matched) VALUES ($1, $2)`
-    await db.query(query, [user1, user2])
+    const query = `INSERT INTO matches (matcher, matched) VALUES ($1::integer, $2::integer)`
+    await db.query(query, [parseInt(user1, 10), parseInt(user2, 10)])
 }
 
 const delMatche = async (user_id, id) => {

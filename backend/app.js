@@ -39,7 +39,7 @@ app.use('/api/auth/', require('./src/routes/authRoutes'))
 app.use('/api/browse/', require('./src/routes/browsingRoutes'))
 app.use('/api/chat/', require('./src/routes/chatRoutes'))
 app.use('/api/notif/', require('./src/routes/notifRoutes'))
-app.use('/api/matching/', require('./src/routes/matchingRoutes'))
+app.use('/api', require('./src/routes/matchingRoutes'))
 
 
 

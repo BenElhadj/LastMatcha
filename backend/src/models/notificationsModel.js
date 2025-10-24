@@ -6,7 +6,7 @@ const insertNotifVis = async (user_id, id) => {
 }
 
 const insertNotif = async (type, user_id, id) => {
-    const query = `INSERT INTO notifications (type, id_from, id_to) VALUES ($1, $2, $3)`
+    const query = `INSERT INTO notifications (type, id_from, id_to) VALUES ($1::text, $2, $3)`
     await db.query(query, [type, user_id, id])
 }
 
@@ -16,7 +16,7 @@ const delNotif = async (id, user_id) => {
 }
 
 const insertNotifConv = async (type, id_from, id_to, id_conversation) => {
-    const query = `INSERT INTO notifications (type, id_from, id_to, id_conversation) VALUES ($1, $2, $3, $4)`
+    const query = `INSERT INTO notifications (type, id_from, id_to, id_conversation) VALUES ($1::text, $2, $3, $4)`
     await db.query(query, [type, id_from, id_to, id_conversation])
 }
 

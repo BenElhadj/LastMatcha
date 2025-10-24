@@ -19,14 +19,14 @@ const insertConv = async (user1, user2) => {
 // Set Conv Allowed 
 
 const disallowConv = async (user_id, id) => {
-    const query = `UPDATE conversations SET allowed = 0 WHERE (id_user1 = $1 AND id_user2 = $2) OR (id_user2 = $1 AND id_user1 = $2)`;
+    const query = `UPDATE conversations SET allowed = FALSE WHERE (id_user1 = $1 AND id_user2 = $2) OR (id_user2 = $1 AND id_user1 = $2)`;
     await db.query(query, [user_id, id]);
 }
 
 // Set Conv unallowed 
 
 const allowConv = async (conv_id) => {
-    const query = `UPDATE conversations SET allowed = 1 WHERE id_conversation = $1`;
+    const query = `UPDATE conversations SET allowed = TRUE WHERE id_conversation = $1`;
     await db.query(query, [conv_id]);
 }
 
