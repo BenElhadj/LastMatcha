@@ -24,14 +24,14 @@ const getUserByemail = async (email) => {
 
 // GET USERS FOR Browsing
 const getUserBrow = async () => {
-    const query = `SELECT users.*, images.*, 0 AS rating FROM users JOIN images ON users.id = images.user_id WHERE images.profile = 1 ORDER BY users.id DESC`;
+    const query = `SELECT users.*, images.*, get_rating(users.id) AS rating FROM users JOIN images ON users.id = images.user_id WHERE images.profile = TRUE ORDER BY rating DESC`;
     const result = await db.query(query);
     return result.rows;
 }
 
 // GET User by id (browsing)
 const getUserbyIdBrow = async (id, user_id) => {
-    const query = `SELECT *, 0 AS rating FROM users WHERE id = $1 AND id NOT IN (SELECT blocked FROM blocked WHERE blocker = $2) AND $2 NOT IN (SELECT blocked FROM blocked WHERE blocker = $1)`;
+    const query = `SELECT users.*, get_rating(users.id) AS rating FROM users WHERE id = $1 AND id NOT IN (SELECT blocked FROM blocked WHERE blocker = $2) AND $2 NOT IN (SELECT blocked FROM blocked WHERE blocker = $1)`;
     const result = await db.query(query, [id, user_id]);
     return result.rows;
 }
