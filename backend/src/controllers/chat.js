@@ -59,11 +59,14 @@ const getMessages = async (req, res) => {
 	const page = req.body.page
 	try {
 		const result = await chatModel.getChat(req.body.id, page * 50)
-		res.json(result.reverse())
 		await chatModel.seenMsg(req.body.id, req.user.id)
 		await notifModel.seenMsgNotif(req.body.id, req.user.id)
+		res.json(result.reverse())
 	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
+		// Log error to console for debugging
+		console.error('getMessages error:', err);
+		// Return more detailed error info for debugging
+		return res.json({ msg: 'Fatal error', error: err.message || err });
 	}
 }
 

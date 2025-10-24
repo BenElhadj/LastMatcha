@@ -84,11 +84,52 @@ const getConvAll = async (user1) => {
     return result.rows;
 }
 
+// Get chat messages for a conversation, paginated (50 per page)
+const getChat = async (id, offset) => {
+    const query = `SELECT * FROM chat WHERE id_conversation = $1 ORDER BY created_at DESC OFFSET $2 LIMIT 50`;
+    const result = await db.query(query, [id, offset]);
+    return result.rows;
+}
+
+// Mark all messages as seen for a conversation, except those sent by the current user
+const seenMsg = async (id_conv, id_from) => {
+    const query = `UPDATE chat SET is_read = TRUE WHERE id_conversation = $1 AND id_from != $2`;
+    await db.query(query, [id_conv, id_from]);
+}
+
+// Get conversation by id and user ids
+const getConversation = async (id_conv, id1, id2) => {
+    const query = `SELECT * FROM conversations WHERE id_conversation = $1 AND (id_user1 = $2 OR id_user2 = $3)`;
+    const result = await db.query(query, [id_conv, id1, id2]);
+    return result.rows;
+}
+
+// Insert a new message
+const insertMsg = async (msg) => {
+    // Ensure is_read is a boolean if present, else default to false
+    const query = `INSERT INTO chat (id_conversation, id_from, message, created_at, is_read) VALUES ($1, $2, $3, $4, $5) RETURNING id`;
+    const isRead = typeof msg.is_read === 'boolean' ? msg.is_read : false;
+    const values = [msg.id_conversation, msg.id_from, msg.message, msg.date, isRead];
+    const result = await db.query(query, values);
+    return result.rows[0];
+}
+
+// Update conversation last_update and last_msg
+const updateConv = async (date, insertID, id_conv) => {
+    const query = `UPDATE conversations SET last_update = $1, last_msg = $2 WHERE id_conversation = $3`;
+    await db.query(query, [date, insertID, id_conv]);
+}
+
 module.exports = {
-	getConv,
-	insertConv,
-	allowConv,
-	disallowConv,
-	delConv,
-	getConvAll
+    getConv,
+    insertConv,
+    allowConv,
+    disallowConv,
+    delConv,
+    getConvAll,
+    getChat,
+    seenMsg,
+    getConversation,
+    insertMsg,
+    updateConv
 }
