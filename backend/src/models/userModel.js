@@ -200,6 +200,13 @@ const getBlocked = async (id) => {
     return result.rows;
 }
 
+// Check if a specific user is already blocked by the current user
+const isBlocked = async (blocker, blocked) => {
+    const query = `SELECT 1 FROM blocked WHERE blocker = $1 AND blocked = $2`;
+    const result = await db.query(query, [blocker, blocked]);
+    return result.rowCount > 0;
+}
+
 //  Block user 
 const blockUser = async (user_id, id) => {
     const query = `INSERT INTO blocked (blocker, blocked) VALUES ($1, $2)`;
@@ -265,6 +272,7 @@ module.exports = {
     getUserBrow,
     getUserbyIdBrow,
     getBlocked,
+    isBlocked,
     blockUser,
     unblockUser,
     reportUser,

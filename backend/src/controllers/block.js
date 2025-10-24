@@ -11,9 +11,8 @@ const blockUser = async (req, res) => {
 	if (!req.body.id || isNaN(req.body.id))
 		return res.json({ msg: 'Invalid request' })
 	try {
-		const users = [req.user.id, req.body.id]
-		const result = await userModel.getBlocked(req.user.id)
-		if (!result.length) {
+		const alreadyBlocked = await userModel.isBlocked(req.user.id, req.body.id);
+		if (!alreadyBlocked) {
 			await userModel.blockUser(req.user.id, req.body.id)
 			await chatModel.disallowConv(req.user.id, req.body.id)
 			await matchingModel.delMatche(req.user.id, req.body.id)
@@ -37,8 +36,12 @@ const unblockUser = async (req, res) => {
 		return res.json({ msg: 'Invalid request' })}
 	try {
 		const result = await userModel.unblockUser(req.user.id, req.body.id)
-		if (!result.affectedRows)
+		// result is undefined, so check if the unblock actually deleted a row
+		// Let's re-query to check if the block still exists
+		const stillBlocked = await userModel.isBlocked(req.user.id, req.body.id);
+		if (stillBlocked) {
 			return res.json({ msg: 'Cannot unblock user' })
+		}
 		res.json({ ok: true })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
@@ -53,10 +56,8 @@ const reportUser = async (req, res) => {
 	if (!req.body.id || isNaN(req.body.id))
 		return res.json({ msg: 'Invalid request' })
 	try {
-		const result = await userModel.unblockUser(req.user.id, req.body.id)
-		if (!result)
-			return res.json({ msg: 'Oups something went wrong' })
-		return res.json({ ok: true })
+		   await userModel.reportUser(req.body.id)
+		   return res.json({ ok: true })
 	   } catch (err) {
 		   return res.json({ msg: 'Fatal error', err })
 	   }
