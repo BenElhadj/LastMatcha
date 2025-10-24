@@ -73,7 +73,7 @@ const destroyRkey = async (id) => {
 
 // Validate an Email
 const validateEmail = async (vkey) => {
-    const query = `UPDATE users SET verified = 1 WHERE vkey = $1 AND verified = 0`;
+    const query = `UPDATE users SET verified = TRUE, vkey = '' WHERE vkey = $1 AND verified = FALSE`;
     await db.query(query, [vkey]);
 }
 
