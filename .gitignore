@@ -139,3 +139,7 @@ dist
 .env.local
 
 en.subject.pdf
+
+intra/
+./frontend/intra-frontend/
+./backend/intra-backend/
