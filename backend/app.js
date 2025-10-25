@@ -363,7 +363,7 @@ app.get('/connectedUsers', (req, res) => {
   if (req.headers['x-requested-with'] !== 'XMLHttpRequest') {
     return res.status(403).send('Forbidden')
   }
-  const onlineUserList = Object.keys(connectedUsers)
+  const onlineUserList = Array.from(connectedUsers)
   res.json(onlineUserList)
 })
 
