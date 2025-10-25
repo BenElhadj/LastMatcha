@@ -153,6 +153,15 @@
 </template>
 
 <script setup>
+onMounted(() => {
+  socket.on('user-status-changed', () => {
+    updateConnectedUsers()
+  })
+})
+
+onBeforeUnmount(() => {
+  socket.off('user-status-changed')
+})
 import AlertView from '@/views/AlertView.vue'
 import LoaderView from '@/views/LoaderView.vue'
 import utility from '@/utility.js'
@@ -173,7 +182,10 @@ import axios from 'axios'
 import moment from 'moment'
 
 import io from 'socket.io-client'
-const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
+const socket = io(`${import.meta.env.VITE_APP_API_URL}`, {
+  transports: ['websocket'],
+  auth: { token: localStorage.getItem('token') }
+})
 const calculateDistance = utility.calculateDistance
 const getLikeIcon = utility.getLikeIcon
 const getFullPath = utility.getFullPath
@@ -265,21 +277,30 @@ const getHistory = async () => {
     ]
     const result = await axios.get(url, { headers })
 
-    const filteredByType = result.data.filter((item) => typesToFilter.includes(item.type))
-    const filteredByHisId = filteredByType.filter((item) => userId.includes(item.his_id))
-    filteredByHisId.sort((a, b) => new Date(a.match_date) - new Date(b.match_date))
+    if (Array.isArray(result.data)) {
+      const filteredByType = result.data.filter((item) => typesToFilter.includes(item.type))
+      const filteredByHisId = filteredByType.filter((item) => userId.includes(item.his_id))
+      filteredByHisId.sort((a, b) => new Date(a.match_date) - new Date(b.match_date))
 
-    likeIcon.value = getLikeIcon(filteredByHisId[0] ? filteredByHisId[0].type : 'default')
-
-    userCanChat.value = true
-      ? filteredByHisId[0]
+      likeIcon.value = getLikeIcon(filteredByHisId[0] ? filteredByHisId[0].type : 'default')
+      userCanChat.value = filteredByHisId[0]
         ? filteredByHisId[0].type === 'he_like_back' || filteredByHisId[0].type === 'you_like_back'
         : false
-      : false
-
-    likedAlert.value = filteredByHisId[0] ? filteredByHisId[0].type.toString() : 'default'
-
-    return filteredByHisId[0] ? filteredByHisId[0].type : 'default'
+      likedAlert.value = filteredByHisId[0] ? filteredByHisId[0].type.toString() : 'default'
+      return filteredByHisId[0] ? filteredByHisId[0].type : 'default'
+    } else {
+      if (result.data && result.data.msg) {
+        alert.value = { state: true, color: 'red', text: result.data.msg }
+      }
+      if (!getHistory.logged) {
+        console.error('getHistory: result.data is not an array', result.data)
+        getHistory.logged = true
+      }
+      likeIcon.value = getLikeIcon('default')
+      userCanChat.value = false
+      likedAlert.value = 'default'
+      return 'default'
+    }
   } catch (err) {
     console.error('err history in frontend/ProfileHistory.vue ===> ', err)
   }
@@ -343,7 +364,7 @@ const getProfileImage = () => {
 }
 
 const matchFunction = async () => {
-  const url = `${import.meta.env.VITE_APP_API_URL}/api/matching/match`
+  const url = `${import.meta.env.VITE_APP_API_URL}/api/match`
   const data = {
     id: route.params.id,
     liked: liked
@@ -398,6 +419,19 @@ const matchFunction = async () => {
       socket.emit('match', data)
     }
   } catch (error) {
+    if (error.response && error.response.status === 404) {
+      alert.value = {
+        state: true,
+        color: 'red',
+        text: "Erreur : la route /api/match n'existe pas sur le serveur. Veuillez contacter l'administrateur."
+      }
+    } else {
+      alert.value = {
+        state: true,
+        color: 'red',
+        text: "Une erreur s'est produite : " + (error.message || 'Erreur inconnue')
+      }
+    }
     console.error("Une erreur s'est produite :", error)
   }
 }
@@ -512,11 +546,13 @@ function updateConnectedUsers() {
       .getConnectedUsers()
       .then((data) => {
         const connectedUserIds = data
-        const userId = route.params.id.toString()
-        if (connectedUserIds.includes(userId)) {
+        const userId = route.params.id ? route.params.id.toString() : ''
+        if (userId && connectedUserIds.includes(userId)) {
           lastSeen.value = 'online'
         } else {
-          lastSeen.value = moment(user.value.status).utc().fromNow()
+          lastSeen.value = user.value.status
+            ? moment(user.value.status).utc().fromNow()
+            : 'Unavailable'
         }
       })
       .catch((error) => {
