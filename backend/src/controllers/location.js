@@ -8,8 +8,8 @@ const updatePosition = async (req, res) => {
 	if (!req.body.lat || !req.body.lng || isNaN(req.body.lat) || isNaN(req.body.lng))
 		return res.json({ msg: 'Invalid request' })
 	try {
-		const result = await userModel.updateLocation(req.body.lat, req.body.lng, req.user.id)
-		if (!result)
+		const result = await userModel.updateLocation(req.body.lat, req.body.lng, req.user.id);
+		if (!result || !result.rowCount)
 			return res.json({ msg: 'Oups something went wrong' })
 		return res.json({ ok: true })
 	} catch (err) {

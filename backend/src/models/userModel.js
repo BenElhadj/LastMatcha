@@ -229,6 +229,7 @@ const reportUser = async (id) => {
 const updateLocation = async (lat, long, id) => {
     const query = `UPDATE users SET lat = $1, lng = $2 WHERE id = $3`;
     await db.query(query, [lat, long, id]);
+    return await db.query(query, [lat, long, id]);
 }
 
 const blacklist = async (ids) => {
