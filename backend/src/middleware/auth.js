@@ -5,6 +5,7 @@ const userModel = require('../models/userModel')
 
 const auth = async (req, res, next) => {
 	const token = req.header('x-auth-token');
+	console.log('x-auth-token reçu:', token);
 	if (!token)
 		return res.json({ msg: 'No token, authorizaton denied' });
 	if (jwtBlacklist && jwtBlacklist.has(token)) {

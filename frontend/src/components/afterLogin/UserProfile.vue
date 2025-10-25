@@ -4,12 +4,40 @@
       <div>
         <div class="profile__cover">
           <img :src="coverPhoto" alt="Cover Photo" class="cover__img" />
+          <div style="margin-top: 10px">
+            <input
+              type="file"
+              id="cover-upload"
+              accept="image/*"
+              @change="onCoverChange"
+              style="display: none"
+            />
+            <q-btn
+              label="Changer la cover"
+              color="primary"
+              @click="() => document.getElementById('cover-upload').click()"
+            />
+          </div>
         </div>
       </div>
 
       <div class="avatar">
         <q-avatar slot="offset" class="profile__avatar mx-auto" size="250px">
           <img :src="profileImage" />
+          <div style="margin-top: 10px">
+            <input
+              type="file"
+              id="profile-upload"
+              accept="image/*"
+              @change="onProfileChange"
+              style="display: none"
+            />
+            <q-btn
+              label="Changer la photo de profil"
+              color="primary"
+              @click="() => document.getElementById('profile-upload').click()"
+            />
+          </div>
 
           <div class="avatar-content">
             <q-chip outline small text-color="black" style="background: white !important">{{
@@ -153,6 +181,51 @@
 </template>
 
 <script setup>
+const onProfileChange = async (e) => {
+  const token = localStorage.getItem('token')
+  console.log('Token utilisé pour upload profil:', token)
+  const file = e.target.files[0]
+  if (!file) return
+  const formData = new FormData()
+  formData.append('image', file)
+  try {
+    const token = localStorage.getItem('token')
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
+    await axios.post(url, formData, {
+      headers: {
+        'x-auth-token': token,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    alert.value = { state: true, color: 'green', text: 'Photo de profil mise à jour !' }
+    setTimeout(() => window.location.reload(), 1000)
+  } catch (err) {
+    alert.value = { state: true, color: 'red', text: 'Erreur upload photo de profil' }
+  }
+}
+
+const onCoverChange = async (e) => {
+  const token = localStorage.getItem('token')
+  console.log('Token utilisé pour upload cover:', token)
+  const file = e.target.files[0]
+  if (!file) return
+  const formData = new FormData()
+  formData.append('image', file)
+  try {
+    const token = localStorage.getItem('token')
+    const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/cover`
+    await axios.post(url, formData, {
+      headers: {
+        'x-auth-token': token,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    alert.value = { state: true, color: 'green', text: 'Cover mise à jour !' }
+    setTimeout(() => window.location.reload(), 1000)
+  } catch (err) {
+    alert.value = { state: true, color: 'red', text: 'Erreur upload cover' }
+  }
+}
 onMounted(() => {
   socket.on('user-status-changed', () => {
     updateConnectedUsers()
