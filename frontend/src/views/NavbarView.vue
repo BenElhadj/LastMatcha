@@ -335,7 +335,11 @@ const logout = async (userId) => {
   try {
     const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
     const headers = { 'x-auth-token': user.value.token }
-    await axios.get(url, { headers })
+    const res = await axios.get(url, { headers })
+    if (res.data && res.data.msg) {
+      // Affiche le message d'erreur réel du backend si présent
+      alert(res.data.msg)
+    }
   } catch (err) {
     console.error('err logout in frontend/NavbarView.view ===> ', err)
   } finally {
