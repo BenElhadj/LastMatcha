@@ -6,16 +6,12 @@
         <input
           type="file"
           id="photo-upload"
+          ref="photoInputRef"
           accept="image/*"
           @change="onPhotoChange"
           style="display: none"
         />
-        <q-btn
-          round
-          color="primary"
-          icon="mdi-camera-plus"
-          @click="() => document.getElementById('photo-upload').click()"
-        />
+        <q-btn round color="primary" icon="mdi-camera-plus" @click="onUploadClick" />
       </div>
       <h1 class="q-pb-md" style="margin-top: -10px; text-align: center">Gallery</h1>
       <h3 style="margin-top: -70px; margin-bottom: 100px; text-align: center">
@@ -60,6 +56,7 @@ const user = computed(() => store.getters.user)
 const alert = ref({ state: false, color: '', text: '' })
 const profileImage = (image) => getFullPath(image)
 const username = ref('')
+const photoInputRef = ref(null)
 if (props.userToto?.username ?? false) {
   username.value = props.userToto.username
 } else {
@@ -73,7 +70,8 @@ const onPhotoChange = async (e) => {
   const formData = new FormData()
   formData.append('image', file)
   const token = user.value.token || localStorage.getItem('token')
-  const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image/gallery`
+  // Utiliser la bonne route backend pour galerie
+  const url = `${import.meta.env.VITE_APP_API_URL}/api/users/image`
   try {
     await axios.post(url, formData, {
       headers: {
@@ -86,6 +84,10 @@ const onPhotoChange = async (e) => {
   } catch (err) {
     alert.value = { state: true, color: 'red', text: 'Erreur upload photo' }
   }
+}
+
+const onUploadClick = () => {
+  if (photoInputRef.value) photoInputRef.value.click()
 }
 
 const deleteImg = async (image) => {

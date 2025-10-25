@@ -149,7 +149,8 @@ const getImagesByUid = async (user_id) => {
 
 // Add images 
 const insertImages = async (user) => {
-    const query = `INSERT INTO images (user_id, name, profile) VALUES ($1, $2, 1) RETURNING *`;
+    // Par défaut, image de galerie (profile=0, cover=0)
+    const query = `INSERT INTO images (user_id, name, profile, cover) VALUES ($1, $2, 0, 0) RETURNING *`;
     const result = await db.query(query, [user.id, user.imgName]);
     return result.rows[0];
 }
