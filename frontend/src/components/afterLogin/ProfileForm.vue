@@ -81,7 +81,6 @@
 import { ref, computed, onMounted, toRefs } from 'vue'
 import { useStore, mapActions } from 'vuex'
 import utility from '@/utility.js'
-import { createTags } from '@johmun/vue-tags-input'
 import axios from 'axios'
 import AlertView from '@/views/AlertView.vue'
 import moment from 'moment'

@@ -8,7 +8,6 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@johmun/vue-tags-input": "^2.1.0",
     "@mdi/font": "^7.4.47",
     "@quasar/extras": "^1.17.0",
     "axios": "^1.12.2",
@@ -22,10 +21,10 @@
     "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@quasar/vite-plugin": "^1.10.0",
-    "@vitejs/plugin-vue": "^5.0.2",
-    "sass": "^1.93.2",
-    "sass-loader": "^13.3.2",
-    "vite": "^7.1.12"
+  "@quasar/vite-plugin": "^1.10.0",
+  "@vitejs/plugin-vue": "^5.0.2",
+  "sass": "^1.93.2",
+  "sass-loader": "^13.3.2",
+  "vite": "^6.4.1"
   }
 }

@@ -109,7 +109,15 @@ import { mdiAbTesting } from '@quasar/extras/mdi-v5'
 import { useRouter } from 'vue-router';
 
 import io from 'socket.io-client'
-const socket = io(`${import.meta.env.VITE_APP_API_URL}`)
+const socket = io(`${import.meta.env.VITE_APP_API_URL}`, {
+  transports: ['websocket'],
+  reconnection: true,
+  timeout: 20000
+})
+
+socket.on('connect_error', (err) => {
+  console.error('Erreur de connexion socket.io :', err)
+})
 
 const connectedUsers = computed(() => store.state.connectedUsers)
 
@@ -394,9 +402,11 @@ function refreshMethods() {
   whoIsUp()
 }
 
-const refreshInterval = setInterval(refreshMethods, 2000)
+const refreshInterval = setInterval(refreshMethods, 5000)
 
 onBeforeUnmount(() => {
+  socket.off('onlineUsers')
+  socket.off('connectedUsers')
   clearInterval(refreshInterval)
 })
 
