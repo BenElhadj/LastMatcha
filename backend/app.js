@@ -348,7 +348,7 @@ io.on('connection', socket => {
           await pool.query('UPDATE users SET status = NOW() WHERE id = $1', [key]);
           delete users[key]
           io.emit('online', Object.keys(users))
-       io.emit('user-status-changed', { userId: id, status: 'online' })
+            io.emit('user-status-changed', { userId: key, status: 'offline' })
           socket.disconnect()
         } catch (err) {
           console.error('app.js disconnect error ===> ', err)
@@ -360,7 +360,6 @@ io.on('connection', socket => {
 
 // Route pour obtenir les utilisateurs connectés
 app.get('/connectedUsers', (req, res) => {
-       io.emit('user-status-changed', { userId: id, status: 'offline' })
   if (req.headers['x-requested-with'] !== 'XMLHttpRequest') {
     return res.status(403).send('Forbidden')
   }
@@ -372,8 +371,6 @@ app.get('/connectedUsers', (req, res) => {
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
 });
-
-           io.emit('user-status-changed', { userId: key, status: 'offline' })
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
 });
