@@ -4,7 +4,7 @@ const { jwtBlacklist } = require('../controllers/auth')
 const userModel = require('../models/userModel')
 
 const auth = async (req, res, next) => {
-	const token = req.header('x-auth-token');
+	const token = req.header('x-auth-token') || req.body.token;
 	console.log('x-auth-token reçu:', token);
 	if (!token)
 		return res.json({ msg: 'No token, authorizaton denied' });
