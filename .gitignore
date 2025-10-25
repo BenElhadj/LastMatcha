@@ -141,5 +141,7 @@ dist
 en.subject.pdf
 
 intra/
-./frontend/intra-frontend/
-./backend/intra-backend/
+backend/intra-backend/
+backend/src/utility/startbdd.recover.js
+backend/src/utility/startbdd.js
+frontend/intra-frontend/
