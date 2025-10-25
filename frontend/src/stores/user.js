@@ -128,9 +128,12 @@ export const user = {
           profile_image: cur.profile_image
         })
         const res = await utility.sync('matching/getmatches')
-        if (Array.isArray(res.data)) {
-          following = res.data.filter(cur => cur.matched_id).map(merge)
-          followers = res.data.filter(cur => cur.matcher_id).map(merge)
+        if (!res || res.length === 0) {
+          // Affiche un message utilisateur si la route est inaccessible ou l'utilisateur non connecté
+          console.warn('Aucun match trouvé ou accès refusé. Vérifiez votre connexion ou contactez l’admin.')
+        } else if (Array.isArray(res)) {
+          following = res.filter(cur => cur.matched_id).map(merge)
+          followers = res.filter(cur => cur.matcher_id).map(merge)
         }
         commit('syncMatches', { following, followers })
       } catch (err) {

@@ -122,7 +122,13 @@
             </q-bar>
           </q-header>
           <q-page-container>
-            <map-location-selector style="margin: 700px 0px 0px important;" :latitude="latitude" :longitude="longitude" @location-updated="locationUpdated"></map-location-selector>
+            <map-location-selector
+              style="margin: 700px 0px 0px important;"
+              :latitude="latitude"
+              :longitude="longitude"
+              api-key="AIzaSyAHVSMrIeymA40C-a9ap0zCQzrHXkycXX8"
+              @location-updated="locationUpdated"
+            ></map-location-selector>
           </q-page-container>
         </q-card>
       </q-dialog>
