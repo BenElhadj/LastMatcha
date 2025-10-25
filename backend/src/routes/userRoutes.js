@@ -11,6 +11,9 @@ const location = require('../controllers/location')
 const multer = require('multer')
 const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
 
+// Nouvelle route pour uploader une image de profil
+routes.post('/image/profile', [authCheck, upload.single('image')], userProfile.uploadProfileImage)
+
 routes.post('/add', register.register)
 
 routes.get('/verify/:key', register.verifyEmail)

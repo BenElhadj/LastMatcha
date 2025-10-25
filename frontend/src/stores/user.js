@@ -88,6 +88,19 @@ export const user = {
     }
   },
   actions: {
+    fetchUserImages: async ({ commit, state }) => {
+      try {
+        const token = state.user.token || localStorage.getItem('token')
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show/${state.user.id}`
+        const headers = { 'x-auth-token': token }
+        const res = await axios.get(url, { headers })
+        if (res.data && Array.isArray(res.data.images)) {
+          commit('updateUser', { ...state.user, images: res.data.images })
+        }
+      } catch (err) {
+        console.error('Erreur lors du rafraîchissement des images utilisateur:', err)
+      }
+    },
     updateUserEmail: ({ commit }, email) => {
       commit('updateUserEmail', email)
     },

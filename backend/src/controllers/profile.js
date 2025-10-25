@@ -1,3 +1,18 @@
+// Upload image de profil
+const uploadProfileImage = async (req, res) => {
+	if (!req.user.id)
+		return res.json({ msg: 'Not logged in' })
+	try {
+		const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
+		const imgName = `${req.user.id}-profile-${randomHex()}.png`
+		await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
+		await userModel.updateProfilePic(req.user.id, imgName)
+		await userModel.setImages(req.user.id)
+		return res.json({ ok: true, status: 'Profile image updated', name: imgName, user_id: req.user.id })
+	} catch (err) {
+		return res.json({ msg: 'Fatal error', err })
+	}
+}
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { promisify } = require('util')
@@ -161,27 +176,25 @@ const changePassword = async (req, res) => {
 const uploadImages = async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
-	try {
-		const base64Data = req.body.image.replace(/^data:image\/\w+;base64,/, '')
-		const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
-		const imgName = `${req.user.id}-${randomHex()}.png`
-		const images = await userModel.getImages(req.user.id)
-		if (images.length < 5) {
-			await writeFileAsync(uploadDir + imgName, base64Data, 'base64')
-			let user = {
-				id: req.user.id,
-				imgName: imgName
+		try {
+			const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
+			const imgName = `${req.user.id}-gallery-${randomHex()}.png`
+			const images = await userModel.getImages(req.user.id)
+			if (images.length < 5) {
+				await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
+				let user = {
+					id: req.user.id,
+					imgName: imgName
+				}
+				const insertRes = await userModel.insertImages(user)
+				await userModel.setImages(req.user.id)
+				return res.json({ ok: true, status: 'Image Updated', name: imgName, user_id: req.user.id })
+			} else {
+				return res.json({ msg: 'User already has 5 photos' })
 			}
-			await userModel.updateProfilePic(req.user.id)
-			const insertRes = await userModel.insertImages(user)
-			await userModel.setImages(req.user.id)
-			return res.json({ ok: true, status: 'Image Updated', name: imgName, user_id: req.user.id })
-		} else {
-			return res.json({ msg: 'User already has 5 photos' })
+		} catch (err) {
+			return res.json({ msg: 'Fatal error', err })
 		}
-	} catch (err) {
-		return res.json({ msg: 'Fatal error', err })
-	}
 }
 
 // Upload cover 
@@ -273,5 +286,6 @@ module.exports = {
 	uploadImages,
 	uploadCover,
 	deleteImage,
-	blacklisted
+	blacklisted,
+	uploadProfileImage
 }
