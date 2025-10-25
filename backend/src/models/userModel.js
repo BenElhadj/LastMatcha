@@ -128,30 +128,40 @@ const changePassword = async (user) => {
 
 // Get images
 const getImages = async (id) => {
-    const query = `SELECT * FROM images WHERE user_id = $1 AND cover = 0 AND profile = 0`;
+    const query = `SELECT *, COALESCE(link, '') AS link, COALESCE(data, '') AS data FROM images WHERE user_id = $1 AND cover = 0 AND profile = 0`;
     const result = await db.query(query, [id]);
-    return result.rows;
+    return result.rows.map(img => ({
+        ...img,
+        image: img.link ? img.link : img.data
+    }));
 }
 
 // Get image By Id
 const getImagesById = async (id, user_id) => {
-    const query = `SELECT * FROM images WHERE id = $1 AND user_id = $2`;
+    const query = `SELECT *, COALESCE(link, '') AS link, COALESCE(data, '') AS data FROM images WHERE id = $1 AND user_id = $2`;
     const result = await db.query(query, [id, user_id]);
-    return result.rows;
+    return result.rows.map(img => ({
+        ...img,
+        image: img.link ? img.link : img.data
+    }));
 }
 
 // Get image by userid
 const getImagesByUid = async (user_id) => {
-    const query = `SELECT * FROM images WHERE user_id = $1`;
+    const query = `SELECT *, COALESCE(link, '') AS link, COALESCE(data, '') AS data FROM images WHERE user_id = $1`;
     const result = await db.query(query, [user_id]);
-    return result.rows;
+    return result.rows.map(img => ({
+        ...img,
+        image: img.link ? img.link : img.data
+    }));
 }
 
 // Add images 
 const insertImages = async (user) => {
     // Par défaut, image de galerie (profile=0, cover=0)
-    const query = `INSERT INTO images (user_id, name, profile, cover) VALUES ($1, $2, 0, 0) RETURNING *`;
-    const result = await db.query(query, [user.id, user.imgName]);
+    // Accepts either link (URL) or data (base64)
+    const query = `INSERT INTO images (user_id, link, data, profile, cover) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+    const result = await db.query(query, [user.id, user.link || null, user.data || null, user.profile ? 1 : 0, user.cover ? 1 : 0]);
     return result.rows[0];
 }
 
@@ -163,9 +173,12 @@ const updateProfilePic = async (id) => {
 
 // Get cover photo
 const getCover = async (id) => {
-    const query = `SELECT * FROM images WHERE cover = 1 AND user_id = $1`;
+    const query = `SELECT *, COALESCE(link, '') AS link, COALESCE(data, '') AS data FROM images WHERE cover = 1 AND user_id = $1`;
     const result = await db.query(query, [id]);
-    return result.rows;
+    return result.rows.map(img => ({
+        ...img,
+        image: img.link ? img.link : img.data
+    }));
 }
 
 // Delete cover photo 
@@ -176,8 +189,9 @@ const delCover = async (id, user_id) => {
 
 // INSERT Cover photo
 const insertCover = async (user_id, imgName) => {
-    const query = `INSERT INTO images (user_id, name, cover) VALUES ($1, $2, 1) RETURNING *`;
-    const result = await db.query(query, [user_id, imgName]);
+    // Accepts either link (URL) or data (base64) for cover image
+    const query = `INSERT INTO images (user_id, link, data, cover) VALUES ($1, $2, $3, 1) RETURNING *`;
+    const result = await db.query(query, [user_id, arguments[1] || null, arguments[2] || null]);
     return result.rows[0];
 }
 
@@ -196,7 +210,7 @@ const setImages = async (user_id) => {
 
 // get Blocked  users 
 const getBlocked = async (id) => {
-    const query = `SELECT blocked.blocked AS blocked_id, users.username AS username, users.first_name AS first_name, users.last_name AS last_name, users.gender AS gender, users.birthdate AS birthdate, images.name AS avatar, blocked.created_at AS blocked_at FROM blocked JOIN users ON blocked.blocked = users.id LEFT JOIN images ON users.id = images.user_id AND images.profile = TRUE WHERE blocked.blocker = $1`;
+    const query = `SELECT blocked.blocked AS blocked_id, users.username AS username, users.first_name AS first_name, users.last_name AS last_name, users.gender AS gender, users.birthdate AS birthdate, COALESCE(images.link, images.data, '') AS avatar, blocked.created_at AS blocked_at FROM blocked JOIN users ON blocked.blocked = users.id LEFT JOIN images ON users.id = images.user_id AND images.profile = TRUE WHERE blocked.blocker = $1`;
     const result = await db.query(query, [id]);
     return result.rows;
 }

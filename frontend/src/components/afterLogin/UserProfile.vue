@@ -12,11 +12,7 @@
               @change="onCoverChange"
               style="display: none"
             />
-            <q-btn
-              label="Changer la cover"
-              color="primary"
-              @click="() => document.getElementById('cover-upload').click()"
-            />
+            <q-btn label="Changer la cover" color="primary" @click="onCoverBtnClick" />
           </div>
         </div>
       </div>
@@ -32,11 +28,7 @@
               @change="onProfileChange"
               style="display: none"
             />
-            <q-btn
-              label="Changer la photo de profil"
-              color="primary"
-              @click="() => document.getElementById('profile-upload').click()"
-            />
+            <q-btn label="Changer la photo de profil" color="primary" @click="onProfileBtnClick" />
           </div>
 
           <div class="avatar-content">
@@ -181,6 +173,14 @@
 </template>
 
 <script setup>
+const onCoverBtnClick = () => {
+  const el = document.getElementById('cover-upload')
+  if (el) el.click()
+}
+const onProfileBtnClick = () => {
+  const el = document.getElementById('profile-upload')
+  if (el) el.click()
+}
 const onProfileChange = async (e) => {
   const token = localStorage.getItem('token')
   console.log('Token utilisé pour upload profil:', token)
@@ -417,7 +417,10 @@ const coverPhoto = computed(() => {
   const cover = 'default/defaut_couverture.jpg'
   if (!user.value || !user.value.images) return getFullPath(cover)
   const image = user.value.images.find((cur) => cur.cover)
-  return getFullPath(image ? image.name : cover)
+  if (!image) return getFullPath(cover)
+  if (image.link) return getFullPath(image.link)
+  if (image.data) return `data:image/png;base64,${image.data}`
+  return getFullPath(cover)
 })
 
 const filteredImages = computed(() => {
@@ -433,7 +436,10 @@ const userTags = computed(() => {
 const getProfileImage = () => {
   if (!user.value || !user.value.images) return 'default/defaut_profile.png'
   const image = user.value.images.find((cur) => cur.profile === 1)
-  return image ? image.name : 'defaut_profile.png'
+  if (!image) return 'default/defaut_profile.png'
+  if (image.link) return getFullPath(image.link)
+  if (image.data) return `data:image/png;base64,${image.data}`
+  return 'default/defaut_profile.png'
 }
 
 const matchFunction = async () => {

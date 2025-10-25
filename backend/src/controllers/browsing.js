@@ -71,7 +71,10 @@ const showUserById = async (req, res) => {
 			delete user.verified
 			delete user.email
 			delete user.google_id
-			user.images = await userModel.getImagesByUid(user.id)
+			user.images = (await userModel.getImagesByUid(user.id)).map(img => ({
+				...img,
+				data: img.data ? `data:image/png;base64,${img.data}` : null
+			}));
 			await historyModel.insertHistory(req.user.id, req.params.id)
 			await notifModel.insertNotifVis(req.user.id, req.params.id)
 			res.json(user)
@@ -117,9 +120,7 @@ const getAllHistory = async (req, res) => {
 		return res.json({ msg: 'not logged in' });
 	try {
 		const history = await historyModel.getAllHistory(req.user.id);
-		
-		res.json(history.allResults);
-		// res.json({ allhistory: history.allResults, allType: history.allType });
+		res.json(history);
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err });
 	}

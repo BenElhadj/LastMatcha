@@ -1,15 +1,16 @@
 <template>
   <q-page class="q-pa-lg">
     <q-page-container>
-      <h1   style="margin-top: -40px; text-align: center;">History</h1>
-      <h3 style="margin-top: -50px; margin-bottom:20px; text-align: center;">{{user.username}}</h3>
+      <h1 style="margin-top: -40px; text-align: center">History</h1>
+      <h3 style="margin-top: -50px; margin-bottom: 20px; text-align: center">
+        {{ user.username }}
+      </h3>
 
-      <q-timeline align="top" label="Loose" center class="timeline_container q-gutter-md " >
-
-        <q-timeline  color="secondary">
-          <q-timeline-entry heading style="margin: 10px; text-align: center;">
+      <q-timeline align="top" label="Loose" center class="timeline_container q-gutter-md">
+        <q-timeline color="secondary">
+          <q-timeline-entry heading style="margin: 10px; text-align: center">
             Her you can see all your history of actions on the website
-            <br><br>
+            <br /><br />
           </q-timeline-entry>
 
           <q-timeline-entry
@@ -19,9 +20,10 @@
             :right="true"
             :color="getNotifIcon(entry.type)[2]"
             :class="getNotifIcon(entry.type)[2]"
-            :icon="getNotifIcon(entry.type)[1]">
+            :icon="getNotifIcon(entry.type)[1]"
+          >
             <q-avatar clickable v-ripple avatar @click="redirectToUser(entry.his_id)">
-              <img :src="getFullPath(entry.avatar)">
+              <img :src="getFullPath(entry.avatar)" />
             </q-avatar>
             <q-item-section right>
               {{ moment(entry.created_at).fromNow() }}
@@ -30,12 +32,25 @@
 
           <q-timeline-entry
             :subtitle="!moreToLoad ? 'you can\'t see more history' : null"
-            :title="moreToLoad ? 'You can show more history' : 'you created your profile on ' + moment(user.created_at).format('D MMMM, YYYY, h:mm A')"
-            side="left"/>
-
+            :title="
+              moreToLoad
+                ? 'You can show more history'
+                : 'you created your profile on ' +
+                  moment(user.created_at).format('D MMMM, YYYY, h:mm A')
+            "
+            side="left"
+          />
         </q-timeline>
       </q-timeline>
-      <q-btn v-if="moreToLoad" label="Show more" color="primary" text rounded class="my-4" @click="increaseLimit"/>
+      <q-btn
+        v-if="moreToLoad"
+        label="Show more"
+        color="primary"
+        text
+        rounded
+        class="my-4"
+        @click="increaseLimit"
+      />
     </q-page-container>
   </q-page>
 </template>
@@ -71,7 +86,7 @@ const getHistory = async () => {
   }
 }
 
-getHistory();
+getHistory()
 
 const redirectToUser = (hisId) => {
   if (hisId === user.value.id || hisId === user.value._id) {
@@ -82,13 +97,13 @@ const redirectToUser = (hisId) => {
 }
 
 const history = computed(() => {
-  return allHistory.value
-    .filter((cur) => !allHistory.value.includes(cur.id))
-    .slice(0, limit.value)
+  const arr = Array.isArray(allHistory.value) ? allHistory.value : []
+  return arr.filter((cur) => !arr.includes(cur.id)).slice(0, limit.value)
 })
 
 const moreToLoad = computed(() => {
-  return limit.value < allHistory.value.length - 1
+  const arr = Array.isArray(allHistory.value) ? allHistory.value : []
+  return limit.value < arr.length - 1
 })
 
 const increaseLimit = () => {
@@ -98,7 +113,6 @@ const increaseLimit = () => {
     limit.value = allHistory.value.length - 1
   }
 }
-
 </script>
 
 <style>
@@ -112,15 +126,15 @@ const increaseLimit = () => {
 
 .bubble.grey {
   border-radius: 5rem;
-  border: 1px solid rgba(0, 0, 0, .1) !important;
-  transition: all .3s ease-out;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease-out;
 }
 
 .bubble.grey:hover {
-  border: 1px solid rgba(0, 0, 0, .25) !important;
+  border: 1px solid rgba(0, 0, 0, 0.25) !important;
 }
 
 .v-timeline-item__body {
-  margin-top: -.8rem !important;
+  margin-top: -0.8rem !important;
 }
 </style>

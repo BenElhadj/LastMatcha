@@ -103,12 +103,13 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- TABLE IMAGES
 CREATE TABLE IF NOT EXISTS images (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
-    profile BOOLEAN DEFAULT FALSE,
-    cover BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  data TEXT,
+  profile BOOLEAN DEFAULT FALSE,
+  cover BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- TABLE MATCHES
@@ -283,25 +284,28 @@ INSERT INTO users (first_name, last_name, username, email, password, created_at,
           sqlContent += `-- 🖼️ INSERTION DES IMAGES
 INSERT INTO images (user_id, name, profile, cover, created_at) VALUES
 `;
-
           let imageCounter = 0;
           const totalImages = userCount * imageCount;
-          
+          function getSampleBase64(j) {
+            // Return a short base64 string for demo (replace with real image data if needed)
+            const samples = [
+              'iVBORw0KGgoAAAANSUhEUgAAAAUA...',
+              'iVBORw0KGgoAAAANSUhEUgAAAAUB...',
+              'iVBORw0KGgoAAAANSUhEUgAAAAUC...',
+              'iVBORw0KGgoAAAANSUhEUgAAAAUD...'
+            ];
+            return samples[j % samples.length];
+          }
           for (let i = 1; i <= userCount; i++) {
             for (let j = 0; j < imageCount; j++) {
               imageCounter++;
-              
-              const width = (j === 0) ? 1584 : 400;
-              const height = (j === 0) ? 396 : 400;
               const imageId = (i * imageCount) + j + 1;
-              
-              const url = `https://i.pravatar.cc/${width}x${height}?u=user-${imageId}`;
+              const imgName = `user${i}-img${j+1}.png`;
+              const base64Data = getSampleBase64(j);
               const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
               const cover = (j === 0) ? 'true' : 'false';
               const profile = (j === 1) ? 'true' : 'false';
-
-              sqlContent += `(${i}, '${url}', ${profile}, ${cover}, '${createdAt}')`;
-              
+              sqlContent += `(${i}, '${imgName}', '${base64Data}', ${profile}, ${cover}, '${createdAt}')`;
               if (imageCounter < totalImages) {
                 sqlContent += ',\n';
               } else {
@@ -784,23 +788,26 @@ INSERT INTO tags (value) VALUES
 
           sql = sql.slice(0, -2) + ';\n\n';
 
-          sql += 'INSERT INTO `images` (`user_id`, `name`,`profile`,`cover`,`created_at`) VALUES\n';
+          sql += 'INSERT INTO `images` (`user_id`, `name`, `data`, `profile`, `cover`, `created_at`) VALUES\n';
 
           try {
             let user_id = await getLastUserId();
             let userId = user_id + 1;
-
+            const base64Samples = [
+              'iVBORw0KGgoAAAANSUhEUgAAAAUA...',
+              'iVBORw0KGgoAAAANSUhEUgAAAAUB...',
+              'iVBORw0KGgoAAAANSUhEUgAAAAUC...',
+              'iVBORw0KGgoAAAANSUhEUgAAAAUD...'
+            ];
             for (let i = 0; i < userCount; i++) {
               for (let j = 0; j < imageCount; j++) {
-                const width = (j === 0) ? 1584 : 400;
-                const height = (j === 0) ? 396 : 400;
                 const imageId = (userId * imageCount) + j + user_id + 1;
-                const url = `https://i.pravatar.cc/${width}x${height}?u=user-${imageId}`;
+                const imgName = `user${userId}-img${j+1}.png`;
+                const base64Data = base64Samples[j % base64Samples.length];
                 const createdAt = faker.date.past().toISOString().slice(0, 19).replace('T', ' ');
                 const cover = (j === 0) ? '1' : '0';
                 const profile = (j === 1) ? '1' : '0';
-
-                sql += `('${userId}', '${url}','${profile}','${cover}', '${createdAt}'),\n`;
+                sql += `('${userId}', '${imgName}', '${base64Data}', '${profile}', '${cover}', '${createdAt}'),\n`;
               }
               userId++;
             }

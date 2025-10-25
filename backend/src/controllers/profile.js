@@ -3,12 +3,12 @@ const uploadProfileImage = async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
 	try {
-		const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
-		const imgName = `${req.user.id}-profile-${randomHex()}.png`
-		await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
-		await userModel.updateProfilePic(req.user.id, imgName)
-		await userModel.setImages(req.user.id)
-		return res.json({ ok: true, status: 'Profile image updated', name: imgName, user_id: req.user.id })
+	let link = req.body.link || null;
+	let data = req.file ? req.file.buffer.toString('base64') : null;
+	await userModel.updateProfilePic(req.user.id)
+	await userModel.insertImages({ id: req.user.id, link, data, profile: true, cover: false })
+	await userModel.setImages(req.user.id)
+	return res.json({ ok: true, status: 'Profile image updated', image: link ? link : data, user_id: req.user.id })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}
@@ -177,20 +177,16 @@ const uploadImages = async (req, res) => {
 	   if (!req.user.id)
 		   return res.json({ msg: 'Not logged in' })
 	   try {
-		   const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
-		   const imgName = `${req.user.id}-gallery-${randomHex()}.png`
 		   const images = await userModel.getImages(req.user.id)
 		   if (images.length < 5) {
-			   try {
-				   await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
-				   console.log(`[UPLOAD] Fichier écrit : ${uploadDir + imgName}`)
-			   } catch (fileErr) {
-				   console.error(`[UPLOAD] Erreur écriture fichier :`, fileErr)
-				   return res.json({ msg: 'Erreur écriture fichier', err: fileErr })
-			   }
+			   let link = req.body.link || null;
+			   let data = req.file ? req.file.buffer.toString('base64') : null;
 			   let user = {
 				   id: req.user.id,
-				   imgName: imgName
+				   link,
+				   data,
+				   profile: false,
+				   cover: false
 			   }
 			   try {
 				   const insertRes = await userModel.insertImages(user)
@@ -200,7 +196,7 @@ const uploadImages = async (req, res) => {
 				   return res.json({ msg: 'Erreur insertion DB', err: dbErr })
 			   }
 			   await userModel.setImages(req.user.id)
-			   return res.json({ ok: true, status: 'Image Updated', name: imgName, user_id: req.user.id })
+			   return res.json({ ok: true, status: 'Image Updated', image: link ? link : data, user_id: req.user.id })
 		   } else {
 			   return res.json({ msg: 'User already has 5 photos' })
 		   }
@@ -218,22 +214,21 @@ const uploadCover = async (req, res) => {
 	try {
 		const result = await userModel.getCover(req.user.id)
 		if (result.length) {
-			if (!isExternal(result[0].name)) {
+			if (!isExternal(result[0].link)) {
 				try {
-					await unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
+					await unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].link))
 				} catch (err) {
 					return res.json({ msg: 'Fatal error', err })
 				}
 			}
 			await userModel.delCover(result[0].id, req.user.id)
 		}
-		const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
-		const imgName = `${req.user.id}-${randomHex()}.png`
-		await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
-		const insertRes = await userModel.insertCover(req.user.id, imgName)
+		let link = req.body.link || null;
+		let data = req.file ? req.file.buffer.toString('base64') : null;
+		const insertRes = await userModel.insertCover(req.user.id, link, data)
 		if (!insertRes)
 			return res.json({ msg: 'Oups.. Something went wrong!' })
-		return res.json({ ok: true, status: 'Image Updated', name: imgName, user_id: req.user.id })
+		return res.json({ ok: true, status: 'Image Updated', image: link ? link : data, user_id: req.user.id })
 	} catch (err) {
 		return res.json({ msg: 'Fatal error', err })
 	}
@@ -249,9 +244,9 @@ const deleteImage = async (req, res) => {
 	try {
 		const result = await userModel.getImagesById(req.body.id, req.user.id)
 		if (result.length) {
-			if (!isExternal(result[0].name)) {
+			if (!isExternal(result[0].link)) {
 				try {
-					await unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
+					await unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].link))
 				} catch (err) {
 					return res.json({ msg: 'Fatal error', err })
 				}

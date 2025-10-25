@@ -48,7 +48,10 @@ const login = async (req, res) => {
 		delete user.password;
 		delete user.verified;
 		delete user.tokenExpiration;
-		user.images = await userModel.getImagesByUid(user.id);
+		user.images = (await userModel.getImagesByUid(user.id)).map(img => ({
+			...img,
+			data: img.data ? `data:image/png;base64,${img.data}` : null
+		}));
 		const payload = { id: user.id };
 		user.token = await sign(payload, process.env.SECRET, tokenExp);
 		connectedUsers[user.id] = user.id;
@@ -93,7 +96,10 @@ const isLoggedIn = async (req, res) => {
 		delete user.password;
 		delete user.verified;
 		delete user.tokenExpiration;
-		user.images = await userModel.getImagesByUid(user.id);
+		user.images = (await userModel.getImagesByUid(user.id)).map(img => ({
+			...img,
+			data: img.data ? `data:image/png;base64,${img.data}` : null
+		}));
 		const payload = { id: user.id };
 		user.token = await sign(payload, process.env.SECRET, tokenExp);
 		return res.json(user);

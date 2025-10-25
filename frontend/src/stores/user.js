@@ -29,11 +29,11 @@ export const user = {
     updateUser: (state, user) => (state.user = user),
     updateProfileImage: (state, data) => {
       state.user.images.forEach(cur => (cur.profile = 0))
-      state.user.images.push({ name: data.name, cover: 0, profile: 1, user_id: data.user_id, id: data.id })
+      state.user.images.push({ link: data.link || null, data: data.data || null, cover: 0, profile: 1, user_id: data.user_id, id: data.id })
     },
     updateCoverImage: (state, data) => {
       state.user.images = state.user.images.filter(cur => !cur.cover)
-      state.user.images.push({ name: data.name, cover: 1, profile: 0, user_id: data.user_id, id: data.id })
+      state.user.images.push({ link: data.link || null, data: data.data || null, cover: 1, profile: 0, user_id: data.user_id, id: data.id })
     },
     locate: (state, location) => {
       state.location = location
@@ -91,11 +91,14 @@ export const user = {
     fetchUserImages: async ({ commit, state }) => {
       try {
         const token = state.user.token || localStorage.getItem('token')
-        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show/${state.user.id}`
+        const userId = state.user.id || JSON.parse(localStorage.getItem('user') || '{}').id
+        const url = `${import.meta.env.VITE_APP_API_URL}/api/users/show/${userId}`
         const headers = { 'x-auth-token': token }
         const res = await axios.get(url, { headers })
         if (res.data && Array.isArray(res.data.images)) {
           commit('updateUser', { ...state.user, images: res.data.images })
+        } else if (res.data && res.data.images) {
+          commit('updateUser', { ...state.user, images: [res.data.images] })
         }
       } catch (err) {
         console.error('Erreur lors du rafraîchissement des images utilisateur:', err)

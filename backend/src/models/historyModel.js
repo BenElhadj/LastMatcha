@@ -54,8 +54,32 @@ const getVisited = async (user_id) => {
     return result.rows;
 }
 
+const getAllHistory = async (user_id) => {
+	// Returns all history events (likes, visits, etc) for the user
+	const query = `
+		SELECT
+			h.id,
+			h.visitor as his_id,
+			h.visited as user_id,
+			h.created_at as match_date,
+			h.type,
+			u.username,
+			u.first_name,
+			u.last_name,
+			COALESCE(i.link, i.data, '') as profile_image
+		FROM history h
+		INNER JOIN users u ON h.visitor = u.id
+		LEFT JOIN images i ON h.visitor = i.user_id AND i.profile = TRUE
+		WHERE h.visited = $1
+		ORDER BY h.created_at DESC
+	`;
+	const result = await db.query(query, [user_id]);
+	return result.rows;
+};
+
 module.exports = {
-    insertHistory,
-    getVisitors,
-    getVisited
+	insertHistory,
+	getVisitors,
+	getVisited,
+	getAllHistory
 }
