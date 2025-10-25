@@ -3,10 +3,29 @@
     <div class="login mt-5">
       <h1 class="page-header text-h3 text-secondary">Login</h1>
       <q-form @submit.prevent="log" class="my-4">
-        <q-input v-model="identifier" color="primary" class="my-5" :rules="identifierRules" label="Username or Email" required></q-input>
-        <q-input v-model="password" color="primary" class="my-5" :rules="passRules" label="Password" :type="showPass ? 'text' : 'password'" @keyup.enter="log">
+        <q-input
+          v-model="identifier"
+          color="primary"
+          class="my-5"
+          :rules="identifierRules"
+          label="Username or Email"
+          required
+        ></q-input>
+        <q-input
+          v-model="password"
+          color="primary"
+          class="my-5"
+          :rules="passRules"
+          label="Password"
+          :type="showPass ? 'text' : 'password'"
+          @keyup.enter="log"
+        >
           <template #append>
-            <q-icon :name="showPass ? 'mdi-eye-off' : 'mdi-eye'" class="cursor-pointer" @click="showPass = !showPass"/>
+            <q-icon
+              :name="showPass ? 'mdi-eye-off' : 'mdi-eye'"
+              class="cursor-pointer"
+              @click="showPass = !showPass"
+            />
           </template>
         </q-input>
         <q-btn block large color="primary" class="my-5" type="submit">Login</q-btn>
@@ -41,18 +60,18 @@ const alert = ref({
 })
 
 const identifierRules = ref([
-  v => !!v || 'This field is required',
-  v => (v.length >= 7 && v.length <= 55) || 'Must be between 7 and 255 characters long',
+  (v) => !!v || 'This field is required',
+  (v) => (v.length >= 7 && v.length <= 55) || 'Must be between 7 and 255 characters long'
 ])
 
 const passRules = ref([
-  v => !!v || 'This field is required',
-  v => v.length >= 8 || 'Must be at least 8 characters long'
+  (v) => !!v || 'This field is required',
+  (v) => v.length >= 8 || 'Must be at least 8 characters long'
 ])
 
 const log = async () => {
   try {
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/login`
+    const url = `https://matcha-backend-t6dr.onrender.com/api/auth/login`
     const auth = {
       identifier: identifier.value,
       password: password.value
@@ -78,7 +97,11 @@ const log = async () => {
       }
     }
   } catch (err) {
-    alert.value = { state: true, color: 'red', text:  'Your account is still not verified,\nPlease check your email' }
+    alert.value = {
+      state: true,
+      color: 'red',
+      text: 'Your account is still not verified,\nPlease check your email'
+    }
   }
 }
 
@@ -98,24 +121,28 @@ checkLogin()
 </script>
 
 <style>
-.alert-enter-active, .alert-leave-active, .register {
-    transition: all .5s;
+.alert-enter-active,
+.alert-leave-active,
+.register {
+  transition: all 0.5s;
 }
-.alert-enter, .alert-leave-to {
-    opacity: 0;
+.alert-enter,
+.alert-leave-to {
+  opacity: 0;
 }
-.login, .alert {
-    width: 100%;
-    max-width: 40rem;
-    margin: auto;
+.login,
+.alert {
+  width: 100%;
+  max-width: 40rem;
+  margin: auto;
 }
 .alert {
-    position: absolute;
-    left: 50%;
-    top: 1rem;
-    transform: translateX(-50%);
+  position: absolute;
+  left: 50%;
+  top: 1rem;
+  transform: translateX(-50%);
 }
 .google {
-    text-decoration: none;
+  text-decoration: none;
 }
 </style>

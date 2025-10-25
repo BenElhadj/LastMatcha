@@ -333,7 +333,7 @@ const syncConvo = async (convo) => {
 
 const logout = async (userId) => {
   try {
-    const url = `${import.meta.env.VITE_APP_API_URL}/api/auth/logout`
+    const url = `https://matcha-backend-t6dr.onrender.com/api/auth/logout`
     const headers = { 'x-auth-token': user.value.token }
     const res = await axios.get(url, { headers })
     if (res.data && res.data.msg) {
@@ -351,6 +351,9 @@ const logout = async (userId) => {
 }
 
 function sortAndFilterMessages(messages) {
+  if (!Array.isArray(messages)) {
+    messages = []
+  }
   messages.sort((a, b) => {
     if (a.is_read !== b.is_read) {
       return a.is_read - b.is_read
@@ -403,11 +406,17 @@ const updateNotifAndMsg = async () => {
       })
       .slice(0, 5)
     newMessage.value = await getNewMsg()
-    if (newMessage.value) {
+    if (Array.isArray(newMessage.value)) {
       menuConvos.value = sortAndFilterMessages(newMessage.value)
       newMsgNum.value = newMessage.value.filter((cur) => !cur.is_read).length
       const newNotif = computed(() => store.getters.notif)
-      notifNum.value = newNotif.value.filter((cur) => !cur.is_read).length
+      notifNum.value = Array.isArray(newNotif.value)
+        ? newNotif.value.filter((cur) => !cur.is_read).length
+        : 0
+    } else {
+      menuConvos.value = []
+      newMsgNum.value = 0
+      notifNum.value = 0
     }
   }
 }
