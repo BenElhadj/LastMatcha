@@ -28,17 +28,22 @@
 
       <q-form @submit.prevent="updateUser" class="q-gutter-md" style="margin-top: 70px" v-if="user">
 
-          <q-input v-model="user.username" :readonly="!isEditing" label="Username" class="one-input"/>
+          <label for="username">Username</label>
+          <q-input id="username" v-model="user.username" :readonly="!isEditing" label="Username" class="one-input"/>
 
           <div class="q-gutter-md row">
-            <q-input v-model="user.first_name" :readonly="!isEditing" label="First Name" class="tow-input"/>
+            <label for="first_name">First Name</label>
+            <q-input id="first_name" v-model="user.first_name" :readonly="!isEditing" label="First Name" class="tow-input"/>
             <q-separator vertical spacing class="separator-margin"></q-separator>
-            <q-input v-model="user.last_name" :readonly="!isEditing" label="Last Name" class="tow-input"/>
+            <label for="last_name">Last Name</label>
+            <q-input id="last_name" v-model="user.last_name" :readonly="!isEditing" label="Last Name" class="tow-input"/>
           </div>
 
 
-          <q-input v-model="birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
-          <q-input v-model="user.phone"  :readonly="!isEditing" label="Phone Number" class="one-input"/>
+          <label for="birthdate">Birth Date</label>
+          <q-input id="birthdate" v-model="birthdate" :readonly="!isEditing" label="Birth Date" type="date" class="one-input"/>
+          <label for="phone">Phone Number</label>
+          <q-input id="phone" v-model="user.phone"  :readonly="!isEditing" label="Phone Number" class="one-input"/>
           
           <div class="q-gutter-md row">
             <q-select v-model="user.gender" label="Gender" id="gender" :readonly="!isEditing" :options="genders" dropdown-icon="mdi-chevron-down" class="tow-input"/>
@@ -46,25 +51,31 @@
             <q-select v-model="user.looking" id="looking" :readonly="!isEditing" label="Looking For" :options="looking" dropdown-icon="mdi-chevron-down" class="tow-input"/>
           </div>
 
-          <q-input v-model="user.address" :readonly="!isEditing" label="Address" class="one-input"/>
+          <label for="address">Address</label>
+          <q-input id="address" v-model="user.address" :readonly="!isEditing" label="Address" class="one-input"/>
           
           <div class="q-gutter-md row">
-            <q-input v-model="user.city" :readonly="!isEditing" label="City" class="tow-input"/>
+            <label for="city">City</label>
+            <q-input id="city" v-model="user.city" :readonly="!isEditing" label="City" class="tow-input"/>
             <q-separator vertical spacing ></q-separator>
-            <q-input v-model="user.postal_code" :readonly="!isEditing" type="number" class="tow-input"/>
+            <label for="postal_code">Postal Code</label>
+            <q-input id="postal_code" v-model="user.postal_code" :readonly="!isEditing" type="number" class="tow-input"/>
           </div>
 
-          <q-input v-model="user.country" :readonly="!isEditing" label="Country" class="one-input"/>
+          <label for="country">Country</label>
+          <q-input id="country" v-model="user.country" :readonly="!isEditing" label="Country" class="one-input"/>
           
           <div class="one-input">
             <span class="text-h8 text-grey-7">Tags</span>
             <vue3-tags-input v-if="isEditing" :max-tags="20" :maxlength="25" :add-on-key="tagEsc" :tags="tags" @on-tags-changed="updateUserTags" />   
             <div v-else>
-              <q-input v-model="user.tags" readonly />
+              <label for="tags">Tags</label>
+              <q-input id="tags" :model-value="Array.isArray(user.tags) ? user.tags.join(', ') : user.tags" readonly />
             </div>
           </div>
 
-          <q-input v-model="user.biography" :readonly="!isEditing" label="Bio" filled type="textarea" class="one-input" :counter="true" :max-length="500"/>
+          <label for="biography">Bio</label>
+          <q-input id="biography" v-model="user.biography" :readonly="!isEditing" label="Bio" filled type="textarea" class="one-input" :counter="true" :max-length="500"/>
           
           <div v-if="isEditing" >
             <q-btn label="Enregistrer" type="submit" color="primary"/>
@@ -116,8 +127,15 @@ const updateUserTags = (newTags) => {
 
 const syncTags = () => {
   if (user.tags) {
-    tags.value = user.tags.split(', ').map(tag => tag.trim())
-    tag = tags.value[0].split(',').map(tag => tag.trim())
+    if (Array.isArray(user.tags)) {
+      tags.value = user.tags.map(tag => tag.trim())
+    } else if (typeof user.tags === 'string') {
+      tags.value = user.tags.split(',').map(tag => tag.trim())
+    } else {
+      tags.value = []
+    }
+  } else {
+    tags.value = []
   }
 }
 
