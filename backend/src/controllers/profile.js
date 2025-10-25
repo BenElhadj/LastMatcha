@@ -174,27 +174,40 @@ const changePassword = async (req, res) => {
 // Upload images 
 
 const uploadImages = async (req, res) => {
-	if (!req.user.id)
-		return res.json({ msg: 'Not logged in' })
-		try {
-			const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
-			const imgName = `${req.user.id}-gallery-${randomHex()}.png`
-			const images = await userModel.getImages(req.user.id)
-			if (images.length < 5) {
-				await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
-				let user = {
-					id: req.user.id,
-					imgName: imgName
-				}
-				const insertRes = await userModel.insertImages(user)
-				await userModel.setImages(req.user.id)
-				return res.json({ ok: true, status: 'Image Updated', name: imgName, user_id: req.user.id })
-			} else {
-				return res.json({ msg: 'User already has 5 photos' })
-			}
-		} catch (err) {
-			return res.json({ msg: 'Fatal error', err })
-		}
+	   if (!req.user.id)
+		   return res.json({ msg: 'Not logged in' })
+	   try {
+		   const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
+		   const imgName = `${req.user.id}-gallery-${randomHex()}.png`
+		   const images = await userModel.getImages(req.user.id)
+		   if (images.length < 5) {
+			   try {
+				   await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
+				   console.log(`[UPLOAD] Fichier écrit : ${uploadDir + imgName}`)
+			   } catch (fileErr) {
+				   console.error(`[UPLOAD] Erreur écriture fichier :`, fileErr)
+				   return res.json({ msg: 'Erreur écriture fichier', err: fileErr })
+			   }
+			   let user = {
+				   id: req.user.id,
+				   imgName: imgName
+			   }
+			   try {
+				   const insertRes = await userModel.insertImages(user)
+				   console.log(`[UPLOAD] Insertion DB :`, insertRes)
+			   } catch (dbErr) {
+				   console.error(`[UPLOAD] Erreur insertion DB :`, dbErr)
+				   return res.json({ msg: 'Erreur insertion DB', err: dbErr })
+			   }
+			   await userModel.setImages(req.user.id)
+			   return res.json({ ok: true, status: 'Image Updated', name: imgName, user_id: req.user.id })
+		   } else {
+			   return res.json({ msg: 'User already has 5 photos' })
+		   }
+	   } catch (err) {
+		   console.error(`[UPLOAD] Erreur générale :`, err)
+		   return res.json({ msg: 'Fatal error', err })
+	   }
 }
 
 // Upload cover 
