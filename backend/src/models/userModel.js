@@ -128,7 +128,7 @@ const changePassword = async (user) => {
 
 // Get images
 const getImages = async (id) => {
-    const query = `SELECT * FROM images WHERE user_id = $1 AND cover = 0`;
+    const query = `SELECT * FROM images WHERE user_id = $1 AND cover = 0 AND profile = 0`;
     const result = await db.query(query, [id]);
     return result.rows;
 }
