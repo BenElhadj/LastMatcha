@@ -115,11 +115,13 @@ const getHistory = async () => {
     const typesToFilter = ['he_like', 'you_like', 'he_like_back', 'you_like_back', 'he_unlike', 'you_unlike'];
     const result = await axios.get(url, { headers });
 
-    const latestInteraction = result.data
-      .filter((item) => typesToFilter.includes(item.type))
-      .filter((item) => item.his_id === selectedUserId)
-      .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))[0];
-
+    let latestInteraction = null;
+    if (Array.isArray(result.data)) {
+      latestInteraction = result.data
+        .filter((item) => typesToFilter.includes(item.type))
+        .filter((item) => item.his_id === selectedUserId)
+        .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))[0];
+    }
     likeIcon.value = latestInteraction ? getLikeIcon(latestInteraction.type) : getLikeIcon('default');
   } catch (err) {
     console.error('Error in frontend/ProfileHistory.vue:', err);

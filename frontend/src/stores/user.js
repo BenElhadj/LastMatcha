@@ -127,13 +127,17 @@ export const user = {
           username: cur.username,
           profile_image: cur.profile_image
         })
-        const res = await utility.sync('matching/getmatches')
-        if (!res || res.length === 0) {
-          // Affiche un message utilisateur si la route est inaccessible ou l'utilisateur non connecté
+        const res = await utility.sync('getmatches')
+        if (!res) {
           console.warn('Aucun match trouvé ou accès refusé. Vérifiez votre connexion ou contactez l’admin.')
         } else if (Array.isArray(res)) {
           following = res.filter(cur => cur.matched_id).map(merge)
           followers = res.filter(cur => cur.matcher_id).map(merge)
+        } else if (res.body && Array.isArray(res.body)) {
+          following = res.body.filter(cur => cur.matched_id).map(merge)
+          followers = res.body.filter(cur => cur.matcher_id).map(merge)
+        } else {
+          console.warn('Format inattendu de la réponse getmatches:', res)
         }
         commit('syncMatches', { following, followers })
       } catch (err) {
